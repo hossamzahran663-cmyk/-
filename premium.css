@@ -1,0 +1,759 @@
+/* ═══════════════════════════════════════════════════════
+   LIFE SPORT — الديزاين الفخم الاحترافي (Premium Navy + Gold)
+   طبقة تجميلية تتطبّق فوق كل الصفحات من غير ما تبوّظ أي وظيفة
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+    --ls-navy: #0b132b;
+    --ls-navy2: #16233f;
+    --ls-gold: #d4af37;
+    --ls-gold2: #c0982a;
+    --ls-gold-light: #e8c659;
+}
+
+/* ===== خلفية فخمة بتدرّج ناعم ===== */
+body {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(212,175,55,0.04), transparent 35%),
+        radial-gradient(circle at 100% 100%, rgba(11,19,43,0.04), transparent 35%),
+        linear-gradient(160deg, #eef1f7 0%, #e7ebf3 100%) !important;
+    background-attachment: fixed !important;
+}
+
+/* ===== الهيدر — لمعة ذهبية فخمة ===== */
+.header {
+    box-shadow: 0 6px 32px rgba(11,19,43,0.4), inset 0 -1px 0 rgba(212,175,55,0.25) !important;
+    backdrop-filter: blur(10px);
+}
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--ls-gold), var(--ls-gold-light), var(--ls-gold), transparent);
+    opacity: 0.7;
+}
+
+/* ===== السايدبار — تدرّج عميق + روابط أنيقة ===== */
+.sidebar {
+    background: linear-gradient(180deg, #0e1628 0%, #0a0f1c 100%) !important;
+    box-shadow: inset -1px 0 0 rgba(212,175,55,0.08) !important;
+}
+.sidebar a {
+    transition: all 0.25s ease !important;
+    position: relative;
+}
+.sidebar a::before {
+    content: '';
+    position: absolute;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 60%;
+    background: var(--ls-gold);
+    border-radius: 0 3px 3px 0;
+    transition: width 0.25s ease;
+}
+.sidebar a:hover {
+    background: linear-gradient(90deg, rgba(212,175,55,0.1), transparent) !important;
+    padding-right: 28px !important;
+}
+.sidebar a:hover::before { width: 4px; }
+.sidebar a.active::before { width: 4px; }
+
+/* ===== البطاقات — فخامة وعمق ===== */
+.stat-card, .card, .section-card, .section-box, .table-section, .table-container, .kpi-card {
+    border-radius: 18px !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) !important;
+    border: 1px solid rgba(11,19,43,0.05) !important;
+}
+.stat-card:hover, .kpi-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 18px 40px rgba(11,19,43,0.14) !important;
+}
+
+/* لمعة علوية خفيفة على الكروت */
+.stat-card::after, .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+}
+
+/* ===== الأزرار الذهبية — لمعة متحركة ===== */
+.btn-print-main, .btn-gold, button[style*="d4af37"], button[style*="gold"] {
+    position: relative;
+    overflow: hidden;
+}
+.btn-print-main::after, .btn-gold::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -120%;
+    width: 80%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+}
+.btn-print-main:hover::after, .btn-gold:hover::after { left: 130%; }
+
+/* كل الأزرار — حركة لطيفة */
+button {
+    transition: all 0.2s ease !important;
+}
+button:active { transform: scale(0.97); }
+
+/* ===== العناوين — خط ذهبي أنيق ===== */
+.section-header, .section-title {
+    position: relative;
+}
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: 0;
+    width: 45px; height: 2px;
+    background: linear-gradient(90deg, var(--ls-gold), transparent);
+}
+
+/* ===== البادچات — ناعمة ولامعة ===== */
+.badge {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.07) !important;
+    font-weight: 800 !important;
+}
+
+/* ===== سكرول بار ذهبي فخم ===== */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track {
+    background: rgba(11,19,43,0.04);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--ls-gold), var(--ls-gold2));
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--ls-gold-light), var(--ls-gold));
+}
+
+/* ===== المدخلات — تركيز ذهبي أنيق ===== */
+input:focus, select:focus, textarea:focus {
+    border-color: var(--ls-gold) !important;
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.13) !important;
+    outline: none !important;
+}
+input, select, textarea {
+    transition: all 0.2s ease !important;
+}
+
+/* ===== الجداول — صفوف أنيقة ===== */
+tbody tr {
+    transition: all 0.18s ease !important;
+}
+thead th {
+    letter-spacing: 0.3px;
+}
+
+/* ===== حركة دخول ناعمة للمحتوى (أول تحميل بس) ===== */
+@keyframes lsFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.main-content > .stat-card, main > .stat-card {
+    animation: lsFadeUp 0.45s ease both;
+}
+.stat-card:nth-child(1) { animation-delay: 0.03s; }
+.stat-card:nth-child(2) { animation-delay: 0.06s; }
+.stat-card:nth-child(3) { animation-delay: 0.09s; }
+.stat-card:nth-child(4) { animation-delay: 0.12s; }
+.stat-card:nth-child(5) { animation-delay: 0.15s; }
+.stat-card:nth-child(6) { animation-delay: 0.18s; }
+
+/* ===== عناوين الصفحات ===== */
+h1, h2, h3 { letter-spacing: 0.3px; }
+
+/* ===== المودالات — ظل فخم ===== */
+.modal, .overlay > div, .pin-box {
+    box-shadow: 0 30px 80px rgba(11,19,43,0.35) !important;
+    border-radius: 20px !important;
+}
+
+/* ===== تأثير ضغط القوائم ===== */
+.tab-btn, .nav-item {
+    transition: all 0.2s ease !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 تصميم الموبايل — نظيف ومتناسق وواضح
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 820px) {
+    /* منع التمرير الأفقي للصفحة كلها */
+    html, body { overflow-x: hidden !important; max-width: 100vw !important; }
+
+    /* الهيدر */
+    .header {
+        padding: 0 12px !important;
+        height: 58px !important;
+        gap: 8px;
+    }
+    .header-title { font-size: 0.92rem !important; letter-spacing: 0.5px !important; }
+    .header-logo img { height: 32px !important; }
+    .header-right { gap: 6px !important; }
+    .server-status, .branch-badge, .branch-info, #branchInfo, #serverStatus {
+        font-size: 0.68rem !important;
+        padding: 4px 8px !important;
+    }
+
+    /* زرار القائمة ☰ */
+    .mobile-menu-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: rgba(212,175,55,0.18) !important;
+        border: 1px solid #d4af37 !important;
+        color: #d4af37 !important;
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 9px !important;
+        cursor: pointer;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    /* السايدبار ينزلق من اليمين */
+    .sidebar {
+        top: 58px !important;
+        height: calc(100vh - 58px) !important;
+        transform: translateX(100%) !important;
+        transition: transform 0.3s ease !important;
+        z-index: 2000 !important;
+        box-shadow: -8px 0 30px rgba(0,0,0,0.4) !important;
+        width: 78vw !important;
+        max-width: 280px !important;
+        overflow-y: auto !important;
+    }
+    .sidebar.mobile-open { transform: translateX(0) !important; }
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        top: 58px;
+        background: rgba(0,0,0,0.55);
+        z-index: 1999;
+    }
+    .sidebar-overlay.active { display: block; }
+
+    /* المحتوى عرض كامل */
+    .main-content, main {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        margin-top: 58px !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        padding: 14px 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* كل الشبكات عمود واحد */
+    .financial-grid, .med-stats-grid, .summary-row, .kpi-grid, .stats-grid,
+    .grid-kpi, .grid-3, .grid-2, .grid, .sections-grid, .cards-grid,
+    .doctors-grid, [class*="grid-"], [class*="-grid"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    /* الصفوف المرنة تتراص عمودياً */
+    .top-bar, .summary-cards, .filters-bar, .filters-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+    .summary-mini, .filter-group { min-width: 100% !important; width: 100% !important; }
+
+    /* الجداول تتمرّر داخل إطارها */
+    .table-scroll, .table-wrap, .table-container, .table-section, .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100% !important;
+        border-radius: 12px;
+    }
+    table { font-size: 0.8rem !important; }
+    th, td { padding: 8px 7px !important; white-space: nowrap; }
+
+    /* الأزرار تلتف وتكبر للمس */
+    .actions-row, .action-buttons, .actions, .top-actions, .btn-row {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+    .actions-row button, .action-buttons button, .btn-print-main {
+        flex: 1 1 auto !important;
+        font-size: 0.82rem !important;
+        padding: 11px 14px !important;
+        min-height: 44px;
+    }
+
+    /* العناوين والأرقام */
+    h1 { font-size: 1.15rem !important; }
+    h2 { font-size: 1rem !important; }
+    h3 { font-size: 0.95rem !important; }
+    .stat-value, .summary-amount, .num, .s-val, .amount, .kc-val {
+        font-size: 1.4rem !important;
+    }
+    .stat-card, .fin-card, .card, .sum-card, .sum-box, .section-box {
+        padding: 16px !important;
+    }
+
+    /* المودالات على مقاس الشاشة */
+    .modal-content, .custom-modal, .modal-box, .pin-box, .docs-content,
+    #editPatientModal > div, #patientModal > div, [class*="modal"] > div {
+        max-width: 94vw !important;
+        width: 94vw !important;
+        max-height: 88vh !important;
+        overflow-y: auto !important;
+        padding: 18px !important;
+        box-sizing: border-box !important;
+    }
+    /* مدخلات المودال عمود واحد */
+    #editPatientModal [style*="grid-template-columns"],
+    #patientModal [style*="grid-template-columns"],
+    .modal-content [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        display: grid !important;
+    }
+    /* المدخلات أكبر للمس */
+    input, select, textarea, button {
+        font-size: 16px !important; /* يمنع الزوم التلقائي في iOS */
+    }
+}
+
+/* الوضع الأفقي (landscape) */
+@media (max-width: 940px) and (orientation: landscape) {
+    .financial-grid, .summary-row, .kpi-grid, .grid-kpi {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .header { height: 52px !important; }
+    .sidebar { top: 52px !important; height: calc(100vh - 52px) !important; }
+    .sidebar-overlay { top: 52px !important; }
+    .main-content, main { margin-top: 52px !important; }
+}
+
+/* شاشات صغيرة جداً */
+@media (max-width: 390px) {
+    .main-content, main { padding: 12px 8px !important; }
+    h1 { font-size: 1.05rem !important; }
+    table { font-size: 0.74rem !important; }
+    th, td { padding: 6px 5px !important; }
+    .stat-value, .amount { font-size: 1.25rem !important; }
+    .header-title { font-size: 0.82rem !important; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   كارت المتابعة على الموبايل (الاستقبال + admin)
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+    /* منطقة كارت المتابعة تظهر كاملة */
+    #cardPreviewArea {
+        display: block !important;
+        overflow-x: auto !important;
+        max-width: 100% !important;
+    }
+    #cardPreviewArea > div, #cardPrintArea {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    /* شبكة بيانات المريض عمود واحد على الموبايل */
+    #cardPreviewArea [style*="repeat(auto-fit,minmax(160px"],
+    #cardPreviewArea [style*="repeat(auto-fit, minmax(160px"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    /* مربعات الجلسات: 5 أعمدة بدل 8 (تتظبط على الموبايل) */
+    #cardPreviewArea [style*="repeat(8,1fr)"],
+    #cardPreviewArea [style*="repeat(8, 1fr)"],
+    #cardPrintArea .grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+    /* كارت admin في المودال */
+    #cardPreviewModal .info { grid-template-columns: 1fr !important; }
+    #cardPreviewModal .grid { grid-template-columns: repeat(5, 1fr) !important; }
+    #cardPreviewModal .fin { flex-wrap: wrap !important; }
+    #cardPreviewModal .fin .b { min-width: 45% !important; }
+}
+@media (max-width: 400px) {
+    #cardPreviewArea [style*="repeat(8,1fr)"],
+    #cardPrintArea .grid,
+    #cardPreviewModal .grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 ضبط نهائي لاستغلال مساحة الهاتف والقائمة الجانبية
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 820px) {
+    .sidebar {
+        width: 78vw !important;
+        max-width: 290px !important;
+        padding: 8px 6px 18px !important;
+    }
+    .sidebar-section {
+        padding: 11px 13px 5px !important;
+        margin: 0 !important;
+        color: rgba(212,175,55,.58) !important;
+        font-size: .69rem !important;
+        font-weight: 900 !important;
+        letter-spacing: .4px !important;
+    }
+    .sidebar a {
+        min-height: 42px !important;
+        margin: 3px 2px !important;
+        padding: 9px 12px !important;
+        border-radius: 9px !important;
+        font-size: .88rem !important;
+        font-weight: 700 !important;
+        line-height: 1.25 !important;
+    }
+    .sidebar a i {
+        width: 22px !important;
+        font-size: .95rem !important;
+        text-align: center !important;
+        flex-shrink: 0;
+    }
+    .sidebar a.active {
+        background: linear-gradient(90deg,rgba(212,175,55,.16),rgba(212,175,55,.05)) !important;
+        color: #f0c94d !important;
+    }
+    .sidebar a:hover { padding-right: 14px !important; }
+
+    /* كروت الأرقام تستفيد من المساحة بدلاً من صف طويل أو فراغ. */
+    .grid-kpi, .kpi-grid, .stats-grid, .financial-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+    .grid-kpi .kpi-card, .kpi-grid .kpi-card, .stats-grid .stat-card,
+    .financial-grid .fin-card {
+        min-width: 0 !important;
+        padding: 11px 9px !important;
+    }
+    .grid-kpi .kpi-value, .kpi-grid .kpi-value, .stats-grid .stat-value,
+    .financial-grid .amount { font-size: 1.12rem !important; }
+
+    /* بوابات الحماية: نفس بطاقة Life Sport البيضاء في كل شاشة محمية. */
+    .auth-overlay-unified, .pin-overlay, #customModalOverlay.active {
+        padding: 18px !important;
+        align-items: center !important;
+    }
+    .auth-box-unified, .pin-box.auth-box-unified, .custom-modal.auth-box-unified {
+        width: min(100%, 390px) !important;
+        padding: 26px 20px !important;
+        border-radius: 22px !important;
+    }
+    .auth-box-unified img { height: 62px !important; margin-bottom: 14px !important; }
+    .auth-box-unified h2, .auth-box-unified h3 { font-size: 1.22rem !important; margin-bottom: 10px !important; }
+    .auth-box-unified input { min-height: 52px !important; font-size: 1.1rem !important; }
+    .auth-box-unified button { min-height: 50px !important; font-size: .96rem !important; }
+}
+
+@media (max-width: 390px) {
+    .sidebar { width: 82vw !important; }
+    .sidebar a { font-size: .84rem !important; padding: 9px 10px !important; }
+    .grid-kpi .kpi-value, .kpi-grid .kpi-value, .stats-grid .stat-value,
+    .financial-grid .amount { font-size: 1.12rem !important; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   🖨️ عطّل كل تأثيرات premium.css وقت الطباعة نهائياً —
+   عشان كود الطباعة الأصلي جوّه كل صفحة يتحكم لوحده
+   ═══════════════════════════════════════════════════════ */
+@media print {
+    .header, .sidebar, .sidebar-overlay, .mobile-menu-btn,
+    #ls-lang-btn, #ai-fab, #ai-box, #floatBackupBtn, #backupReminder, #ls-update-btn {
+        display: none !important;
+    }
+    * {
+        animation: none !important;
+        transition: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    .stat-card::after, .kpi-card::after,
+    .sidebar a::before, .header::after,
+    .section-header::after, .badge::before {
+        display: none !important;
+        content: none !important;
+    }
+    body {
+        background: white !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   🔐 توحيد شكل شاشات الباسورد في كل الصفحات
+   ═══════════════════════════════════════════════════════ */
+.pin-overlay, #pinOverlay, #customModalOverlay.active, .access-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: linear-gradient(160deg, #0b132b, #1a2a5e) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    font-family: 'Tajawal', sans-serif !important;
+}
+.pin-box, .custom-modal, .access-box {
+    background: white !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🔒 توحيد شكل شاشات الباسورد في كل الصفحات
+   ═══════════════════════════════════════════════════════ */
+/* الخلفية (overlay) — الشكل بس، من غير ما نتحكم في الظهور/الإخفاء */
+#customModalOverlay, .pin-overlay, #pinOverlay, #lockScreen, #authOverlay {
+    background: linear-gradient(160deg, #0b132b 0%, #1a2a5e 100%) !important;
+    padding: 16px !important;
+}
+/* احترم حالة الإخفاء الأصلية لكل صفحة */
+.pin-overlay.hidden { opacity: 0 !important; pointer-events: none !important; }
+#customModalOverlay:not(.active) { display: none !important; }
+#authOverlay {
+    position: fixed !important; inset: 0 !important; z-index: 99999 !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+}
+#authOverlay.ls-hidden { display: none !important; }
+
+/* الصندوق الأبيض */
+.custom-modal, .pin-box, #lockScreen > div, .auth-box {
+    background: #ffffff !important;
+    border-radius: 22px !important;
+    padding: 38px 30px !important;
+    max-width: 380px !important;
+    width: 90% !important;
+    text-align: center !important;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.45) !important;
+    border: 1px solid rgba(212,175,55,0.25) !important;
+    animation: pinBoxIn 0.4s cubic-bezier(0.16,1,0.3,1) both !important;
+}
+@keyframes pinBoxIn {
+    from { opacity: 0; transform: translateY(18px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* الأيقونة */
+.custom-modal .modal-icon, .pin-box .pin-icon, #lockScreen .fa-lock, .auth-box img {
+    width: 74px !important;
+    height: 74px !important;
+    margin: 0 auto 18px !important;
+    background: linear-gradient(135deg, #d4af37, #f4d03f) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 2rem !important;
+    color: #0b132b !important;
+    box-shadow: 0 8px 24px rgba(212,175,55,0.4) !important;
+}
+
+/* العناوين */
+.custom-modal h3, .pin-box h3, .auth-box h2 {
+    color: #0b132b !important;
+    font-size: 1.3rem !important;
+    font-weight: 900 !important;
+    margin-bottom: 8px !important;
+}
+.custom-modal p, .pin-box p, .auth-box p {
+    color: #888 !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 22px !important;
+}
+
+/* حقل الإدخال */
+.custom-modal input, .pin-box input, .pin-input, #lockInput, #ledgerPinInput, #pinInput, #cpanelPass {
+    width: 100% !important;
+    padding: 15px !important;
+    border: 2px solid #e0e4ea !important;
+    border-radius: 14px !important;
+    font-size: 1.4rem !important;
+    text-align: center !important;
+    letter-spacing: 10px !important;
+    font-family: 'Tajawal', sans-serif !important;
+    margin-bottom: 18px !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.2s !important;
+}
+.custom-modal input:focus, .pin-box input:focus, #lockInput:focus, #ledgerPinInput:focus, #pinInput:focus, #cpanelPass:focus {
+    outline: none !important;
+    border-color: #d4af37 !important;
+}
+
+/* الأزرار */
+.custom-modal .btn-confirm, .pin-box .btn-unlock, .pin-box button, .auth-box button {
+    width: 100% !important;
+    background: linear-gradient(135deg, #0b132b, #1a2a5e) !important;
+    color: white !important;
+    border: none !important;
+    padding: 15px !important;
+    border-radius: 14px !important;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    font-family: 'Tajawal', sans-serif !important;
+    transition: transform 0.15s, box-shadow 0.2s !important;
+}
+.custom-modal .btn-confirm:hover, .pin-box .btn-unlock:hover, .pin-box button:hover, .auth-box button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(11,19,43,0.35) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🔒 القالب الموحّد النهائي لكل شاشات الباسورد
+   (نسخة طبق الأصل من تصميم support.html)
+   ═══════════════════════════════════════════════════════ */
+.auth-overlay-unified {
+    position: fixed !important; top: 0 !important; left: 0 !important;
+    width: 100% !important; height: 100% !important;
+    background: rgba(11,19,43,0.95) !important;
+    z-index: 9999 !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    backdrop-filter: blur(10px) !important;
+    padding: 16px !important;
+}
+.auth-overlay-unified:not(.active) { display: none !important; }
+.auth-overlay-unified.hidden { opacity: 0 !important; pointer-events: none !important; }
+
+.auth-box-unified {
+    background: white !important;
+    padding: 40px !important;
+    border-radius: 20px !important;
+    text-align: center !important;
+    width: 400px !important;
+    max-width: 100% !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+    border: 2px solid #d4af37 !important;
+}
+/* اللوجو الموحد: نفس الدائرة والوهج الذهبي في بوابة السابورت. */
+.auth-box-unified img {
+    width: 74px !important;
+    height: 74px !important;
+    object-fit: contain !important;
+    padding: 9px !important;
+    margin: 0 auto 20px !important;
+    background: linear-gradient(135deg, #d4af37, #f4d03f) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    box-shadow: 0 8px 24px rgba(212,175,55,0.40) !important;
+}
+.auth-box-unified h2, .auth-box-unified h3 {
+    color: #0b132b !important;
+    margin-bottom: 20px !important;
+    font-weight: 800 !important;
+    font-size: 1.3rem !important;
+}
+.auth-box-unified input {
+    width: 100% !important;
+    padding: 15px !important;
+    text-align: center !important;
+    font-size: 1.5rem !important;
+    font-weight: bold !important;
+    border: 2px solid #dde1e5 !important;
+    border-radius: 10px !important;
+    margin-bottom: 20px !important;
+    outline: none !important;
+    letter-spacing: 5px !important;
+    font-family: 'Tajawal', sans-serif !important;
+    box-sizing: border-box !important;
+}
+.auth-box-unified input:focus { border-color: #d4af37 !important; }
+.auth-box-unified button {
+    background: #0b132b !important;
+    color: #d4af37 !important;
+    width: 100% !important;
+    padding: 15px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    transition: 0.3s !important;
+    font-family: 'Tajawal', sans-serif !important;
+}
+.auth-box-unified button:hover { background: #d4af37 !important; color: #0b132b !important; }
+
+/* زر إغلاق موحّد: لا يفتح المحتوى المحمي، بل يرجع بأمان للوحة القيادة. */
+.auth-box, .auth-box-unified, .pin-box.auth-box-unified, .custom-modal.auth-box-unified { position: relative !important; }
+.auth-box .auth-close, .auth-box-unified .auth-close {
+    position: absolute !important;
+    top: 13px !important;
+    left: 13px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    border: 1px solid #e3e8ef !important;
+    background: #f6f8fb !important;
+    color: #778397 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: .9rem !important;
+    box-shadow: none !important;
+}
+.auth-box .auth-close:hover, .auth-box-unified .auth-close:hover { background: #e74c3c !important; color: #fff !important; border-color: #e74c3c !important; transform: rotate(90deg) !important; }
+
+/* ═══════════════════════════════════════════════════════
+   ✨ تحسينات تجميلية إضافية (شكل أنعم وأحلى) — بدون لمس أي وظيفة
+   ═══════════════════════════════════════════════════════ */
+
+/* الكروت — ظل ناعم وحواف مدوّرة أكتر + حركة رفع خفيفة عند المرور */
+.stat-card, .kpi-card, .doc-card, .section-box, .card, .med-card {
+    border-radius: 16px !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+.stat-card:hover, .kpi-card:hover, .doc-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 30px rgba(11,19,43,0.13) !important;
+}
+
+/* الأزرار — حواف أنعم وحركة خفيفة */
+button {
+    border-radius: 11px !important;
+    transition: transform 0.12s ease, box-shadow 0.18s ease, filter 0.18s ease !important;
+}
+button:active { transform: scale(0.97) !important; }
+
+/* المدخلات — تركيز أنيق بإطار ذهبي */
+input:focus, select:focus, textarea:focus {
+    outline: none !important;
+    border-color: var(--ls-gold) !important;
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.12) !important;
+}
+
+/* الجداول — صفوف أنعم وتظليل عند المرور */
+table { border-collapse: separate !important; border-spacing: 0 !important; }
+tbody tr { transition: background 0.15s ease !important; }
+tbody tr:hover { background: rgba(212,175,55,0.05) !important; }
+
+/* شريط التمرير (scrollbar) أنيق */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(11,19,43,0.04); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #c9b264, #b89a3f); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ls-gold); }
+
+/* عرض المحتوى على الشاشات العريضة جداً — يفضل مركّز ومايتمددش وحش */
+@media (min-width: 1600px) {
+    .main-content > .grid-kpi,
+    .main-content > .grid-3,
+    .main-content > .section-box,
+    main > .grid-kpi,
+    main > .section-box { max-width: 1500px; margin-left: auto; margin-right: auto; }
+}
+
+/* التوستات (الإشعارات) — شكل أنعم */
+.toast, #toastContainer > div {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(11,19,43,0.22) !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+/* عناوين الأقسام — خط ذهبي صغير تحتها */
+.section-box h2, .section-box h3 { position: relative; }
+
+/* تحسين مظهر الـ badges */
+.badge, .col-badge { border-radius: 20px !important; font-weight: 800 !important; }

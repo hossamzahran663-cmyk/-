@@ -6,9 +6,17 @@
   const enabled = params.get('demo') === '1' || sessionStorage.getItem('lifeSportDemoMode') === '1';
   if (!enabled) return;
 
+  // Never load the live application or its data for a demo URL.
+  if (!/\/demo\/index\.html$/i.test(location.pathname)) {
+    const demoUrl = new URL('demo/index.html', location.href);
+    demoUrl.searchParams.set('demo', '1');
+    location.replace(demoUrl.href);
+    return;
+  }
+
   const redact = () => {
     document.documentElement.classList.add('ls-demo-mode');
-    document.title = 'نظام إدارة المراكز الطبية — نسخة عرض';
+    document.title = 'Obsidian System — نسخة عرض';
 
     // يبقى وضع العرض فعالاً مع كل روابط القائمة والصفحات الداخلية.
     document.querySelectorAll('a[href]').forEach(link => {
@@ -29,7 +37,7 @@
       img.setAttribute('alt', '');
     });
     document.querySelectorAll('.header-title, .brand-name, .system-name').forEach(el => {
-      if (!el.dataset.demoDone) { el.textContent = 'MEDICAL CENTER SYSTEM'; el.dataset.demoDone = '1'; }
+      if (!el.dataset.demoDone) { el.textContent = 'OBSIDIAN SYSTEM'; el.dataset.demoDone = '1'; }
     });
 
     document.querySelectorAll('.patient-name, .res-card-name, .patient-card-name, .patient-title, .patient-name-text, #pcName, #pName, #iName, #cName').forEach((el, index) => {
@@ -49,7 +57,7 @@
       if (!value || !/life\s*sport|لايف\s*سبورت/i.test(value)) return;
       const parent = node.parentElement;
       if (parent && /^(SCRIPT|STYLE)$/i.test(parent.tagName)) return;
-      node.nodeValue = value.replace(/life\s*sport/ig, 'MEDICAL DEMO').replace(/لايف\s*سبورت/ig, 'مركز تجريبي');
+      node.nodeValue = value.replace(/life\s*sport/ig, 'OBSIDIAN SYSTEM').replace(/لايف\s*سبورت/ig, 'Obsidian System');
     });
 
     // الجداول التي لا تملك class للاسم: نخفي الخلية الأولى فقط في صفوف المرضى.

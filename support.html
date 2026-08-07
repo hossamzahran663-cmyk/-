@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - الدعم وسجل المراقبة</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background-color: #f4f7f6; display: flex; overflow-x: hidden; color: #1c1e21; }
+
+        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,19,43,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .auth-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 2px solid #d4af37; }
+        .auth-box img { height: 70px; margin-bottom: 20px; }
+        .auth-box h2 { color: #0b132b; margin-bottom: 20px; font-weight: 800; }
+        .auth-box input { width: 100%; padding: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; border: 2px solid #dde1e5; border-radius: 10px; margin-bottom: 20px; outline: none; letter-spacing: 5px; }
+        .auth-box input:focus { border-color: #d4af37; }
+        .auth-box button { background: #0b132b; color: #d4af37; width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 1.2rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .auth-box button:hover { background: #d4af37; color: #0b132b; }
+
+        .header { background-color: #0b132b; height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; border-bottom: 3px solid #d4af37; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header-logo { display: flex; align-items: center; gap: 15px; }
+        .header-logo img { height: 45px; }
+        .header-title { color: white; font-size: 1.35rem; font-weight: 800; }
+        .header-title span { color: #d4af37; }
+        
+        .sidebar { background: #0e1628; width: 255px; height: 100vh; position: fixed; top: 72px; right: 0; padding-top: 22px; border-left: 1px solid rgba(212,175,55,0.07); z-index: 900; }
+        .sidebar a { display: flex; align-items: center; color: rgba(163,174,209,0.8); text-decoration: none; padding: 13px 22px; transition: 0.22s; font-size: 0.95rem; border-right: 2px solid transparent; margin-bottom: 2px; gap: 11px; font-weight: 600; }
+        .sidebar a i { width: 18px; text-align: center; font-size: 0.88rem; }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.04); border-right-color: rgba(212,175,55,0.5); }
+        .sidebar a.active { color: #d4af37; background: rgba(212,175,55,0.09); border-right: 2px solid #d4af37; font-weight: 800; }
+
+        .main-content { margin-right: 255px; margin-top: 72px; padding: 35px; width: calc(100% - 255px); transition: 0.3s; visibility: hidden; opacity: 0; }
+        .main-content.unlocked { visibility: visible; opacity: 1; }
+
+        .section-box { background: white; padding: 30px; border-radius: 20px; border: 1px solid #e4e6eb; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 30px; }
+        .section-header { border-bottom: 2px solid #f0f2f5; padding-bottom: 15px; margin-bottom: 20px; color: #0b132b; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .setting-row { background:#f8f9fa; padding:20px; border-radius:15px; border:1px solid #eaeaea; display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+        .setting-row:last-child { margin-bottom: 0; }
+        .setting-info h4 { color:#0b132b; margin-bottom:5px; font-size: 1.1rem; font-weight: 800; }
+        .setting-info p { font-size:0.9rem; color:#777; font-weight: 600; }
+
+        .backup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .backup-card { padding: 30px; border-radius: 15px; text-align: center; border: 2px dashed #dcd1cb; background: #fdfbf7; transition: 0.3s; display:flex; flex-direction:column; justify-content:space-between; }
+        .btn-action { background: #0b132b; color: #d4af37; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.3s; width:100%; font-family:'Tajawal'; }
+        .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .users-grid { display: grid; grid-template-columns: 350px 1fr; gap: 30px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .input-group label { font-size: 0.85rem; font-weight: 800; color: #555; }
+        .input-group input, .input-group select { padding: 12px; border-radius: 8px; border: 1px solid #dde1e5; outline: none; font-size: 1rem; font-weight: 700; background: #f8f9fa; font-family:'Tajawal'; }
+
+        .table-container { width: 100%; border-collapse: collapse; text-align: right; }
+        th { background: #f8f9fa; padding: 12px 15px; border-bottom: 2px solid #e4e6eb; font-weight: 800; color: #0b132b; font-size: 0.9rem; }
+        td { padding: 12px 15px; border-bottom: 1px solid #f0f2f5; font-weight: 700; color: #555; font-size: 0.9rem; }
+        .scroll-box { max-height: 400px; overflow-y: auto; border: 1px solid #e4e6eb; border-radius: 10px; }
+        .badge { padding: 4px 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 800; display: inline-block; }
+        .server-status { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: bold; color: #27ae60; background: #e8f5e9; padding: 8px 15px; border-radius: 10px; border: 1px solid #27ae60; margin-left: 15px; }
+
+        /* ===== نسبة الكاش ===== */
+        .ratio-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .ratio-input-wrap { display: flex; align-items: center; gap: 8px; background: white; border: 2px solid #e0e4ea; border-radius: 10px; padding: 8px 14px; }
+        .ratio-input-wrap input { width: 70px; border: none; outline: none; font-size: 1.2rem; font-weight: 900; color: #0b132b; text-align: center; background: transparent; font-family:'Tajawal'; }
+        .ratio-input-wrap span { font-size: 1.1rem; font-weight: 900; color: #d4af37; }
+        .ratio-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; }
+        .ratio-on  { background: #e8f5e9; color: #2e7d32; border: 1px solid #27ae60; }
+        .ratio-off { background: #ffebee; color: #c62828; border: 1px solid #e74c3c; }
+
+        /* ===== سجل النشاط اليومي ===== */
+        .activity-filters { display: flex; gap: 12px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; }
+        .activity-filters input, .activity-filters select { padding: 8px 14px; border-radius: 9px; border: 1.5px solid #e0e4ea; font-family: 'Tajawal'; font-size: 0.9rem; outline: none; background: #f8f9fc; }
+        .activity-filters input:focus, .activity-filters select:focus { border-color: #d4af37; }
+
+        .activity-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .activity-card { background: white; border-radius: 14px; padding: 18px; border: 1px solid #e8eaf0; box-shadow: 0 3px 12px rgba(0,0,0,0.05); border-top: 4px solid #d4af37; }
+        .activity-card .ac-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .activity-card .ac-name { font-weight: 900; font-size: 1rem; color: #0b132b; }
+        .activity-card .ac-branch { font-size: 0.78rem; color: #999; font-weight: 700; margin-top: 2px; }
+        .activity-card .ac-time { font-size: 0.75rem; color: #aaa; font-weight: 700; text-align: left; }
+        .activity-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .stat-item { background: #f8f9fc; border-radius: 9px; padding: 8px; text-align: center; }
+        .stat-num { font-size: 1.3rem; font-weight: 900; color: #0b132b; display: block; }
+        .stat-lbl { font-size: 0.68rem; font-weight: 700; color: #999; display: block; margin-top: 2px; }
+        .stat-item.insu { border-top: 3px solid #1565c0; }
+        .stat-item.cash { border-top: 3px solid #27ae60; }
+        .stat-item.reserv { border-top: 3px solid #8e44ad; }
+
+        #toastContainer { position: fixed; bottom: 30px; left: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #0b132b; color: white; padding: 15px 25px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateX(-150%); transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-right: 5px solid #d4af37; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-right-color: #27ae60; }
+        .toast.error   { border-right-color: #e74c3c; }
+    
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+    </style>
+
+    <style>
+
+    
+    
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            .stat-card, .kpi-card { min-width: 140px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+        }
+
+    </style>
+
+
+
+
+    <link rel="stylesheet" href="premium.css">
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<div id="authOverlay">
+    <div class="auth-box">
+        <button type="button" class="auth-close" onclick="window.location.href='dashboard.html'" aria-label="إغلاق والعودة للوحة القيادة"><i class="fas fa-times"></i></button>
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <h2>بوابة الإدارة والأمان</h2>
+        <p style="color:#777; margin-bottom:20px; font-weight:bold;">يرجى إدخال رمز التحقق الخاص بالدعم الفني</p>
+        <input type="password" id="cpanelPass" placeholder="****" onkeydown="if(event.key==='Enter') checkPass()">
+        <button onclick="checkPass()"><i class="fas fa-unlock-alt"></i> فتح لوحة التحكم</button>
+    </div>
+</div>
+
+<header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+    </div>
+    <div style="display:flex; align-items:center;">
+        <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
+        <div style="color:#d4af37; font-weight:800; font-size:1rem;">مركز الإدارة والأمان (CPanel)</div>
+    </div>
+</header>
+
+<nav class="sidebar">
+    <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+    <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+    <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+    <a href="patients.html"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+    <a href="ledger.html"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+    <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+    <a href="hr.html"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+    <a href="analytics.html"><i class="fas fa-chart-pie"></i> التحليل الشهري (VIP)</a>
+    <a href="support.html" class="active"><i class="fas fa-shield-alt"></i> الدعم وسجل المراقبة</a>
+</nav>
+
+<main class="main-content" id="mainContent">
+
+    <!-- ===== إعدادات النظام ===== -->
+    <div class="section-box">
+        <h3 class="section-header"><i class="fas fa-cogs" style="color:#e67e22;"></i> إعدادات النظام العامة</h3>
+
+        <!-- أسعار الكاش -->
+        <div class="setting-row">
+            <div class="setting-info">
+                <h4>أسعار الكاش في الاستقبال</h4>
+                <p>تفعيل أو تعطيل ظهور المبالغ المالية للموظفين في شاشة الاستقبال (قسم الكاش).</p>
+            </div>
+            <button id="btnToggleCashPrices" class="btn-action" style="width:auto; min-width:250px;" onclick="toggleCashPrices()">
+                <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+            </button>
+        </div>
+
+        <!-- الجلسات القديمة -->
+        <div class="setting-row">
+            <div class="setting-info">
+                <h4>إدخال الجلسات القديمة في الاستقبال</h4>
+                <p>تفعيل أو تعطيل ظهور خانة (الجلسات المستهلكة السابقة) عند فتح ملف مريض جديد.</p>
+            </div>
+            <button id="btnTogglePastSessions" class="btn-action" style="width:auto; min-width:250px;" onclick="togglePastSessions()">
+                <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+            </button>
+        </div>
+
+        <!-- ===== نسبة الكاش الظاهرة ===== -->
+        <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <div class="setting-info">
+                    <h4><i class="fas fa-percentage" style="color:#d4af37;"></i> نسبة الكاش الظاهرة في Dashboard واليومية</h4>
+                    <p>حدد النسبة % التي ستظهر من إجمالي الكاش. مثلاً: 20% من 3000 ج = 600 ج فقط هو اللي بيظهر.</p>
+                </div>
+                <span id="ratioStatusBadge" class="ratio-status ratio-off"><i class="fas fa-times-circle"></i> معطل</span>
+            </div>
+            <div class="ratio-row">
+                <div class="ratio-input-wrap">
+                    <input type="number" id="cashRatioInput" min="1" max="100" value="20" placeholder="20">
+                    <span>%</span>
+                </div>
+                <button class="btn-action" style="width:auto; padding:10px 20px; background:#d4af37; color:#0b132b;" onclick="saveCashRatio()">
+                    <i class="fas fa-save"></i> حفظ النسبة
+                </button>
+                <button id="btnToggleRatio" class="btn-action" style="width:auto; padding:10px 20px; background:#27ae60; color:white;" onclick="toggleCashRatio()">
+                    <i class="fas fa-toggle-off"></i> تفعيل النسبة
+                </button>
+            </div>
+            <div id="ratioPreview" style="font-size:0.9rem; color:#555; font-weight:700; background:#f0f7ff; padding:8px 14px; border-radius:8px; border-right:4px solid #2196f3; display:none;">
+                مثال: لو الكاش اليومي 3000 ج → سيظهر <strong id="ratioExample" style="color:#1565c0;">600 ج</strong> فقط
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== إدارة الباسوردات ===== -->
+    <div class="section-box">
+        <h3 class="section-header"><i class="fas fa-key" style="color:#d4af37;"></i> إدارة الأرقام السرية للصفحات</h3>
+        <p style="color:#888; margin-bottom:18px; font-size:0.9rem;">تقدر تغيّر الأرقام السرية لكل صفحة. تتحفظ في السيرفر وتطبق على كل الأجهزة.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
+            <div>
+                <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-shield-halved"></i> صفحة الدعم (السابورت)</label>
+                <input type="text" id="passSupport" placeholder="2210" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-book"></i> الحركة المالية اليومية</label>
+                <input type="text" id="passLedger" placeholder="1234" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-chart-pie"></i> التحليل الشهري</label>
+                <input type="text" id="passAnalytics" placeholder="9999" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</label>
+                <input type="text" id="passAdminPatients" placeholder="9999" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-trash"></i> مسح مريض</label>
+                <input type="text" id="passDelete" placeholder="999" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+            </div>
+        </div>
+        <button onclick="savePasswords()" style="margin-top:18px; background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; border:none; padding:13px 30px; border-radius:12px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.95rem;"><i class="fas fa-save"></i> حفظ الأرقام السرية</button>
+    </div>
+
+    <!-- قسم تعديل الرسائل -->
+    <div class="section-card" style="background:white; border-radius:18px; padding:24px; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+        <h3 class="section-header" style="margin-bottom:6px;"><i class="fas fa-comment-dots" style="color:#25d366;"></i> تعديل رسائل الواتساب</h3>
+        <p style="color:#888; font-size:0.85rem; margin-bottom:18px;">عدّل نصوص الرسائل المرسلة للمرضى. استخدم <b style="color:#0b132b;">{الاسم}</b> و <b style="color:#0b132b;">{الساعة}</b> و <b style="color:#0b132b;">{الدكتور}</b> وسيتم استبدالها تلقائياً ببيانات المريض.</p>
+
+        <div style="display:flex; flex-direction:column; gap:16px;">
+            <div>
+                <label style="font-weight:800; font-size:0.9rem; color:#0b132b; display:block; margin-bottom:6px;"><i class="far fa-bell" style="color:#2980b9;"></i> رسالة تذكير بالموعد</label>
+                <textarea id="msgConfirm" rows="5" style="width:100%; padding:12px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-size:0.9rem; line-height:1.7; resize:vertical;"></textarea>
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.9rem; color:#0b132b; display:block; margin-bottom:6px;"><i class="fas fa-user-clock" style="color:#e67e22;"></i> رسالة التأخر / عدم الحضور</label>
+                <textarea id="msgLate" rows="5" style="width:100%; padding:12px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-size:0.9rem; line-height:1.7; resize:vertical;"></textarea>
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.9rem; color:#0b132b; display:block; margin-bottom:6px;"><i class="fas fa-calendar-times" style="color:#c0392b;"></i> رسالة انقطاع عن الجلسات (الكول سنتر)</label>
+                <textarea id="msgAbsent" rows="5" style="width:100%; padding:12px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-size:0.9rem; line-height:1.7; resize:vertical;"></textarea>
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.9rem; color:#0b132b; display:block; margin-bottom:6px;"><i class="fas fa-lock" style="color:#7b1fa2;"></i> رسالة إغلاق ملف التأمين</label>
+                <textarea id="msgCloseInsu" rows="4" style="width:100%; padding:12px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-size:0.9rem; line-height:1.7; resize:vertical;"></textarea>
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.9rem; color:#0b132b; display:block; margin-bottom:6px;"><i class="fas fa-flag-checkered" style="color:#16a085;"></i> رسالة انتهاء الكورس (الكاش)</label>
+                <textarea id="msgCloseCash" rows="4" style="width:100%; padding:12px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-size:0.9rem; line-height:1.7; resize:vertical;"></textarea>
+            </div>
+            <div>
+                <label style="font-weight:800; font-size:0.9rem; color:#0b132b; display:block; margin-bottom:6px;"><i class="fab fa-whatsapp" style="color:#25d366;"></i> رسالة تأكيد الحجز الشاملة (زي Allura)</label>
+                <p style="color:#999; font-size:0.78rem; margin-bottom:6px;">استخدم {الاسم} {الساعة} {الدكتور} {الفرع} {اليوم} وسيتم استبدالهم تلقائياً</p>
+                <textarea id="msgBookingConfirm" rows="12" style="width:100%; padding:12px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-size:0.9rem; line-height:1.7; resize:vertical;"></textarea>
+            </div>
+        </div>
+        <button onclick="saveMessages()" style="margin-top:18px; background:linear-gradient(135deg,#25d366,#128c7e); color:white; border:none; padding:13px 30px; border-radius:12px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.95rem;"><i class="fas fa-save"></i> حفظ الرسائل</button>
+    </div>
+
+
+        <div class="activity-filters">
+            <input type="date" id="activityDate">
+            <select id="activityBranch">
+                <option value="all">كل الفروع</option>
+                <option value="المهندسين">المهندسين</option>
+                <option value="أكتوبر">أكتوبر</option>
+                <option value="الهرم">الهرم</option>
+                <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+            </select>
+            <button class="btn-action" style="width:auto; padding:8px 20px; background:#0b132b;" onclick="loadDailyActivity()">
+                <i class="fas fa-search"></i> عرض النشاط
+            </button>
+            <button class="btn-action" style="width:auto; padding:8px 20px; background:#27ae60;" onclick="loadDailyActivity(true)">
+                <i class="fas fa-sync"></i> تحديث
+            </button>
+        </div>
+
+        <div id="activityCards" class="activity-cards">
+            <div style="color:#999; text-align:center; padding:30px; grid-column:1/-1;">
+                <i class="fas fa-calendar-day" style="font-size:2.5rem; display:block; margin-bottom:10px; color:#e0e0e0;"></i>
+                اختر التاريخ واضغط "عرض النشاط"
+            </div>
+        </div>
+
+        <!-- جدول تفصيلي -->
+        <div class="scroll-box" id="activityTableWrap" style="display:none;">
+            <table class="table-container">
+                <thead>
+                    <tr>
+                        <th>الموظف</th>
+                        <th>الفرع</th>
+                        <th>تأمين (مرضى)</th>
+                        <th>كاش (مرضى)</th>
+                        <th>حجوزات</th>
+                        <th>مصروفات</th>
+                        <th>آخر نشاط</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== المستخدمين ===== -->
+    <div class="section-box">
+        <h3 class="section-header"><i class="fas fa-users-cog" style="color:#2980b9;"></i> إدارة صلاحيات الدخول للمنظومة</h3>
+        <div class="users-grid">
+            <div style="background:#f8f9fa; padding:20px; border-radius:15px; border:1px solid #eaeaea;">
+                <h4 style="margin-bottom:15px; color:#0b132b; font-weight:800;">إضافة موظف جديد</h4>
+                <div class="input-group"><label>اسم المستخدم</label><input type="text" id="newUsername" placeholder="مثال: أحمد استقبال"></div>
+                <div class="input-group"><label>الرقم السري</label><input type="text" id="newPassword" placeholder="اكتب رقم سري"></div>
+                <div class="input-group"><label>صلاحية الدخول</label>
+                    <select id="newRole">
+                        <option value="reception">استقبال</option>
+                        <option value="manager">مدير فرع</option>
+                        <option value="owner">إدارة عليا</option>
+                    </select>
+                </div>
+                <div class="input-group"><label>الفرع</label>
+                    <select id="newBranch">
+                        <option value="الإدارة المركزية">الإدارة المركزية</option>
+                        <option value="الهرم">الهرم</option>
+                        <option value="المهندسين">المهندسين</option>
+                        <option value="أكتوبر">أكتوبر</option>
+                        <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+                    </select>
+                </div>
+                <button class="btn-action" style="background:#2980b9; color:white;" onclick="addUser()">
+                    <i class="fas fa-plus"></i> إنشاء الحساب على السيرفر
+                </button>
+            </div>
+            <div class="scroll-box">
+                <table class="table-container">
+                    <thead><tr><th>المستخدم</th><th>الباسورد</th><th>الصلاحية</th><th>الفرع</th><th>إجراء</th></tr></thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== النسخ الاحتياطي ===== -->
+    <div class="section-box">
+        <h3 class="section-header"><i class="fas fa-database" style="color:#27ae60;"></i> النسخ الاحتياطي وحفظ البيانات السحابية</h3>
+        <div class="backup-grid">
+            <div class="backup-card">
+                <i class="fas fa-file-excel" style="color:#27ae60; font-size:2rem; margin-bottom:10px;"></i>
+                <h3>نسخة Excel كاملة (احتياط)</h3>
+                <p>نسخة كل بيانات النظام للاحتفاظ والاسترجاع؛ للتقرير المنظم استخدم «تقارير Excel الاحترافية».</p>
+                <button class="btn-action" style="background:#27ae60; color:white; margin-top:15px;" onclick="exportToExcel()">
+                    <i class="fas fa-file-export"></i> تحميل شيت إكسيل
+                </button>
+            </div>
+            <div class="backup-card">
+                <i class="fas fa-code" style="font-size:2rem; margin-bottom:10px;"></i>
+                <h3>نسخة (JSON)</h3>
+                <p>تحميل نسخة كود احتياطية من السيرفر.</p>
+                <button class="btn-action" style="margin-top:15px;" onclick="exportBackup()">
+                    <i class="fas fa-download"></i> تحميل نسخة السيرفر
+                </button>
+            </div>
+            <div class="backup-card">
+                <i class="fas fa-upload" style="color:#e74c3c; font-size:2rem; margin-bottom:10px;"></i>
+                <h3>استعادة السيرفر</h3>
+                <p>ارفع ملف JSON لاستبدال بيانات السيرفر.</p>
+                <input type="file" id="importFile" style="display:none;" accept=".json" onchange="importBackup(event)">
+                <button class="btn-action" style="background:#e74c3c; color:white; margin-top:15px;" onclick="document.getElementById('importFile').click()">
+                    <i class="fas fa-upload"></i> استعادة البيانات
+                </button>
+            </div>
+            <div class="backup-card">
+                <i class="fas fa-envelope" style="color:#1565c0; font-size:2rem; margin-bottom:10px;"></i>
+                <h3>بريد اليومية اليدوي</h3>
+                <p>يفتح رسالة جاهزة لملخص اليوم إلى البريدين المحددين. أرفق ملف Excel يدويًا إذا أردت.</p>
+                <button class="btn-action" style="background:#1565c0; color:white; margin-top:15px;" onclick="composeDailyEmail()">
+                    <i class="fas fa-paper-plane"></i> تجهيز رسالة البريد
+                </button>
+            </div>
+            <div class="backup-card" style="border-color:#d4af37;">
+                <i class="fas fa-chart-line" style="color:#d4af37; font-size:2rem; margin-bottom:10px;"></i>
+                <h3>تقارير Excel الاحترافية</h3>
+                <p>شيتات منفصلة: إجمالي، كاش وكورسات، تأمين، مصروفات، ودفعات قديمة.</p>
+                <input type="date" id="excelDailyDate" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-family:Tajawal;margin:6px 0;">
+                <input type="month" id="excelMonthlyMonth" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-family:Tajawal;margin-bottom:6px;">
+                <label style="display:block;text-align:right;font-size:.78rem;font-weight:800;color:#087EAF;margin:5px 0 3px;">لوجو التقرير (اختياري)</label>
+                <input type="file" id="excelReportLogo" accept="image/png,image/jpeg" onchange="saveExcelReportLogo(this)" style="width:100%;font-size:.75rem;margin-bottom:7px;">
+                <select id="excelDailyBranch" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-family:Tajawal;margin-bottom:8px;">
+                    <option value="all">كل الفروع</option><option value="المهندسين">المهندسين</option><option value="أكتوبر">أكتوبر</option><option value="الهرم">الهرم</option><option value="العبور">العبور</option><option value="مدينة نصر">مدينة نصر</option><option value="مستشفى الشروق">مستشفى الشروق</option><option value="بني سويف">بني سويف</option>
+                </select>
+                <button class="btn-action" style="background:#0b132b; color:#d4af37; margin-top:4px;" onclick="exportProfessionalReport('daily')">
+                    <i class="fas fa-file-excel"></i> تنزيل تقرير اليومية
+                </button>
+                <button class="btn-action" style="background:#6a1b9a; color:white; margin-top:8px;" onclick="exportProfessionalReport('monthly')">
+                    <i class="fas fa-chart-pie"></i> تنزيل إجمالي التحليل الشهري
+                </button>
+                <button class="btn-action" style="background:#087eaf; color:white; margin-top:8px;" onclick="exportOrthoDoctorsExcel()">
+                    <i class="fas fa-user-doctor"></i> تقرير أطباء العظام الشهري (ملف مستقل)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== سجل المراقبة ===== -->
+    <div class="section-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 class="section-header" style="margin-bottom:0; border:none; padding:0;">
+                <i class="fas fa-user-secret" style="color:#d4af37;"></i> سجل المراقبة (Audit Trail)
+            </h3>
+            <button onclick="clearLogs()" style="background:#fff1f0; color:#e74c3c; border:1px solid #ffccc7; padding:8px 15px; border-radius:8px; font-weight:800; cursor:pointer; font-family:'Tajawal';">
+                <i class="fas fa-trash-alt"></i> مسح السجل
+            </button>
+        </div>
+        <div class="scroll-box">
+            <table class="table-container">
+                <thead><tr><th width="20%">التاريخ والوقت</th><th width="15%">المستخدم</th><th width="15%">الفرع</th><th width="15%">نوع الإجراء</th><th width="35%">التفاصيل</th></tr></thead>
+                <tbody id="auditBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div'); toast.className = `toast ${type}`;
+        toast.innerHTML = type === 'success'
+            ? `<i class="fas fa-check-circle" style="color:#27ae60;"></i> ${message}`
+            : `<i class="fas fa-times-circle" style="color:#e74c3c;"></i> ${message}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3500);
+    }
+
+    // باسورد السابورت (يتحدّث من الإعdادات، الافتراضي 2210)
+    let SUPPORT_PASS = '2210';
+
+    function checkPass() {
+        let pass = document.getElementById('cpanelPass').value;
+        if (pass === SUPPORT_PASS) {
+            document.getElementById('authOverlay').classList.add('ls-hidden');
+            document.getElementById('mainContent').classList.add('unlocked');
+        } else {
+            showToast("الرقم السري غير صحيح!", "error");
+        }
+    }
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY",
+        authDomain: "life-sport-system-hossamzahran.firebaseapp.com",
+        projectId: "life-sport-system-hossamzahran",
+        storageBucket: "life-sport-system-hossamzahran.firebasestorage.app",
+        messagingSenderId: "797045013311",
+        appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a"
+    };
+
+    let db;
+    let globalUsers = [], globalLogs = [], globalInsuDB = {}, globalCashDB = {}, globalLedger = [], globalReservations = [], globalTransactions = [];
+    let currentCashPriceStatus = false;
+    let currentPastSessionsStatus = false;
+    let currentRatioEnabled = false;
+    let currentRatioValue = 20;
+
+    // ===== الرسائل الافتراضية (global) =====
+    const DEFAULT_MESSAGES = {
+        msgConfirm: 'أهلاً وسهلاً أستاذ/ة {الاسم} 😊\n\nنود تذكيركم بموعد جلستكم اليوم في مركز لايف سبورت:\n🕐 الساعة: {الساعة}\n👨‍⚕️ مع: {الدكتور}\n\nننتظر تشريفكم وجودكم في الميعاد.\nنتمنى لحضرتكم دوام الصحة والعافية 🌿',
+        msgLate: 'أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} مع {الدكتور} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟',
+        msgAbsent: 'أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nلاحظنا انقطاع حضرتك عن جلسات العلاج.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟',
+        msgCloseInsu: 'أستاذ/ة {الاسم}،\nنبلغ حضرتك أننا قمنا بإغلاق جلساتك لدينا لأن لشركة التأمين الخاصة بحضرتك "ديد لاين" وحضرتك متغيب منذ فترة.\nإذا كنت ترغب في الاستكمال، يرجى الكشف وإحضار "موافقة جديدة".\nنتمنى لحضرتك دوام الصحة والعافية.',
+        msgCloseCash: 'أستاذ/ة {الاسم}،\nنبلغ حضرتك بانتهاء جلسات الكورس الخاص بك وتم تقفيل الملف.\nفي حال رغبتك في استكمال العلاج، يمكنك تشريفنا لفتح كورس جديد.\nنتمنى لحضرتك دوام الصحة والعافية.',
+        msgBookingConfirm: '🌿 *مركز Life Sport للعلاج الطبيعي* 🌿\n\nأهلاً وسهلاً أستاذ/ة *{الاسم}* 😊\nتم تأكيد حجز جلستكم بنجاح ✅\n━━━━━━━━━━━━\n📋 *تفاصيل الحجز:*\n🏥 الفرع: *{الفرع}*\n📅 اليوم: *{اليوم}*\n🕐 الساعة: *{الساعة}*\n👨‍⚕️ مع: *{الدكتور}*\n━━━━━━━━━━━━\n📌 *لحجز الجلسات يرجى مراعاة:*\n\n🍀 قبل كل موعد بـ 24 ساعة سيصلك رسالة لتأكيد أو إلغاء الحجز\n\n🍀 التأخير أكتر من 15 دقيقة سيتم إلغاء حجز الجلسة وتأجيلها لميعاد آخر\n\n🍀 في حالة تأكيد الموعد وعدم الحضور سيتم احتساب الجلسة من رصيد جلساتك\n\n🍀 عدم اصطحاب الأطفال لراحة جميع المرضى\n\n🍀 أثناء الجلسة لا يسمح بالمرافقين\n\n🍀 أثناء الجلسة بملابس مريحة وفضفاضة\n\n🍀 جميع العاملين طبيبات ومساعدين\n\n🍀 التواصل والحجز مع الاستقبال فقط\n━━━━━━━━━━━━\n🤍 نتمنى لحضرتك دوام الصحة والعافية\n_إدارة مركز Life Sport_'
+    };
+
+    // ===== حفظ الأرقام السرية (global) =====
+    async function savePasswords() {
+        if (!db) { alert('جاري الاتصال، حاول بعد ثانية'); return; }
+        const data = {
+            passSupport: document.getElementById('passSupport').value.trim() || '2210',
+            passLedger: document.getElementById('passLedger').value.trim() || '1234',
+            passAnalytics: document.getElementById('passAnalytics').value.trim() || '9999',
+            passAdminPatients: document.getElementById('passAdminPatients').value.trim() || '9999',
+            passDelete: document.getElementById('passDelete').value.trim() || '999'
+        };
+        try {
+            await db.collection("settings").doc("system_settings").set(data, { merge: true });
+            alert('✅ تم حفظ الأرقام السرية بنجاح:\n\nالدفتر: ' + data.passLedger + '\nملفات المرضى: ' + data.passAdminPatients + '\nالتحليل: ' + data.passAnalytics + '\nالحذف: ' + data.passDelete);
+        } catch(e) { alert('❌ خطأ أثناء الحفظ:\n' + e.message); console.error(e); }
+    }
+
+    // ===== حفظ الرسائل (global) =====
+    async function saveMessages() {
+        if (!db) { alert('جاري الاتصال، حاول بعد ثانية'); return; }
+        const data = {
+            msgConfirm: document.getElementById('msgConfirm').value.trim() || DEFAULT_MESSAGES.msgConfirm,
+            msgLate: document.getElementById('msgLate').value.trim() || DEFAULT_MESSAGES.msgLate,
+            msgAbsent: document.getElementById('msgAbsent').value.trim() || DEFAULT_MESSAGES.msgAbsent,
+            msgCloseInsu: document.getElementById('msgCloseInsu').value.trim() || DEFAULT_MESSAGES.msgCloseInsu,
+            msgCloseCash: document.getElementById('msgCloseCash').value.trim() || DEFAULT_MESSAGES.msgCloseCash,
+            msgBookingConfirm: (document.getElementById('msgBookingConfirm') ? document.getElementById('msgBookingConfirm').value.trim() : '') || DEFAULT_MESSAGES.msgBookingConfirm
+        };
+        try {
+            await db.collection("settings").doc("system_settings").set(data, { merge: true });
+            alert('✅ تم حفظ الرسائل بنجاح');
+        } catch(e) { alert('خطأ أثناء حفظ الرسائل: ' + e.message); console.error(e); }
+    }
+
+    // ===== تحميل الرسائل في الحقول (global) =====
+    function loadMessages(d) {
+        if (!d) d = {};
+        if (document.getElementById('msgConfirm')) document.getElementById('msgConfirm').value = d.msgConfirm || DEFAULT_MESSAGES.msgConfirm;
+        if (document.getElementById('msgLate')) document.getElementById('msgLate').value = d.msgLate || DEFAULT_MESSAGES.msgLate;
+        if (document.getElementById('msgAbsent')) document.getElementById('msgAbsent').value = d.msgAbsent || DEFAULT_MESSAGES.msgAbsent;
+        if (document.getElementById('msgCloseInsu')) document.getElementById('msgCloseInsu').value = d.msgCloseInsu || DEFAULT_MESSAGES.msgCloseInsu;
+        if (document.getElementById('msgCloseCash')) document.getElementById('msgCloseCash').value = d.msgCloseCash || DEFAULT_MESSAGES.msgCloseCash;
+        if (document.getElementById('msgBookingConfirm')) document.getElementById('msgBookingConfirm').value = d.msgBookingConfirm || DEFAULT_MESSAGES.msgBookingConfirm;
+    }
+
+    function initFirebase() {
+        if (window._supportInit) return; // اتحمّل قبل كده
+        window._supportInit = true;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+        try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+    // تأكيد الاتصال بعد 3 ثواني
+    setTimeout(() => {
+        const st = document.getElementById('serverStatus');
+        if (st && st.innerHTML.includes('جاري')) {
+            st.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60;"></i> متصل';
+        }
+    }, 3000);
+
+        // ملحوظة: الصفحة أصلاً محمية بشاشة الباسورد، مفيش داعي لشرط دور يوقف تحميل البيانات
+
+        // إعدادات النظام
+        db.collection("settings").doc("system_settings").onSnapshot(doc => {
+            let btnCash = document.getElementById('btnToggleCashPrices');
+            let btnPast = document.getElementById('btnTogglePastSessions');
+            let btnRatio = document.getElementById('btnToggleRatio');
+            let ratioInput = document.getElementById('cashRatioInput');
+            let statusBadge = document.getElementById('ratioStatusBadge');
+            let preview = document.getElementById('ratioPreview');
+
+            if (doc.exists) {
+                let data = doc.data();
+
+                // أسعار الكاش
+                currentCashPriceStatus = data.showCashPrices === true;
+                if (currentCashPriceStatus) {
+                    btnCash.innerHTML = '<i class="fas fa-eye"></i> الأسعار ظاهرة (اضغط للإخفاء)';
+                    btnCash.style.background = '#e74c3c'; btnCash.style.color = '#fff';
+                } else {
+                    btnCash.innerHTML = '<i class="fas fa-eye-slash"></i> الأسعار مخفية (اضغط للإظهار)';
+                    btnCash.style.background = '#27ae60'; btnCash.style.color = '#fff';
+                }
+
+                // الجلسات القديمة
+                currentPastSessionsStatus = data.allowPastSessions === true;
+                if (currentPastSessionsStatus) {
+                    btnPast.innerHTML = '<i class="fas fa-toggle-on"></i> إدخال القديم مفعل (اضغط للتعطيل)';
+                    btnPast.style.background = '#e74c3c'; btnPast.style.color = '#fff';
+                } else {
+                    btnPast.innerHTML = '<i class="fas fa-toggle-off"></i> إدخال القديم معطل (اضغط للتفعيل)';
+                    btnPast.style.background = '#27ae60'; btnPast.style.color = '#fff';
+                }
+
+                // نسبة الكاش
+                currentRatioEnabled = data.cashRatioEnabled === true;
+                currentRatioValue = data.cashRatio || 20;
+                ratioInput.value = currentRatioValue;
+
+                if (currentRatioEnabled) {
+                    statusBadge.className = 'ratio-status ratio-on';
+                    statusBadge.innerHTML = `<i class="fas fa-check-circle"></i> مفعّل — ${currentRatioValue}%`;
+                    btnRatio.innerHTML = '<i class="fas fa-toggle-on"></i> تعطيل النسبة';
+                    btnRatio.style.background = '#e74c3c';
+                    preview.style.display = 'block';
+                    updateRatioPreview();
+                } else {
+                    statusBadge.className = 'ratio-status ratio-off';
+                    statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> معطل';
+                    btnRatio.innerHTML = '<i class="fas fa-toggle-off"></i> تفعيل النسبة';
+                    btnRatio.style.background = '#27ae60';
+                    preview.style.display = 'none';
+                }
+
+                // حدّث الرقم السري الفعلي للدخول من الإعدادات المحفوظة
+                if (data.passSupport) SUPPORT_PASS = data.passSupport;
+
+                // الأرقام السرية — تتملأ مرة واحدة بس (مش كل snapshot عشان ماتمسحش اللي بتكتبه)
+                if (document.getElementById('passLedger') && !window._passwordsLoaded) {
+                    window._passwordsLoaded = true;
+                    if (document.getElementById('passSupport')) document.getElementById('passSupport').value = data.passSupport || '2210';
+                    document.getElementById('passLedger').value = data.passLedger || '1234';
+                    document.getElementById('passAnalytics').value = data.passAnalytics || '9999';
+                    document.getElementById('passAdminPatients').value = data.passAdminPatients || '9999';
+                    document.getElementById('passDelete').value = data.passDelete || '999';
+                }
+                if (!window._messagesLoaded) { window._messagesLoaded = true; loadMessages(data); }
+            }
+        });
+
+        // حفظ الأرقام السرية
+        db.collection("users").onSnapshot(snap => {
+            globalUsers = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalUsers.push(d); });
+            renderUsers();
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-check-circle"></i> متصل ومحدث';
+        });
+        db.collection("audit_logs").orderBy("timestamp", "desc").limit(100).onSnapshot(snap => {
+            globalLogs = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalLogs.push(d); });
+            renderAuditLogs();
+        });
+        db.collection("patients_insu").limit(1200).onSnapshot(snap => { globalInsuDB = {}; snap.forEach(doc => globalInsuDB[doc.id] = doc.data()); });
+        db.collection("patients_cash").limit(1200).onSnapshot(snap => { globalCashDB = {}; snap.forEach(doc => globalCashDB[doc.id] = doc.data()); });
+        db.collection("daily_ledger").orderBy("timestamp","desc").limit(800).onSnapshot(snap => { globalLedger = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalLedger.push(d); }); });
+        db.collection("reservations").orderBy("createdAt","desc").limit(1200).onSnapshot(snap => { globalReservations = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalReservations.push(d); }); }, err => { db.collection("reservations").limit(1200).onSnapshot(snap => { globalReservations = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalReservations.push(d); }); }); });
+        db.collection("daily_transactions").orderBy("timestamp","desc").limit(500).onSnapshot(snap => { globalTransactions = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalTransactions.push(d); }); });
+
+        // ضبط تاريخ اليوم تلقائي
+        document.getElementById('activityDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('excelDailyDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('excelMonthlyMonth').value = new Date().toISOString().slice(0,7);
+    }
+
+    // ===== تغيير الإعدادات =====
+    async function toggleCashPrices() {
+        let newState = !currentCashPriceStatus;
+        try {
+            await db.collection("settings").doc("system_settings").set({ showCashPrices: newState }, { merge: true });
+            logAction('إعدادات النظام', newState ? "تفعيل إظهار أسعار الكاش" : "تعطيل إظهار أسعار الكاش");
+            showToast("تم تحديث إعدادات أسعار الكاش.");
+        } catch(e) { showToast("خطأ في الاتصال!", "error"); }
+    }
+
+    async function togglePastSessions() {
+        let newState = !currentPastSessionsStatus;
+        try {
+            await db.collection("settings").doc("system_settings").set({ allowPastSessions: newState }, { merge: true });
+            logAction('إعدادات النظام', newState ? "تفعيل خانة الجلسات القديمة" : "تعطيل خانة الجلسات القديمة");
+            showToast("تم تحديث إعدادات الجلسات القديمة.");
+        } catch(e) { showToast("خطأ في الاتصال!", "error"); }
+    }
+
+    // ===== نسبة الكاش =====
+    function updateRatioPreview() {
+        let ratio = parseFloat(document.getElementById('cashRatioInput').value) || 20;
+        let example = Math.round(3000 * ratio / 100);
+        document.getElementById('ratioExample').innerText = example.toLocaleString() + ' ج';
+        document.getElementById('ratioPreview').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // ابدأ تحميل كل البيانات (دلوقتي كل التعريفات جاهزة)
+        try { initFirebase(); } catch(e) { console.error('initFirebase error:', e); }
+        const ratioInp = document.getElementById('cashRatioInput');
+        if (ratioInp) ratioInp.addEventListener('input', updateRatioPreview);
+    });
+    // احتياطي: لو الصفحة اتحمّلت خلاص قبل ما نربط الحدث
+    if (document.readyState !== 'loading') {
+        try { initFirebase(); } catch(e) { console.error('initFirebase error:', e); }
+    }
+
+    async function saveCashRatio() {
+        let ratio = parseFloat(document.getElementById('cashRatioInput').value);
+        if (!ratio || ratio < 1 || ratio > 100) return showToast("أدخل نسبة بين 1 و 100!", "error");
+        try {
+            await db.collection("settings").doc("system_settings").set({ cashRatio: ratio }, { merge: true });
+            logAction('إعدادات النظام', `تحديد نسبة الكاش الظاهرة: ${ratio}%`);
+            showToast(`تم حفظ النسبة: ${ratio}%`);
+            updateRatioPreview();
+        } catch(e) { showToast("خطأ في الاتصال!", "error"); }
+    }
+
+    async function toggleCashRatio() {
+        let newState = !currentRatioEnabled;
+        try {
+            await db.collection("settings").doc("system_settings").set({ cashRatioEnabled: newState }, { merge: true });
+            logAction('إعدادات النظام', newState ? `تفعيل نسبة الكاش (${currentRatioValue}%)` : "تعطيل نسبة الكاش");
+            showToast(newState ? `تم تفعيل النسبة (${currentRatioValue}%)` : "تم تعطيل النسبة");
+        } catch(e) { showToast("خطأ في الاتصال!", "error"); }
+    }
+
+    // ===== سجل النشاط اليومي =====
+    async function loadDailyActivity(autoRefresh = false) {
+        let selDate   = document.getElementById('activityDate').value;
+        let selBranch = document.getElementById('activityBranch').value;
+        if (!selDate) return showToast("اختر التاريخ!", "error");
+
+        // تحويل التاريخ لصيغة اليومية (dd/mm/yyyy)
+        let parts = selDate.split('-');
+        let dateFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+        // فلترة اليومية حسب التاريخ والفرع
+        let ledgerToday = globalLedger.filter(e => {
+            let match = e.date === dateFormatted || e.date === selDate;
+            if (!match && e.timestamp && typeof e.timestamp.toDate === 'function') {
+                let d = e.timestamp.toDate();
+                let ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                match = ds === selDate;
+            }
+            if (selBranch !== 'all' && e.branch !== selBranch) return false;
+            return match;
+        });
+
+        let reservToday = globalReservations.filter(r => {
+            if (selBranch !== 'all' && r.branch !== selBranch) return false;
+            return r.date === selDate;
+        });
+
+        let transToday = globalTransactions.filter(t => {
+            let match = t.date === dateFormatted || t.date === selDate;
+            if (!match && t.timestamp && typeof t.timestamp.toDate === 'function') {
+                let d = t.timestamp.toDate();
+                let ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                match = ds === selDate;
+            }
+            if (selBranch !== 'all' && t.branch !== selBranch) return false;
+            return match;
+        });
+
+        // تجميع حسب الفرع (مش الموظف لأن الاسم مش مسجل في اللدجر)
+        let branchActivity = {};
+
+        ledgerToday.forEach(e => {
+            let branch = e.branch || 'غير محدد';
+            if (!branchActivity[branch]) branchActivity[branch] = { insu: 0, cash: 0, reserv: 0, expenses: 0, lastTime: null };
+            let t = e.type || '';
+            if (t === 'تحمل' || t.includes('تأمين')) branchActivity[branch].insu++;
+            else if (t.includes('كاش')) branchActivity[branch].cash++;
+            if (e.timestamp && typeof e.timestamp.toDate === 'function') {
+                let ts = e.timestamp.toDate();
+                if (!branchActivity[branch].lastTime || ts > branchActivity[branch].lastTime) {
+                    branchActivity[branch].lastTime = ts;
+                }
+            }
+        });
+
+        reservToday.forEach(r => {
+            let branch = r.branch || 'غير محدد';
+            if (!branchActivity[branch]) branchActivity[branch] = { insu: 0, cash: 0, reserv: 0, expenses: 0, lastTime: null };
+            branchActivity[branch].reserv++;
+        });
+
+        transToday.forEach(t => {
+            let branch = t.branch || 'غير محدد';
+            if (!branchActivity[branch]) branchActivity[branch] = { insu: 0, cash: 0, reserv: 0, expenses: 0, lastTime: null };
+            branchActivity[branch].expenses++;
+        });
+
+        // رندر الكاردز
+        let cardsContainer = document.getElementById('activityCards');
+        let tableBody = document.getElementById('activityTableBody');
+        let tableWrap = document.getElementById('activityTableWrap');
+
+        if (Object.keys(branchActivity).length === 0) {
+            cardsContainer.innerHTML = `<div style="color:#999; text-align:center; padding:30px; grid-column:1/-1;">
+                <i class="fas fa-inbox" style="font-size:2.5rem; display:block; margin-bottom:10px; color:#e0e0e0;"></i>
+                لا يوجد نشاط في هذا اليوم
+            </div>`;
+            tableWrap.style.display = 'none';
+            return;
+        }
+
+        let cardsHtml = '';
+        let tableHtml = '';
+        let totalInsu = 0, totalCash = 0, totalReserv = 0, totalExp = 0;
+
+        Object.entries(branchActivity).forEach(([branch, stats]) => {
+            totalInsu += stats.insu; totalCash += stats.cash; totalReserv += stats.reserv; totalExp += stats.expenses;
+            let lastTimeStr = stats.lastTime ? stats.lastTime.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
+
+            cardsHtml += `
+            <div class="activity-card">
+                <div class="ac-header">
+                    <div>
+                        <div class="ac-name"><i class="fas fa-map-marker-alt" style="color:#d4af37;"></i> فرع ${branch}</div>
+                        <div class="ac-branch">${dateFormatted}</div>
+                    </div>
+                    <div class="ac-time">آخر نشاط<br><strong style="color:#0b132b;">${lastTimeStr}</strong></div>
+                </div>
+                <div class="activity-stats">
+                    <div class="stat-item insu">
+                        <span class="stat-num">${stats.insu}</span>
+                        <span class="stat-lbl">تأمين</span>
+                    </div>
+                    <div class="stat-item cash">
+                        <span class="stat-num">${stats.cash}</span>
+                        <span class="stat-lbl">كاش</span>
+                    </div>
+                    <div class="stat-item reserv">
+                        <span class="stat-num">${stats.reserv}</span>
+                        <span class="stat-lbl">حجوزات</span>
+                    </div>
+                </div>
+                ${stats.expenses > 0 ? `<div style="margin-top:8px; font-size:0.8rem; color:#e74c3c; font-weight:800;"><i class="fas fa-minus-circle"></i> ${stats.expenses} مصروف مسجل</div>` : ''}
+            </div>`;
+
+            tableHtml += `<tr>
+                <td><strong>فرع ${branch}</strong></td>
+                <td>${branch}</td>
+                <td><span class="badge" style="background:#e3f2fd; color:#1565c0;">${stats.insu}</span></td>
+                <td><span class="badge" style="background:#e8f5e9; color:#2e7d32;">${stats.cash}</span></td>
+                <td><span class="badge" style="background:#f3e5f5; color:#7b1fa2;">${stats.reserv}</span></td>
+                <td><span class="badge" style="background:#ffebee; color:#c62828;">${stats.expenses}</span></td>
+                <td>${lastTimeStr}</td>
+            </tr>`;
+        });
+
+        // إجمالي
+        cardsHtml += `
+        <div class="activity-card" style="border-top-color:#0b132b; background: linear-gradient(135deg, #f8f9fc, #f0f2f5);">
+            <div class="ac-header">
+                <div>
+                    <div class="ac-name" style="font-size:1.1rem;"><i class="fas fa-chart-bar" style="color:#0b132b;"></i> إجمالي اليوم</div>
+                    <div class="ac-branch">كل الفروع</div>
+                </div>
+            </div>
+            <div class="activity-stats">
+                <div class="stat-item insu">
+                    <span class="stat-num">${totalInsu}</span>
+                    <span class="stat-lbl">تأمين</span>
+                </div>
+                <div class="stat-item cash">
+                    <span class="stat-num">${totalCash}</span>
+                    <span class="stat-lbl">كاش</span>
+                </div>
+                <div class="stat-item reserv">
+                    <span class="stat-num">${totalReserv}</span>
+                    <span class="stat-lbl">حجوزات</span>
+                </div>
+            </div>
+        </div>`;
+
+        cardsContainer.innerHTML = cardsHtml;
+        tableBody.innerHTML = tableHtml;
+        tableWrap.style.display = 'block';
+        if (!autoRefresh) showToast(`تم تحميل نشاط ${dateFormatted}`);
+    }
+
+    // ===== المستخدمين =====
+    function renderUsers() {
+        if (!globalUsers.length) {
+            document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999;">لا يوجد مستخدمين</td></tr>';
+            return;
+        }
+        document.getElementById('usersTableBody').innerHTML = globalUsers.map(u => {
+            // اسم المستخدم: جرّب كل الحقول المحتملة
+            const uname = u.username || u.userName || u.name || u.user || '(بدون اسم)';
+            const upass = u.password || u.pass || '-';
+            const urole = u.role || '-';
+            return `
+            <tr>
+                <td><strong>${uname}</strong></td>
+                <td style="color:#c0392b; font-weight:bold;">${upass}</td>
+                <td><span class="badge" style="background:#0b132b; color:#d4af37;">${urole}</span></td>
+                <td>${u.branch || 'المركز'}</td>
+                <td><button onclick="deleteUser('${u.id}','${(uname||'').replace(/'/g,"\\'")}')" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:1.2rem;"><i class="fas fa-trash-alt"></i></button></td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function addUser() {
+        let uName = document.getElementById('newUsername').value.trim();
+        let uPass = document.getElementById('newPassword').value.trim();
+        if (!uName || !uPass) return showToast("أكمل البيانات.", "error");
+        if (globalUsers.find(u => (u.username||u.userName||u.name) === uName)) return showToast("المستخدم موجود.", "error");
+        await db.collection("users").add({ username: uName, password: uPass, role: document.getElementById('newRole').value, branch: document.getElementById('newBranch').value });
+        logAction('إضافة', `إنشاء مستخدم: ${uName}`);
+        showToast("تم إنشاء الحساب بنجاح.");
+        document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = '';
+    }
+
+    async function deleteUser(docId, uName) {
+        if (confirm(`هل أنت متأكد من حذف (${uName}) نهائياً؟\n\n⚠️ تأكد إن فيه حساب تاني تقدر تدخل بيه.`)) {
+            try {
+                await db.collection("users").doc(docId).delete();
+                logAction('حذف', `مسح مستخدم: ${uName}`);
+                showToast("تم الحذف بنجاح.");
+            } catch(e) { showToast("خطأ أثناء الحذف!", "error"); console.error(e); }
+        }
+    }
+
+    // ===== سجل المراقبة =====
+    async function logAction(type, actionDetails) {
+        let user = localStorage.getItem('userName') || 'System';
+        let branch = localStorage.getItem('userBranch') || 'المركز';
+        await db.collection("audit_logs").add({ user, branch, type, action: actionDetails, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+
+    function renderAuditLogs() {
+        document.getElementById('auditBody').innerHTML = globalLogs.map(log => `
+            <tr>
+                <td style="direction:ltr; text-align:right;">${log.timestamp ? new Date(log.timestamp.toDate()).toLocaleString('ar-EG') : 'الآن'}</td>
+                <td><span class="badge" style="background:#0b132b; color:#d4af37;">${log.user}</span></td>
+                <td>${log.branch}</td>
+                <td><span class="badge" style="background:#3498db; color:white;">${log.type}</span></td>
+                <td>${log.action}</td>
+            </tr>`).join('');
+    }
+
+    async function clearLogs() {
+        if (prompt("برجاء إدخال رقم تأكيد مسح السجل (1234):") === "1234") {
+            let snap = await db.collection('audit_logs').get();
+            let batch = db.batch();
+            snap.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            showToast("تم مسح السجل بالكامل.");
+        } else { showToast("رمز التأكيد غير صحيح.", "error"); }
+    }
+
+    // ===== نسخ احتياطي =====
+    // نسخة احتياطية كاملة (كل البيانات مباشرة من Firebase)
+    async function exportBackup() {
+        showToast("جاري تجهيز النسخة الاحتياطية الكاملة...");
+        try {
+            const collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+            const backup = { _meta: { date: new Date().toISOString(), version: 'full' } };
+            for (const col of collections) {
+                const snap = await db.collection(col).get();
+                backup[col] = [];
+                snap.forEach(doc => backup[col].push({ _id: doc.id, ...doc.data() }));
+            }
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `LifeSport_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast("✅ تم تحميل النسخة الاحتياطية الكاملة");
+            logAction('نظام', 'تحميل نسخة احتياطية كاملة من السيرفر');
+        } catch(e) {
+            console.error(e);
+            showToast("خطأ أثناء التصدير", "error");
+        }
+    }
+
+    function saveExcelReportLogo(input) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) return showToast('اختر لوجو أقل من 2 ميجابايت', 'error');
+        const reader = new FileReader();
+        reader.onload = event => {
+            try { localStorage.setItem('lifeSportExcelLogo', event.target.result); showToast('✅ تم حفظ اللوجو للتقارير'); }
+            catch (error) { showToast('تعذر حفظ اللوجو، اختر صورة أصغر', 'error'); }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function exportOrthoDoctorsExcel() {
+        const month=document.getElementById('excelMonthlyMonth').value, branch=document.getElementById('excelDailyBranch').value;
+        if(!month) return showToast('اختر الشهر أولاً','error');
+        if(typeof ExcelJS==='undefined') return showToast('تعذر تحميل مكتبة التقرير','error');
+        const btn=document.querySelector('button[onclick="exportOrthoDoctorsExcel()"]'), old=btn.innerHTML;btn.disabled=true;btn.innerHTML='جاري تجهيز تقرير الأطباء...';
+        try {
+            const toISO=row=>{const raw=String(row.date||'');if(/^\d{4}-\d{2}-\d{2}/.test(raw))return raw.slice(0,10);const p=raw.split(/[\/\-]/);return p.length===3?`${p[2]}-${String(p[1]).padStart(2,'0')}-${String(p[0]).padStart(2,'0')}`:'';};
+            const [iSnap,cSnap,lSnap]=await Promise.all([db.collection('patients_insu').get(),db.collection('patients_cash').get(),db.collection('daily_ledger').get()]);
+            const patients=[...iSnap.docs,...cSnap.docs].map(d=>({id:d.id,...d.data()})).filter(p=>branch==='all'||(p.branch||'المهندسين')===branch);
+            const ledger=lSnap.docs.map(d=>d.data()).filter(x=>toISO(x).startsWith(month)&&(branch==='all'||(x.branch||'المهندسين')===branch));
+            const key=x=>String(x||'').trim().replace(/\s+/g,' ').toLowerCase();
+            const rowsByDoctor=new Map();
+            // يطابق صفحة «تقارير أطباء العظام VIP»: الحالة تُنسب لشهر فتح ملفها، لا لشهر حضورها.
+            const createdMonth = value => { if(!value || typeof value.toDate!=='function') return ''; const d=value.toDate(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+            patients.forEach(p=>{const doctor=String(p.refDoctor||'').trim();if(!doctor)return;const opened=createdMonth(p.createdAt);if(opened&&opened!==month)return;const rows=ledger.filter(x=>key(x.patientName)===key(p.id));const attendance=rows.filter(x=>!x.isPaymentOnly&&!x.isRefund);const attendanceDates=[...new Set(attendance.map(x=>x.date||toISO(x)).filter(Boolean))].join(' | ')||'لم يحضر في الشهر';const isInsu=!!p.comp;const paidThisMonth=rows.reduce((s,x)=>s+(parseFloat(x.amount)||0),0);const totalSessions=parseInt(p.totalSess||0), attendedTotal=parseInt(p.attended||0), remaining=Math.max(0,totalSessions-attendedTotal), price=parseFloat(p.price||p.sessPrice||p.cost||0), totalValue=isInsu?(price*totalSessions)+(parseFloat(p.copayTotal)||0):(p.mode==='course'?(parseFloat(p.cost)||0):price*attendedTotal), actualEarned=isInsu?(price*attendedTotal)+(parseFloat(p.copayPaid)||0):(p.mode==='course'?(parseFloat(p.paid)||0):price*attendedTotal);const renewed=rows.some(x=>String(x.type||'').includes('تجديد')||String(x.notes||'').includes('تجديد'))?'جدد خلال الشهر':'—';const row=[p.id,p.branch||'المهندسين',isInsu?'تأمين':'كاش',p.comp||'—',p.phone||'-',price,totalSessions,attendance.length,attendanceDates,attendedTotal,remaining,paidThisMonth,totalValue,actualEarned,renewed,p.serviceType||p.sessionType||p.type||'-'];if(!rowsByDoctor.has(doctor))rowsByDoctor.set(doctor,[]);rowsByDoctor.get(doctor).push(row);});
+            const wb=new ExcelJS.Workbook();wb.creator='Life Sport';
+            const style=(sh,title)=>{sh.views=[{rightToLeft:true,state:'frozen',ySplit:4}];sh.mergeCells('A1:P1');sh.getCell('A1').value=`LIFE SPORT | ${title} | شهر ${month}`;sh.getCell('A1').font={bold:true,size:16,color:{argb:'FFFFFFFF'}};sh.getCell('A1').fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF087EAF'}};sh.getCell('A1').alignment={horizontal:'center'};sh.addRow([]);const h=sh.addRow(['اسم المريض','الفرع','النوع','شركة التأمين','الهاتف','سعر الموافقة / الجلسة','جلسات الموافقة','حضور هذا الشهر','تواريخ الحضور في الشهر','إجمالي الحضور','المتبقي','المحصل النقدي خلال الشهر','القيمة الإجمالية للملف','المكتسب الفعلي','التجديد','الخدمة']);h.eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0B132B'}};c.alignment={horizontal:'center',wrapText:true};});sh.columns=[{width:24},{width:15},{width:12},{width:19},{width:17},{width:18},{width:15},{width:15},{width:30},{width:15},{width:13},{width:21},{width:21},{width:20},{width:17},{width:20}];};
+            const summary=wb.addWorksheet('ملخص الأطباء');style(summary,'ملخص أطباء العظام');[...rowsByDoctor.entries()].forEach(([doctor,rows])=>summary.addRow([doctor,'-','-','-','-','-','-',rows.reduce((s,r)=>s+(parseFloat(r[7])||0),0),'-','-','-',rows.reduce((s,r)=>s+(parseFloat(r[11])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[12])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[13])||0),0),`إجمالي ${rows.length} حالة`,'']));
+            [...rowsByDoctor.entries()].forEach(([doctor,rows],index)=>{const clean=doctor.replace(/[\\/*?:\[\]]/g,'').slice(0,26)||`طبيب ${index+1}`;const sh=wb.addWorksheet(clean);style(sh,`د. ${doctor}`);rows.forEach(r=>sh.addRow(r));const last=sh.addRow(['إجمالي الحالات','','','','','','',rows.reduce((s,r)=>s+(parseFloat(r[7])||0),0),'','','',rows.reduce((s,r)=>s+(parseFloat(r[11])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[12])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[13])||0),0),'','']);last.font={bold:true,color:{argb:'FFFFFFFF'}};last.eachCell(c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF087EAF'}});});
+            wb.worksheets.forEach(sh=>sh.eachRow((row,rowNumber)=>{if(rowNumber>=4){row.height=23;row.eachCell(cell=>{cell.font={...(cell.font||{}),name:'Arial',size:12,bold:true};cell.alignment={horizontal:'center',vertical:'middle',wrapText:true};});}}));
+            const data=await wb.xlsx.writeBuffer(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=`LifeSport_Ortho_Doctors_${month}.xlsx`;a.click();URL.revokeObjectURL(a.href);showToast('تم تنزيل ملف أطباء العظام');
+        } catch(e){console.error(e);showToast('تعذر تجهيز تقرير أطباء العظام','error');} finally {btn.disabled=false;btn.innerHTML=old;}
+    }
+
+    async function exportProfessionalReport(mode) {
+        const dateInput = document.getElementById('excelDailyDate').value;
+        const monthInput = document.getElementById('excelMonthlyMonth').value;
+        const selectedBranch = document.getElementById('excelDailyBranch').value;
+        const period = mode === 'monthly' ? monthInput : dateInput;
+        if (!period) return showToast('اختر التاريخ أو الشهر أولاً', 'error');
+        if (typeof ExcelJS === 'undefined') return showToast('تعذر تحميل مكتبة التقرير، تحقق من الإنترنت', 'error');
+        const button = document.querySelector(`button[onclick="exportProfessionalReport('${mode}')"]`);
+        const oldHtml = button.innerHTML; button.disabled = true; button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التجهيز...';
+        try {
+            const toISO = row => {
+                const raw = String(row.date || row.Date || '');
+                if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0,10);
+                const parts = raw.split(/[\/\-]/); if (parts.length === 3) { const year=parts[2].length===2 ? `20${parts[2]}` : parts[2]; return `${year}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`; }
+                if (row.timestamp && typeof row.timestamp.toDate === 'function') { const dt=row.timestamp.toDate(); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; }
+                return '';
+            };
+            const [insuSnap,cashSnap,ledgerSnap,transSnap,absenceSnap] = await Promise.all([
+                db.collection('patients_insu').get(), db.collection('patients_cash').get(), db.collection('daily_ledger').get(), db.collection('daily_transactions').get(), db.collection('follow_up_reports').get()
+            ]);
+            const branchOK = row => selectedBranch === 'all' || (row.branch || 'المهندسين') === selectedBranch;
+            const inPeriod = row => { const iso=toISO(row); return mode === 'monthly' ? iso.startsWith(monthInput) : iso === dateInput; };
+            const insu = insuSnap.docs.map(d=>({_id:d.id,...d.data()})).filter(branchOK);
+            const cashPatients = cashSnap.docs.map(d=>({_id:d.id,...d.data()})).filter(branchOK);
+            const ledger = ledgerSnap.docs.map(d=>({_id:d.id,...d.data()})).filter(row=>branchOK(row)&&inPeriod(row));
+            // نفس ترتيب دفتر اليومية: الأحدث أولاً حسب وقت التسجيل، لا حسب اسم الملف.
+            const ledgerTime = row => row.timestamp && typeof row.timestamp.toMillis==='function' ? row.timestamp.toMillis() : 0;
+            ledger.sort((a,b)=>ledgerTime(b)-ledgerTime(a));
+            const expenses = transSnap.docs.map(d=>({_id:d.id,...d.data()})).filter(row=>branchOK(row)&&inPeriod(row));
+            const absences = absenceSnap.docs.map(d=>({_id:d.id,...d.data()})).filter(row=>branchOK(row)&&inPeriod(row));
+            const num = value => parseFloat(value || 0);
+            const isInsu = row => String(row.type||'').includes('تحمل') || String(row.type||'').includes('تأمين');
+            const isInsta = row => { const text=`${row.method||''} ${row.type||''}`.toLowerCase(); return text.includes('instapay') || text.includes('إنستاباي') || text.includes('انستاباي'); };
+            const isCashExpense = row => !isInsta(row) && !row.isRefund;
+            // كل مصدر مال يتحسب مرة واحدة فقط: كاش أو تحمل كاش أو إنستاباي.
+            let cashTotal = ledger.filter(row=>!row.isCompanyAddition&&!isInsu(row)&&!isInsta(row)).reduce((s,row)=>s+num(row.amount),0);
+            const copayTotal = ledger.filter(row=>!row.isCompanyAddition&&isInsu(row)&&!isInsta(row)).reduce((s,row)=>s+num(row.amount),0);
+            let instaTotal = ledger.filter(row=>String(row.method||'').toLowerCase()==='instapay').reduce((s,row)=>s+num(row.amount),0);
+            const cashExpense = expenses.filter(isCashExpense).reduce((s,row)=>s+num(row.amount),0);
+            const instaExpense = expenses.filter(row=>isInsta(row)&&!row.isTransfer).reduce((s,row)=>s+num(row.amount),0);
+            // التحويل ليس مصروفاً: ينقص درج الكاش ويزيد رصيد الإنستاباي بالقيمة نفسها.
+            expenses.filter(row=>row.isTransfer).forEach(row=>{const amount=num(row.amount);if(row.transferDirection==='instapay_to_cash'){cashTotal+=amount;instaTotal-=amount;}else{cashTotal-=amount;instaTotal+=amount;}});
+            // أسماء الملفات أحياناً تحتوي مسافات أو اختلافاً بسيطاً في الهمزات؛
+            // نوحّد المفتاح حتى ترتبط الدفعة باسم صاحبها دائماً.
+            const patientKey = value => String(value || '').trim().replace(/\s+/g,' ').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').toLowerCase();
+            // بعض السجلات القديمة من «إدارة المرضى» تضع سعر الجلسة تلقائياً عند الحضور
+            // رغم عدم وجود سداد؛ لا نعتبرها دفعة ولا نلوّن اسمها.
+            const isActualPayment = row => {
+                const note = String(row.notes || '');
+                const autoAttendance = note.includes('حضور مسجل من إدارة المرضى') || note.includes('تسجيل من إدارة المرضى');
+                return !row.isRefund && !row.isExam && !autoAttendance && num(row.amount) > 0;
+            };
+            // التلوين في الإكسيل يعتمد على «دفعة مؤرخة داخل الفترة» فقط، وليس مجرد حضور أو قيمة قديمة في اليومية.
+            const historyInPeriod = value => {
+                const iso = toISO({date:value});
+                return mode === 'monthly' ? iso.startsWith(monthInput) : iso === dateInput;
+            };
+            const paidToday = new Map(), paymentMethods = new Map();
+            [...insu,...cashPatients].forEach(patient => {
+                (Array.isArray(patient.paymentsHistory) ? patient.paymentsHistory : []).forEach(pay => {
+                    if ((parseFloat(pay.amount)||0) <= 0 || !historyInPeriod(pay.date)) return;
+                    const name = patientKey(patient._id);
+                    paidToday.set(name, (paidToday.get(name) || 0) + num(pay.amount));
+                    const methods = paymentMethods.get(name) || new Set();
+                    methods.add(isInsta(pay) ? 'إنستاباي' : 'كاش'); paymentMethods.set(name, methods);
+                });
+            });
+            // الحضور الفعلي فقط: نستبعد الدفعات المستقلة والاسترجاعات.
+            const attendanceRows = ledger.filter(row=>row.patientName&&!row.isPaymentOnly&&!row.isRefund);
+            const attendanceByName = new Map();
+            // اليومية مرتبة بالأحدث أولاً؛ احتفظ بأحدث ملاحظة بدلاً من أن تستبدلها ملاحظة أقدم.
+            attendanceRows.forEach(row => { const key=patientKey(row.patientName); if(!attendanceByName.has(key)) attendanceByName.set(key, row); });
+            const attendanceHistory = new Map(), attendanceTimes = new Map();
+            attendanceRows.forEach(row => {
+                const name=patientKey(row.patientName), date=row.date||toISO(row)||'-';
+                let time=row.time||'';
+                if(!time && row.timestamp && typeof row.timestamp.toDate==='function') time=row.timestamp.toDate().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+                const dates=attendanceHistory.get(name)||[], times=attendanceTimes.get(name)||[];
+                if(!dates.includes(date)) dates.push(date);
+                if(time && !times.includes(time)) times.push(time);
+                attendanceHistory.set(name,dates); attendanceTimes.set(name,times);
+            });
+            const insuranceNames = new Set(attendanceRows.filter(isInsu).map(row=>patientKey(row.patientName)));
+            const cashNames = new Set(attendanceRows.filter(row=>!isInsu(row)).map(row=>patientKey(row.patientName)));
+            const cases = new Set([...insuranceNames,...cashNames]);
+            const checkupNames = new Set(attendanceRows.filter(row=>row.isExam===true || String(row.type||'').includes('كشف')).map(row=>patientKey(row.patientName)));
+            const ledgerOrder = new Map(); attendanceRows.forEach((row,index)=>{const k=patientKey(row.patientName);if(!ledgerOrder.has(k))ledgerOrder.set(k,index);});
+            const byLedgerOrder = (a,b)=>(ledgerOrder.get(patientKey(a._id))??999999)-(ledgerOrder.get(patientKey(b._id))??999999);
+            const insuAttendees = insu.filter(p=>insuranceNames.has(patientKey(p._id))).sort(byLedgerOrder);
+            const cashAttendees = cashPatients.filter(p=>cashNames.has(patientKey(p._id))).sort(byLedgerOrder);
+            const allAttendees = [...insuAttendees,...cashAttendees];
+            const firstTime = new Set([...allAttendees.filter(p=>num(p.attended)===1).map(p=>p._id), ...checkupNames]).size;
+            const categoryA = insuAttendees.filter(p=>p.cat==='A').length, categoryB = insuAttendees.filter(p=>p.cat==='B').length, categoryC = insuAttendees.filter(p=>p.cat==='C').length;
+            const manual = allAttendees.filter(p=>String(p.type||p.sessionType||'').includes('يدوي')).length;
+            const surgery = allAttendees.filter(p=>/تأهيل|عملية|تصادمي/.test(String(p.type||p.sessionType||''))).length;
+            const normal = Math.max(0, allAttendees.length-manual-surgery);
+            const companyClaims = insuAttendees.reduce((sum,p)=>sum+num(p.price||p.sessPrice),0)+ledger.filter(row=>row.isCompanyAddition).reduce((sum,row)=>sum+num(row.amount),0);
+            const branchLabel = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
+            const periodLabel = mode === 'monthly' ? `شهر ${monthInput}` : new Date(dateInput+'T00:00:00').toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+            const wb = new ExcelJS.Workbook(); wb.creator='Life Sport System'; wb.created=new Date();
+            let logoId=null; try { const customLogo=localStorage.getItem('lifeSportExcelLogo'); if(customLogo) { logoId=wb.addImage({base64:customLogo,extension:customLogo.includes('image/jpeg')?'jpeg':'png'}); } else { const res=await fetch('./logo.png', {cache:'no-store'}); if(res.ok) { const bytes=new Uint8Array(await res.arrayBuffer()); let binary=''; bytes.forEach(byte=>binary+=String.fromCharCode(byte)); logoId=wb.addImage({base64:btoa(binary),extension:'png'}); } } } catch(e) { console.warn('logo embed error',e); }
+            const navy='087EAF', gold='D4AF37', stripe='E8F8FE';
+            const brand = (sheet,title) => {
+                sheet.views=[{rightToLeft:true,state:'frozen',ySplit:6}]; sheet.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};
+                sheet.mergeCells('D1:J2'); const h=sheet.getCell('D1'); h.value='LIFE SPORT | مركز لايف سبورت للعلاج الطبيعي'; h.font={bold:true,size:18,color:{argb:'FFFFFFFF'}};h.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+navy}};h.alignment={horizontal:'center',vertical:'middle'};
+                sheet.mergeCells('D3:J3'); const sub=sheet.getCell('D3'); sub.value=`${title} | الفرع: ${branchLabel} | ${periodLabel}`; sub.font={bold:true,size:12,color:{argb:'FF'+navy}};sub.alignment={horizontal:'center'};sub.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE1F5FC'}};
+                if(logoId!==null) sheet.addImage(logoId,{tl:{col:0,row:0},br:{col:2.7,row:3.8},editAs:'oneCell'});
+            };
+            const table = (name,title,headers,rows) => { const sh=wb.addWorksheet(name);brand(sh,title);sh.addRow([]);const head=sh.addRow(headers);head.height=22;head.eachCell(c=>{c.font={name:'Arial',size:10,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+navy}};c.alignment={horizontal:'center',vertical:'middle',wrapText:true};});rows.forEach((data,i)=>{const r=sh.addRow(data);r.height=18;r.eachCell(c=>{c.font={name:'Arial',size:9,bold:true,color:{argb:'FF172033'}};c.alignment={horizontal:'center',vertical:'middle',wrapText:true};if(i%2===0)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+stripe}};});});sh.autoFilter={from:{row:5,column:1},to:{row:Math.max(5,rows.length+5),column:headers.length}};sh.columns=headers.map((header,i)=>({width:Math.min(32,Math.max(11,String(header).length+3,...rows.slice(0,100).map(r=>String(r[i]??'').length+1)))}));return sh; };
+            const footer = (sheet, items) => { let row=sheet.rowCount+2; items.forEach((item,index)=>{sheet.mergeCells(row,1,row,Math.min(4,sheet.columnCount));const label=sheet.getCell(row,1);label.value=item[0];label.font={bold:true,size:12,color:{argb:'FFFFFFFF'}};label.fill={type:'pattern',pattern:'solid',fgColor:{argb:index===0?'FF075985':'FF0369A1'}};label.alignment={horizontal:'right',vertical:'middle'};const value=sheet.getCell(row,Math.min(5,sheet.columnCount));value.value=item[1];value.font={bold:true,size:13,color:{argb:'FFFFFFFF'}};value.fill={type:'pattern',pattern:'solid',fgColor:{argb:index===0?'FF075985':'FF0369A1'}};value.alignment={horizontal:'center',vertical:'middle'};if(typeof item[1]==='number'&&item[2]!==false)value.numFmt='#,##0 "ج.م"';sheet.getRow(row).height=25;row+=1;}); };
+            const dash=wb.addWorksheet('لوحة الإجماليات');brand(dash,mode==='monthly'?'التحليل الشهري':'إجمالي اليومية');dash.columns=[{width:30},{width:22},{width:8},{width:30},{width:22}];
+            const cards=[['إجمالي الحالات',cases.size,'27AE60'],['حالات أول مرة',firstTime,'F59E0B'],['الكاش',cashTotal,'27AE60'],['التحمل المدفوع',copayTotal,'2980B9'],['مطالبات شركات التأمين',companyClaims,'006C8E'],['إنستاباي',instaTotal,'4A148C'],['مصروفات الكاش',cashExpense,'C0392B'],['مصروفات إنستاباي',instaExpense,'4A148C'],['الصافي (كاش + تحمل - مصروفات الكاش)',cashTotal+copayTotal-cashExpense,navy],['الإجمالي الكلي',cashTotal+copayTotal+instaTotal-cashExpense-instaExpense,gold]];
+            cards.forEach((card,i)=>{const col=i%2?4:1,row=5+Math.floor(i/2)*3;dash.mergeCells(row,col,row,col+1);const l=dash.getCell(row,col);l.value=card[0];l.font={bold:true,color:{argb:'FFFFFFFF'}};l.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+card[2]}};l.alignment={horizontal:'center'};dash.mergeCells(row+1,col,row+1,col+1);const v=dash.getCell(row+1,col);v.value=card[1];v.font={bold:true,size:16,color:{argb:'FF'+navy}};v.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFC'}};v.alignment={horizontal:'center'};if(i)v.numFmt='#,##0 "ج.م"';});
+            const detailsRow=dash.getRow(21); detailsRow.values=['تفاصيل ملخص الفترة','القيمة','','تفاصيل ملخص الفترة','القيمة']; detailsRow.eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+navy}};c.alignment={horizontal:'center'};});
+            [['حالات أول مرة',firstTime],['مطالبات شركات التأمين',companyClaims],['فئة A',categoryA],['فئة B',categoryB],['فئة C',categoryC],['يدوي',manual],['تأهيل / عملية / تصادمي',surgery],['علاج عادي',normal],['الغياب',absences.length]].forEach((item,i)=>{const row=22+Math.floor(i/2),col=i%2?4:1;dash.getCell(row,col).value=item[0];dash.getCell(row,col+1).value=item[1];dash.getCell(row,col).font={bold:true,color:{argb:'FF'+navy}};dash.getCell(row,col+1).font={bold:true,color:{argb:'FF'+navy}};dash.getCell(row,col).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE8F8FE'}};dash.getCell(row,col+1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE8F8FE'}};});
+            let detailRow=28; dash.mergeCells(detailRow,1,detailRow,5); dash.getCell(detailRow,1).value=`تفاصيل المصروفات — الإجمالي: ${(cashExpense+instaExpense).toLocaleString()} ج.م`; dash.getCell(detailRow,1).font={bold:true,color:{argb:'FFFFFFFF'}};dash.getCell(detailRow,1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFC0392B'}};dash.getCell(detailRow,1).alignment={horizontal:'center'};detailRow++;
+            if(expenses.length) expenses.forEach(x=>{dash.getCell(detailRow,1).value=x.reason||'مصروف';dash.getCell(detailRow,2).value=num(x.amount);dash.getCell(detailRow,4).value=x.type==='instapay'?'إنستاباي':'كاش';dash.getCell(detailRow,5).value=x.category||'المركز';detailRow++;}); else { dash.getCell(detailRow,1).value='لا توجد مصروفات'; detailRow++; }
+            detailRow++;dash.mergeCells(detailRow,1,detailRow,5);dash.getCell(detailRow,1).value=`تفاصيل الغياب — الإجمالي: ${absences.length} حالة`;dash.getCell(detailRow,1).font={bold:true,color:{argb:'FFFFFFFF'}};dash.getCell(detailRow,1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF8E44AD'}};dash.getCell(detailRow,1).alignment={horizontal:'center'};detailRow++;
+            if(absences.length) absences.forEach(x=>{dash.getCell(detailRow,1).value=x.patientName||'-';dash.getCell(detailRow,2).value=x.reason||'-';dash.mergeCells(detailRow,3,detailRow,5);dash.getCell(detailRow,3).value=x.notes||'';detailRow++;}); else { dash.getCell(detailRow,1).value='لا يوجد غياب في الفترة'; detailRow++; }
+            // في آخر لوحة الإجماليات: نفس كشف التغذية والريكفري الموجود في التحليل الشهري.
+            const patientLookup=new Map([...insu,...cashPatients].map(p=>[patientKey(p._id),p]));
+            const serviceRows=ledger.filter(x=>String(x.type||'').includes('تغذية')||String(x.type||'').includes('ريكفري')).map(x=>{const p=patientLookup.get(patientKey(x.patientName))||{};return[String(x.type||'').includes('تغذية')?'تغذية':'ريكفري',p.serviceDoctor||p.refDoctor||'غير مسجل',x.patientName||'-',p.phone||'-',x.date||toISO(x)||'-',num(x.amount),isInsta(x)?'إنستاباي':'كاش',x.notes||'-'];});
+            detailRow++;dash.mergeCells(detailRow,1,detailRow,8);dash.getCell(detailRow,1).value=`التغذية والريكفري — التغذية: ${serviceRows.filter(x=>x[0]==='تغذية').length} | الريكفري: ${serviceRows.filter(x=>x[0]==='ريكفري').length}`;dash.getCell(detailRow,1).font={bold:true,color:{argb:'FFFFFFFF'}};dash.getCell(detailRow,1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF6A1B9A'}};dash.getCell(detailRow,1).alignment={horizontal:'center'};detailRow++;
+            ['الخدمة','اسم الدكتور','اسم الحالة','الموبايل','اليوم','المبلغ','طريقة الدفع','الملاحظات'].forEach((text,col)=>{const cell=dash.getCell(detailRow,col+1);cell.value=text;cell.font={bold:true,color:{argb:'FFFFFFFF'}};cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF087EAF'}};cell.alignment={horizontal:'center',wrapText:true};});detailRow++;
+            if(serviceRows.length) serviceRows.forEach((row,index)=>{row.forEach((value,col)=>{const cell=dash.getCell(detailRow,col+1);cell.value=value;cell.alignment={horizontal:'center',vertical:'middle',wrapText:true};if(index%2===0)cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF4EEFB'}};});dash.getRow(detailRow).height=21;detailRow++;}); else {dash.getCell(detailRow,1).value='لا توجد حالات تغذية أو ريكفري في الفترة';detailRow++;}
+            [16,22,22,17,15,14,16,28].forEach((width,index)=>dash.getColumn(index+1).width=Math.max(dash.getColumn(index+1).width||0,width));
+            const paymentMark = () => '';
+            const cashSheet=table('كاش وكورسات','الحضور الفعلي — كاش وكورسات',['#','اسم المريض','الفرع','الهاتف','الدكتور','النوع','حالة الحضور','تاريخ الحضور','وقت الحضور','سعر / تكلفة الكورس','مدفوع اليوم','المتبقي','طريقة الدفع اليوم','ملاحظات اليومية'],cashAttendees.map((p,i)=>{const key=patientKey(p._id),total=num(p.totalSess),att=num(p.attended),isCourse=p.mode==='course',unitPrice=num(p.price||p.sessPrice),cost=isCourse?num(p.cost):unitPrice*total,paid=num(p.paid),entry=attendanceByName.get(key)||{};return[i+1,`${paymentMark(p._id)}${p._id}`,p.branch||entry.branch||'المهندسين',p.phone||'-',p.serviceDoctor||p.refDoctor||'لم يحدد',p.serviceType|| (isCourse?'كورس':'جلسة'),isCourse?`حضر ${att} من ${total}`:`حضر ${att} من ${total}`,(attendanceHistory.get(key)||[]).join('\n'),(attendanceTimes.get(key)||[]).join('\n'),isCourse?cost:unitPrice,paidToday.get(key)||0,Math.max(0,cost-paid),[...(paymentMethods.get(key)||[])].join(' + ')||'-',entry.notes||p.notes||'-'];}));
+            [1,5,6,10,11,12].forEach(col=>cashSheet.getColumn(col).width=10); cashSheet.getColumn(2).width=18;cashSheet.getColumn(3).width=12;cashSheet.getColumn(4).width=14;cashSheet.getColumn(7).width=13;cashSheet.getColumn(8).width=14;cashSheet.getColumn(9).width=12;cashSheet.getColumn(13).width=14;cashSheet.getColumn(14).width=16;
+            cashSheet.getColumn(4).eachCell({includeEmpty:false}, cell=>cell.font={bold:true,size:13,color:{argb:'FF075985'}});
+            cashAttendees.forEach((p,index)=>{const nameCell=cashSheet.getCell(index+6,2);cashSheet.getRow(index+6).height=24;nameCell.font={bold:true,size:9,color:{argb:'FF075985'}};nameCell.alignment={horizontal:'center',vertical:'middle',wrapText:true};});
+            footer(cashSheet,[['عدد حالات الكاش / الكورسات في الفترة',cashAttendees.length,false],['إجمالي الكاش / الكورسات المحصل في الفترة',cashTotal]]);
+            const insuSheet=table('تأمين وشركات','الحضور الفعلي — تأمين وشركات',['#','اسم المريض','الفرع','الدكتور','شركة التأمين / الفئة','حالة الحضور','تاريخ الحضور','وقت الحضور','سعر الجلسة','مدفوع التحمل اليوم','المديونية','طريقة الدفع اليوم','الهاتف','ملاحظات اليومية'],insuAttendees.map((p,i)=>{const key=patientKey(p._id),total=num(p.totalSess),att=num(p.attended),co=num(p.copayTotal),paid=num(p.copayPaid),entry=attendanceByName.get(key)||{};return[i+1,`${paymentMark(p._id)}${p._id}`,p.branch||entry.branch||'المهندسين',p.refDoctor||'لم يحدد',`${p.comp||'-'} / ${p.cat||'-'}`,`حضر ${att} من ${total}`,(attendanceHistory.get(key)||[]).join('\n'),(attendanceTimes.get(key)||[]).join('\n'),num(p.price||p.sessPrice),paidToday.get(key)||0,Math.max(0,co-paid),[...(paymentMethods.get(key)||[])].join(' + ')||'-',p.phone||'-',entry.notes||p.notes||'-'];}));
+            [1,3,4,9,10,11].forEach(col=>insuSheet.getColumn(col).width=10);insuSheet.getColumn(2).width=18;insuSheet.getColumn(5).width=16;insuSheet.getColumn(6).width=13;insuSheet.getColumn(7).width=14;insuSheet.getColumn(8).width=12;insuSheet.getColumn(12).width=14;insuSheet.getColumn(13).width=14;insuSheet.getColumn(14).width=16;
+            insuSheet.getColumn(12).eachCell({includeEmpty:false}, cell=>cell.font={bold:true,size:13,color:{argb:'FF075985'}});
+            insuAttendees.forEach((p,index)=>{const nameCell=insuSheet.getCell(index+6,2);insuSheet.getRow(index+6).height=24;nameCell.font={bold:true,size:9,color:{argb:'FF075985'}};nameCell.alignment={horizontal:'center',vertical:'middle',wrapText:true};});
+            footer(insuSheet,[['عدد حالات التأمين في الفترة',insuAttendees.length,false],['إجمالي التحمل المدفوع في الفترة',copayTotal],['إجمالي التحمل المستحق للحالات الظاهرة',insuAttendees.reduce((sum,p)=>sum+Math.max(0,num(p.copayTotal)-num(p.copayPaid)),0)]]);
+            // السجلات التاريخية التفصيلية مطلوبة في تقرير الشهر فقط؛ لا نثقل اليومية بها.
+            if (mode === 'monthly') {
+                table('دفعات قديمة','سجل جميع الدفعات السابقة',['اسم المريض','النوع','الفرع','التاريخ','المبلغ','طريقة الدفع','ملاحظة'],[...insu,...cashPatients].flatMap(p=>(Array.isArray(p.paymentsHistory)?p.paymentsHistory:[]).map(x=>[p._id,p.comp?'تأمين':'كاش',p.branch||'المهندسين',x.date||'-',num(x.amount),x.method||'-',x.note||''])));
+                table('حضور ومدفوعات الفترة','الأسماء وحركات الفترة',['الاسم','النوع','المبلغ','طريقة الدفع','التاريخ','الفرع','ملاحظات'],ledger.map(x=>[x.patientName||'-',x.type||'-',num(x.amount),x.method||'-',x.date||toISO(x),x.branch||'المهندسين',x.notes||'-']));
+            }
+            const expenseSheet=table('مصروفات الفترة','المصروفات',['سبب المصروف','المبلغ','كاش / إنستاباي','التصنيف','التاريخ','الفرع'],expenses.map(x=>[x.reason||'مصروف',num(x.amount),x.type==='instapay'?'إنستاباي':'كاش',x.category||'المركز',x.date||toISO(x),x.branch||'المهندسين']));
+            expenseSheet.getCell('D1').fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFC0392B'}}; expenseSheet.getRow(5).eachCell(c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFC0392B'}});
+            expenses.forEach((x,index)=>{const cell=expenseSheet.getCell(index+6,1);cell.font={bold:true,size:12,color:{argb:'FF8B1E1E'}};cell.alignment={horizontal:'right',vertical:'middle',wrapText:true};});
+            expenses.forEach((x,index)=>{if(x.type==='instapay'){const cell=expenseSheet.getCell(index+6,3);cell.font={bold:true,color:{argb:'FFFFFFFF'}};cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF4A148C'}};}});
+            footer(expenseSheet,[['عدد المصروفات في الفترة',expenses.length,false],['إجمالي مصروفات الكاش',cashExpense],['إجمالي مصروفات إنستاباي',instaExpense],['إجمالي كل المصروفات',cashExpense+instaExpense]]);
+            // سجل الحركات الكلي خاص بتقرير الشهر فقط.
+            if (mode === 'monthly') {
+                const movements=[...ledger.filter(x=>x.isCompanyAddition||String(x.patientName||'').startsWith('إضافة كاش')).map(x=>[x.date||toISO(x),x.branch||'المهندسين',x.isCompanyAddition?'إضافة للشركات':'إضافة كاش',x.patientName||'-',num(x.amount),x.isCompanyAddition?'إضافة يدوية':'كاش']),...expenses.map(x=>[x.date||toISO(x),x.branch||'المهندسين',x.isTransfer?'تحويل':'مصروف',x.reason||'-',num(x.amount),x.isTransfer?(x.transferDirection==='instapay_to_cash'?'إنستاباي ← كاش':'كاش ← إنستاباي'):(isInsta(x)?'إنستاباي':'كاش')])];
+                const movementSheet=table('سجل الحركات المالية','سجل الحركات المالية للفترة',['التاريخ','الفرع','نوع الحركة','البيان','المبلغ','طريقة / اتجاه'],movements);
+                [14,16,16,32,16,22].forEach((width,index)=>movementSheet.getColumn(index+1).width=width);
+                footer(movementSheet,[['عدد الحركات المالية',movements.length,false],['إجمالي المصروفات',cashExpense+instaExpense]]);
+            }
+            const output=await wb.xlsx.writeBuffer(), blob=new Blob([output],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=mode==='monthly'?`إجمالي التحليل الشهري_${branchLabel}_${period}.xlsx`:`LifeSport_Daily_${branchLabel}_${period}.xlsx`;a.click();URL.revokeObjectURL(a.href);showToast('✅ تم تنزيل التقرير الاحترافي');
+        } catch(error) { console.error(error); showToast('تعذر تجهيز التقرير، حاول مرة أخرى','error'); } finally { button.disabled=false;button.innerHTML=oldHtml; }
+    }
+
+    async function exportDailyProfessionalExcel() {
+        const dateInput = document.getElementById('excelDailyDate').value;
+        const selectedBranch = document.getElementById('excelDailyBranch').value;
+        if (!dateInput) return showToast('اختر تاريخ اليومية أولاً', 'error');
+        if (typeof ExcelJS === 'undefined') return showToast('تعذر تحميل مكتبة التقرير، تحقق من الإنترنت', 'error');
+        const button = document.querySelector('button[onclick="exportDailyProfessionalExcel()"]');
+        const oldHtml = button.innerHTML;
+        button.disabled = true; button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تجهيز التقرير...';
+        try {
+            const [y, m, d] = dateInput.split('-');
+            const dateFormats = [...new Set([dateInput, `${d}/${m}/${y}`, `${parseInt(d)}/${parseInt(m)}/${y}`])];
+            const readDay = async collection => {
+                const snap = await db.collection(collection).where('date', 'in', dateFormats).get();
+                return snap.docs.map(doc => ({ id:doc.id, ...doc.data() })).filter(row => selectedBranch === 'all' || (row.branch || 'المهندسين') === selectedBranch);
+            };
+            const [ledger, transactions] = await Promise.all([readDay('daily_ledger'), readDay('daily_transactions')]);
+            const amount = value => parseFloat(value || 0);
+            const isInsu = row => String(row.type || '').includes('تحمل') || String(row.type || '').includes('تأمين');
+            const cashRows = ledger.filter(row => !isInsu(row));
+            const insuRows = ledger.filter(isInsu);
+            const cash = cashRows.reduce((sum, row) => sum + amount(row.amount), 0);
+            const copay = insuRows.reduce((sum, row) => sum + amount(row.amount), 0);
+            const insta = ledger.filter(row => row.method === 'instapay').reduce((sum, row) => sum + amount(row.amount), 0);
+            const expCash = transactions.filter(row => row.type !== 'instapay' && !row.isRefund).reduce((sum, row) => sum + amount(row.amount), 0);
+            const expInsta = transactions.filter(row => row.type === 'instapay' && !row.isTransfer).reduce((sum, row) => sum + amount(row.amount), 0);
+            const cases = new Set(ledger.filter(row => row.patientName && !row.isPaymentOnly && !row.isRefund).map(row => row.patientName.trim()));
+            const branchLabel = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
+            const dateLabel = `${d}/${m}/${y}`;
+            const dayName = new Date(dateInput + 'T00:00:00').toLocaleDateString('ar-EG', { weekday:'long' });
+            const wb = new ExcelJS.Workbook();
+            wb.creator = 'Life Sport System'; wb.created = new Date();
+            let logoBuffer = null;
+            try { logoBuffer = await (await fetch('logo.png')).arrayBuffer(); } catch (e) { console.warn('logo unavailable', e); }
+            const logoId = logoBuffer ? wb.addImage({ buffer:logoBuffer, extension:'png' }) : null;
+            const blue = '0B132B', gold = 'D4AF37', pale = 'F4F7FB';
+            const applyBrand = (sheet, title, subtitle) => {
+                sheet.views = [{ rightToLeft:true, state:'frozen', ySplit:6 }];
+                sheet.pageSetup = { orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{ left:0.25,right:0.25,top:0.4,bottom:0.4 } };
+                sheet.mergeCells('D1:J2'); sheet.getCell('D1').value = 'LIFE SPORT | مركز لايف سبورت للعلاج الطبيعي';
+                sheet.getCell('D1').font = { bold:true, size:18, color:{argb:'FFFFFFFF'} }; sheet.getCell('D1').alignment = { horizontal:'center', vertical:'middle' }; sheet.getCell('D1').fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+blue} };
+                sheet.mergeCells('D3:J3'); sheet.getCell('D3').value = `${title} — ${subtitle}`; sheet.getCell('D3').font = { bold:true, size:12, color:{argb:'FF'+blue} }; sheet.getCell('D3').alignment = { horizontal:'center' };
+                if (logoId !== null) sheet.addImage(logoId, { tl:{ col:0, row:0 }, br:{ col:2.6, row:3.8 }, editAs:'oneCell' });
+            };
+            const styleHeader = row => row.eachCell(cell => { cell.font={bold:true,color:{argb:'FFFFFFFF'}}; cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+blue}}; cell.alignment={horizontal:'center',vertical:'middle'}; cell.border={bottom:{style:'thin',color:{argb:'FF'+gold}}}; });
+            const addTableSheet = (name, title, headers, rows) => {
+                const sheet = wb.addWorksheet(name); applyBrand(sheet, title, `${branchLabel} | ${dayName} ${dateLabel}`);
+                sheet.addRow([]); sheet.addRow(headers); styleHeader(sheet.getRow(5));
+                rows.forEach((row, index) => { const r=sheet.addRow(row); if(index%2===0) r.eachCell(c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+pale}}); });
+                sheet.autoFilter = { from:{ row:5, column:1 }, to:{ row:Math.max(5, rows.length+5), column:headers.length } };
+                sheet.columns = headers.map((header, i) => ({ width:Math.min(35, Math.max(13, String(header).length+5, ...rows.slice(0,80).map(r=>String(r[i] ?? '').length+2))) }));
+                return sheet;
+            };
+            const dashboard = wb.addWorksheet('لوحة اليومية'); applyBrand(dashboard, 'لوحة إجماليات اليومية', `${branchLabel} | ${dayName} ${dateLabel}`);
+            dashboard.columns = [{width:28},{width:20},{width:5},{width:28},{width:20},{width:5},{width:28},{width:20}];
+            const cards = [['إجمالي الحالات',cases.size,'27AE60'],['الكاش',cash,'27AE60'],['التحمل',copay,'2980B9'],['إنستاباي',insta,'8E44AD'],['مصروفات الكاش',expCash,'C0392B'],['مصروفات إنستاباي',expInsta,'8E44AD'],['صافي كاش + تحمل - المصروفات',cash+copay-expCash,'0B132B'],['الإجمالي الكلي',cash+copay+insta-expCash-expInsta,'D4AF37']];
+            cards.forEach((card, i) => { const col = i%2===0 ? 1 : 4, row = 5 + Math.floor(i/2)*3; dashboard.mergeCells(row,col,row,col+1); const cell=dashboard.getCell(row,col); cell.value=card[0]; cell.font={bold:true,color:{argb:'FFFFFFFF'}}; cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+card[2]}}; cell.alignment={horizontal:'center'}; dashboard.mergeCells(row+1,col,row+1,col+1); const valueCell=dashboard.getCell(row+1,col); valueCell.value=card[1]; valueCell.font={bold:true,size:16,color:{argb:'FF'+blue}}; valueCell.alignment={horizontal:'center'}; valueCell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFC'}}; if(i!==0) valueCell.numFmt='#,##0 "ج.م"'; });
+            addTableSheet('الحضور والمدفوعات', 'أسماء الحضور والمدفوعات', ['#','اسم المريض','النوع','المبلغ','طريقة الدفع','الفرع','ملاحظات'], ledger.map((row,i)=>[i+1,row.patientName||'-',row.type||'-',amount(row.amount),row.method||'-',row.branch||'المهندسين',row.notes||'']));
+            addTableSheet('مصروفات اليومية', 'مصروفات اليومية', ['#','البيان','المبلغ','طريقة الصرف','التصنيف','الفرع'], transactions.map((row,i)=>[i+1,row.reason||'مصروف',amount(row.amount),row.type==='instapay'?'إنستاباي':'كاش',row.category||'المركز',row.branch||'المهندسين']));
+            const buffer = await wb.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=`LifeSport_Daily_${branchLabel}_${dateInput}.xlsx`; link.click(); URL.revokeObjectURL(link.href);
+            showToast('✅ تم تنزيل تقرير اليومية الاحترافي');
+        } catch (error) {
+            console.error('daily excel:', error); showToast('تعذر تجهيز التقرير، حاول مرة أخرى', 'error');
+        } finally { button.disabled=false; button.innerHTML=oldHtml; }
+    }
+
+    // نسخة Excel تشغيلية شاملة. JSON يبقى النسخة الفنية المناسبة للاسترجاع.
+    async function exportToExcel() {
+        showToast("جاري تجهيز ملف Excel الشامل...");
+        try {
+            if (typeof XLSX === 'undefined') throw new Error('مكتبة Excel غير متاحة');
+            const collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','follow_up_reports'];
+            const snapshots = await Promise.all(collections.map(col => db.collection(col).get()));
+            const data = {};
+            snapshots.forEach((snap, index) => {
+                data[collections[index]] = [];
+                snap.forEach(doc => data[collections[index]].push({ _id: doc.id, ...doc.data() }));
+            });
+
+            const value = v => {
+                if (v === undefined || v === null) return '';
+                if (v && typeof v.toDate === 'function') return v.toDate().toLocaleString('en-GB');
+                if (Array.isArray(v) || (typeof v === 'object' && !(v instanceof Date))) return JSON.stringify(v);
+                return v;
+            };
+            const addSheet = (workbook, name, headers, rows) => {
+                const sheet = XLSX.utils.aoa_to_sheet([
+                    ['LIFE SPORT | مركز لايف سبورت للعلاج الطبيعي'],
+                    headers,
+                    ...rows.map(row => headers.map((_, i) => value(row[i])))
+                ]);
+                sheet['!cols'] = headers.map((header, index) => ({ wch: Math.min(42, Math.max(13, String(header).length + 5, ...rows.slice(0, 100).map(r => String(value(r[index]) || '').length + 2))) }));
+                sheet['!rtl'] = true;
+                XLSX.utils.book_append_sheet(workbook, sheet, name);
+            };
+            const wb = XLSX.utils.book_new();
+            const now = new Date();
+            const dateText = now.toLocaleDateString('en-GB');
+            addSheet(wb, 'ملخص النسخة', ['البند','القيمة'], [
+                ['تاريخ إنشاء النسخة', now.toLocaleString('en-GB')],
+                ['مرضى التأمين', data.patients_insu.length], ['مرضى الكاش', data.patients_cash.length],
+                ['سجل اليومية', data.daily_ledger.length], ['المصروفات', data.daily_transactions.length],
+                ['الحجوزات', data.reservations.length], ['الغياب', data.follow_up_reports.length]
+            ]);
+            addSheet(wb, 'مرضى التأمين', ['الاسم','الشركة','الفرع','الهاتف','إجمالي الجلسات','الحضور','سعر الجلسة','التحمل الكلي','المدفوع','الحالة','التشخيص','تاريخ الموافقة'],
+                data.patients_insu.map(p => [p._id,p.comp,p.branch,p.phone,p.totalSess,p.attended,p.price||p.sessPrice,p.copayTotal,p.copayPaid,p.isClosed?'مغلق':'نشط',p.injury||p.notes,p.approvalDate]));
+            addSheet(wb, 'مرضى الكاش', ['الاسم','النوع','الفرع','الهاتف','إجمالي الجلسات','الحضور','التكلفة','المدفوع','الحالة','التشخيص'],
+                data.patients_cash.map(p => [p._id,p.mode==='course'?'كورس':'جلسات',p.branch,p.phone,p.totalSess,p.attended,p.cost||p.price,p.paid,p.isClosed?'مغلق':'نشط',p.injury||p.notes]));
+            addSheet(wb, 'اليومية', ['الاسم','المبلغ','النوع','طريقة الدفع','التاريخ','الفرع','ملاحظات','دفعة فقط','استرجاع','كشف'],
+                data.daily_ledger.map(x => [x.patientName,x.amount,x.type,x.method,x.date,x.branch,x.notes,x.isPaymentOnly?'نعم':'',x.isRefund?'نعم':'',x.isExam?'نعم':'']));
+            addSheet(wb, 'المصروفات', ['البيان','المبلغ','النوع','التصنيف','طريقة الدفع','التاريخ','الفرع','تحويل'],
+                data.daily_transactions.map(x => [x.reason,x.amount,x.type,x.category,x.method,x.date,x.branch,x.isTransfer?'نعم':'']));
+            addSheet(wb, 'الحجوزات', ['الاسم','التاريخ','الوقت','الفرع','الدكتور','الحالة','نوع الجلسة'],
+                data.reservations.map(x => [x.patientName||x.name,x.date,x.time,x.branch,x.doctor,x.status,x.sessionType]));
+            addSheet(wb, 'الغياب', ['الاسم','التاريخ','الفرع','السبب','ملاحظات'],
+                data.follow_up_reports.map(x => [x.patientName,x.date,x.branch,x.reason,x.notes]));
+
+            const approvals = data.patients_insu.flatMap(p => (Array.isArray(p.approvalsHistory) ? p.approvalsHistory : []).map(a =>
+                [p._id,p.branch,p.comp,a.date,a.startSession,a.endSession,a.sessions,a.injury,a.sessionType,a.price]));
+            addSheet(wb, 'كروت متابعة التأمين', ['اسم المريض','الفرع','الشركة','تاريخ الموافقة','من جلسة','إلى جلسة','العدد','الإصابة','نوع الجلسة','السعر'], approvals);
+            const payments = [...data.patients_insu, ...data.patients_cash].flatMap(p => (Array.isArray(p.paymentsHistory) ? p.paymentsHistory : []).map(pay =>
+                [p._id,p.branch,p.comp||'كاش',pay.date,pay.amount,pay.type,pay.method,pay.note]));
+            addSheet(wb, 'دفعات المرضى', ['اسم المريض','الفرع','الجهة','التاريخ','المبلغ','النوع','طريقة الدفع','ملاحظة'], payments);
+
+            wb.Props = { Title: 'Life Sport Full Backup', Subject: 'نسخة Excel شاملة', Author: 'Life Sport System' };
+            XLSX.writeFile(wb, `LifeSport_Full_Backup_${dateText.replace(/\//g,'-')}.xlsx`);
+            showToast("✅ تم تحميل نسخة Excel الشاملة");
+            logAction('نظام', 'تصدير نسخة Excel شاملة من السيرفر');
+        } catch(e) {
+            console.error(e);
+            showToast("خطأ أثناء التصدير", "error");
+        }
+    }
+
+    // رسالة يدوية فقط: لا توجد أي خدمة مدفوعة أو إرسال تلقائي.
+    async function composeDailyEmail() {
+        const now = new Date();
+        const iso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        const dmy = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+        const dates = [iso, dmy, `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`];
+        try {
+            const fetchToday = async collection => {
+                const snap = await db.collection(collection).where('date', 'in', dates).get();
+                return snap.docs.map(d => d.data());
+            };
+            const [ledger, transactions] = await Promise.all([fetchToday('daily_ledger'), fetchToday('daily_transactions')]);
+            let cash = 0, copay = 0, insta = 0, expCash = 0, expInsta = 0;
+            const patients = new Set();
+            ledger.forEach(row => {
+                const amount = parseFloat(row.amount || 0);
+                const type = String(row.type || '');
+                const name = String(row.patientName || '').trim();
+                if (name && !row.isPaymentOnly && !row.isRefund) patients.add(name);
+                if (type.includes('تحمل') || type.includes('تأمين')) copay += amount;
+                else cash += amount;
+                if (row.method === 'instapay') insta += amount;
+            });
+            transactions.forEach(row => {
+                const amount = parseFloat(row.amount || 0);
+                if (row.isRefund) return;
+                if (row.type === 'instapay') { if (!row.isTransfer) expInsta += amount; }
+                else expCash += amount;
+            });
+            const subject = `Life Sport | ملخص اليومية | ${dmy}`;
+            const body = [
+                '🏥 مركز لايف سبورت للعلاج الطبيعي', 'التقرير اليومي', `التاريخ: ${dmy}`, '',
+                `إجمالي الحالات: ${patients.size}`,
+                `الكاش: ${cash.toLocaleString()} ج.م`, `التحمل: ${copay.toLocaleString()} ج.م`,
+                `الإنستاباي: ${insta.toLocaleString()} ج.م`, `مصروفات الكاش: ${expCash.toLocaleString()} ج.م`,
+                `مصروفات الإنستاباي: ${expInsta.toLocaleString()} ج.م`, '',
+                `صافي كاش + تحمل - مصروفات الكاش: ${(cash + copay - expCash).toLocaleString()} ج.م`,
+                `الإجمالي الكلي: ${(cash + copay + insta - expCash - expInsta).toLocaleString()} ج.م`, '',
+                'يمكن إرفاق ملف Excel الشامل الذي تم تنزيله من صفحة السابورت.'
+            ].join('\n');
+            window.location.href = `mailto:lifesport.approvals@gmail.com,hossamzahran663@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        } catch (error) {
+            console.error('compose daily email:', error);
+            showToast('تعذر تجهيز رسالة البريد', 'error');
+        }
+    }
+
+    async function importBackup(e) {
+        let file = e.target.files[0]; if (!file) return;
+        if (!confirm("⚠️ تحذير: هيتم استرجاع البيانات من النسخة وإضافتها للسيرفر الحالي.\nمتأكد إنك عايز تكمّل؟")) {
+            e.target.value = ''; return;
+        }
+        const reader = new FileReader();
+        reader.onload = async function(ev) {
+            try {
+                showToast("جاري استرجاع البيانات... استنى لحد ما يخلص");
+                const data = JSON.parse(ev.target.result);
+                // كل الكولكشنز اللي ممكن تكون في النسخة
+                const collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports'];
+                let count = 0;
+                for (const col of collections) {
+                    const items = data[col];
+                    if (!Array.isArray(items)) continue;
+                    for (const item of items) {
+                        const docId = item._id;
+                        const clean = { ...item }; delete clean._id;
+                        if (docId) {
+                            // استخدم نفس الـ ID (مهم للمرضى لأن الاسم هو الـ ID)
+                            await db.collection(col).doc(docId).set(clean, { merge: true });
+                        } else {
+                            await db.collection(col).add(clean);
+                        }
+                        count++;
+                    }
+                }
+                // الإعدادات
+                if (Array.isArray(data.settings)) {
+                    for (const s of data.settings) {
+                        const sid = s._id || 'system_settings';
+                        const cs = { ...s }; delete cs._id;
+                        await db.collection('settings').doc(sid).set(cs, { merge: true });
+                    }
+                }
+                logAction('نظام', `استعادة نسخة احتياطية (${count} سجل)`);
+                showToast(`✅ تم استرجاع ${count} سجل بنجاح!`);
+            } catch(err) {
+                console.error(err);
+                showToast("ملف غير صالح أو تالف.", "error");
+            }
+            e.target.value = '';
+        };
+        reader.readAsText(file);
+    }
+</script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+<script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        if (sb) sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+
+
+
+</body>
+</html>

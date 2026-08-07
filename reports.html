@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - الكول سنتر والغياب الذكي</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        if (localStorage.getItem('userRole') === 'reception' || localStorage.getItem('userRole') === 'receptionist') {
+            document.write('<style>.admin-only { display: none !important; }</style>');
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f3f8; display: flex; overflow-x: hidden; color: #1c1e21; min-height: 100vh; }
+
+        /* HEADER */
+        .header { background: linear-gradient(135deg, #0b132b, #1a2a5e); height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 35px; border-bottom: 2px solid rgba(212,175,55,0.4); z-index: 1000; box-shadow: 0 4px 20px rgba(11,19,43,0.3); }
+        .header-logo { display: flex; align-items: center; gap: 14px; }
+        .header-logo img { height: 44px; }
+        .header-title { color: white; font-size: 1.2rem; font-weight: 900; }
+        .header-title span { color: #d4af37; }
+        .server-status { display: flex; align-items: center; gap: 7px; font-size: 0.85rem; font-weight: 700; color: #27ae60; background: rgba(39,174,96,0.12); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(39,174,96,0.3); }
+
+        /* SIDEBAR */
+        .sidebar { background: #0b1120; width: 255px; height: 100vh; position: fixed; top: 72px; right: 0; padding-top: 20px; z-index: 900; border-left: 1px solid rgba(255,255,255,0.05); }
+        .sidebar a { display: flex; align-items: center; gap: 11px; color: rgba(163,174,209,0.8); text-decoration: none; padding: 12px 20px; transition: 0.22s; font-size: 0.95rem; border-right: 2px solid transparent; margin: 1px 8px; border-radius: 10px; font-weight: 600; }
+        .sidebar a i { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; background: rgba(255,255,255,0.06); border-radius: 7px; flex-shrink: 0; }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .sidebar a.active { background: rgba(212,175,55,0.12); color: #d4af37; font-weight: 800; border-right: 2px solid #d4af37; }
+        .sidebar a.active i { background: rgba(212,175,55,0.2); }
+
+        /* MAIN */
+        .main-content { margin-right: 255px; margin-top: 72px; padding: 24px 28px; width: calc(100% - 255px); }
+
+        /* TOP BAR */
+        .top-bar { background: white; padding: 15px 22px; border-radius: 16px; border: 1px solid #e4e9f0; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .top-bar h1 { color: #0b132b; font-size: 1.2rem; font-weight: 900; display: flex; align-items: center; gap: 10px; margin: 0; }
+        .branch-pill { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 10px rgba(11,19,43,0.2); }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+        .stat-card { background: white; padding: 16px 18px; border-radius: 14px; border: 1px solid #e4e9f0; display: flex; align-items: center; gap: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: 0.25s; cursor: default; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,0.09); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; flex-shrink: 0; }
+        .bg-red    { background: linear-gradient(135deg, #e74c3c, #c0392b); box-shadow: 0 4px 12px rgba(231,76,60,0.3); }
+        .bg-purple { background: linear-gradient(135deg, #8e44ad, #6c3483); box-shadow: 0 4px 12px rgba(142,68,173,0.3); }
+        .bg-green  { background: linear-gradient(135deg, #27ae60, #1e8449); box-shadow: 0 4px 12px rgba(39,174,96,0.3); }
+        .bg-blue   { background: linear-gradient(135deg, #2196f3, #1565c0); box-shadow: 0 4px 12px rgba(33,150,243,0.3); }
+        .stat-info h4 { color: #9aa0b0; font-size: 0.72rem; font-weight: 800; margin-bottom: 4px; letter-spacing: 0.8px; text-transform: uppercase; }
+        .stat-info strong { color: #0b132b; font-size: 1.7rem; font-weight: 900; line-height: 1; }
+
+        /* COLUMNS */
+        .crm-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .crm-column { background: white; border-radius: 18px; border: 1px solid #e4e9f0; box-shadow: 0 3px 16px rgba(0,0,0,0.05); overflow: hidden; }
+        .crm-col-header { padding: 14px 18px; font-size: 1rem; font-weight: 900; color: white; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .crm-col-header.red-theme    { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .crm-col-header.purple-theme { background: linear-gradient(135deg, #7b2d9e, #9b4dca); }
+        .col-badge { background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 20px; font-size: 0.82rem; font-weight: 900; border: 1px solid rgba(255,255,255,0.3); }
+        .missed-date-filter { background: rgba(255,255,255,0.15); padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); color: white; font-family: 'Tajawal'; font-weight: 700; outline: none; cursor: pointer; font-size: 0.82rem; }
+
+        /* TICKET LIST */
+        .ticket-list { padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 570px; overflow-y: auto; background: #fafbfd; }
+        .ticket-list::-webkit-scrollbar { width: 3px; }
+        .ticket-list::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+
+        /* TICKET CARD */
+        .ticket-card { background: white; border: 1px solid #e8edf4; border-radius: 13px; padding: 14px; transition: 0.22s; border-right: 4px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .ticket-card:hover { transform: translateX(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.09); border-color: #d0d8e8; }
+        .ticket-card.purple { border-right-color: #8e44ad; }
+        .ticket-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .ticket-card h3 { font-size: 1rem; color: #0b132b; font-weight: 900; margin: 0; }
+        .ticket-details { font-size: 0.85rem; color: #666; display: flex; flex-direction: column; gap: 5px; font-weight: 700; }
+        .ticket-details i { color: #d4af37; width: 15px; text-align: center; font-size: 0.82rem; }
+        .days-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 20px; font-size: 0.76rem; font-weight: 800; }
+        .days-badge.red    { background: #ffebee; color: #c62828; }
+        .days-badge.orange { background: #fff3e0; color: #e65100; }
+        .days-badge.purple { background: #f3e5f5; color: #6a1b9a; }
+        .branch-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(212,175,55,0.1); color: #b8850a; padding: 2px 8px; border-radius: 8px; font-size: 0.76rem; font-weight: 800; border: 1px solid rgba(212,175,55,0.2); }
+
+        /* ACTIONS */
+        .ticket-actions { display: flex; gap: 6px; margin-top: 12px; border-top: 1px dashed #edf1f6; padding-top: 10px; }
+        .btn-action { flex: 1; padding: 8px 5px; border-radius: 9px; font-weight: 800; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.22s; font-family: 'Tajawal'; }
+        .btn-wa   { background: #e8f5e9; color: #27ae60; border: 1px solid #c8e6c9; }
+        .btn-wa:hover { background: #27ae60; color: white; transform: translateY(-1px); }
+        .btn-call { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; text-decoration: none; }
+        .btn-call:hover { background: #1565c0; color: white; transform: translateY(-1px); }
+        .btn-done { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; }
+        .btn-done:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; transform: translateY(-1px); }
+
+        /* MODAL */
+        .reason-modal { position: fixed; inset: 0; background: rgba(11,19,43,0.88); display: flex; align-items: center; justify-content: center; z-index: 5000; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(8px); }
+        .reason-modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; padding: 26px; border-radius: 18px; width: 420px; max-width: 94vw; border-top: 4px solid #d4af37; box-shadow: 0 24px 60px rgba(0,0,0,0.3); transform: scale(0.9) translateY(15px); transition: 0.32s cubic-bezier(0.34,1.2,0.64,1); }
+        .reason-modal.active .modal-content { transform: scale(1) translateY(0); }
+        .modal-content h3 { color: #0b132b; margin-bottom: 14px; font-size: 1.1rem; font-weight: 900; padding-bottom: 10px; border-bottom: 1px solid #f0f2f5; }
+        .modal-content label { display: block; text-align: right; margin-bottom: 5px; font-size: 0.8rem; font-weight: 800; color: #888; }
+        .modal-content select, .modal-content textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #e0e4ea; margin-bottom: 12px; font-family: 'Tajawal'; font-weight: 700; outline: none; transition: 0.22s; font-size: 0.92rem; }
+        .modal-content select:focus, .modal-content textarea:focus { border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+        .modal-btns { display: flex; gap: 10px; }
+        .modal-btns button { flex: 1; padding: 11px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; font-family: 'Tajawal'; transition: 0.25s; }
+        .modal-btn-save { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; }
+        .modal-btn-save:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; }
+        .modal-btn-cancel { background: #f0f2f5; color: #666; }
+        .modal-btn-cancel:hover { background: #e0e4ea; }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 36px 20px; color: #bbb; }
+        .empty-state i { font-size: 2.2rem; display: block; margin-bottom: 10px; color: #e0e0e0; }
+        .empty-state p { font-size: 0.88rem; font-weight: 700; }
+
+        /* BRANCH FILTER BUTTONS */
+        #branchFilterWrap { display: flex; }
+        .branch-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e0e4ea; background: white; color: #666; font-family: 'Tajawal'; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: 0.22s; white-space: nowrap; }
+        .branch-btn:hover { border-color: #d4af37; color: #0b132b; background: rgba(212,175,55,0.08); }
+        .branch-btn.active { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; border-color: #0b132b; box-shadow: 0 3px 10px rgba(11,19,43,0.2); }
+
+        /* TOAST */
+        #toastContainer { position: fixed; bottom: 24px; left: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 9px; }
+        .toast { background: #0b132b; color: white; padding: 13px 20px; border-radius: 14px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 35px rgba(11,19,43,0.25); transform: translateX(-200%); transition: 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-right: 4px solid #d4af37; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-right-color: #27ae60; }
+        .toast.error   { border-right-color: #e74c3c; }
+    
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+    </style>
+
+    <style>
+
+
+
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            .stat-card, .kpi-card { min-width: 140px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+        }
+
+    </style>
+
+
+
+
+    <link rel="stylesheet" href="premium.css">
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<!-- Modal سبب الغياب -->
+<div id="reasonModal" class="reason-modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-clipboard-check" style="color:#d4af37;"></i> تسجيل نتيجة التواصل</h3>
+        <label>سبب الغياب / التأخير:</label>
+        <select id="reasonSelect">
+            <option value="تعب مفاجئ">تعب مفاجئ / ظروف صحية</option>
+            <option value="ظروف عمل">ظروف العمل / سفر</option>
+            <option value="نسيان الموعد">نسيان الموعد</option>
+            <option value="مشكلة في المواصلات">مشكلة في المواصلات</option>
+            <option value="اعتراض على السعر">اعتراض على السعر</option>
+            <option value="عدم الرضا عن الخدمة">عدم الرضا عن الخدمة</option>
+            <option value="تم التواصل ولم يتم الرد">📞 تم التواصل ولم يتم الرد</option>
+            <option value="تم التواصل على الواتس ولم يتم الرد">💬 تم التواصل على الواتس ولم يتم الرد</option>
+            <option value="تم التواصل وحجز للجلسة الجاية">✅ تم التواصل وحجز للجلسة الجاية</option>
+            <option value="تم التواصل على الواتس وتم الرد وحجز">✅ تم التواصل على الواتس وتم الرد وحجز</option>
+            <option value="أخرى">أخرى (اكتب في الملاحظات)</option>
+        </select>
+        <label>ملاحظات إضافية:</label>
+        <textarea id="reasonNotes" placeholder="أضف ملاحظات هنا..." rows="3"></textarea>
+        <div class="modal-btns">
+            <button class="modal-btn-save" onclick="saveReason()"><i class="fas fa-check"></i> حفظ وإغلاق</button>
+            <button class="modal-btn-cancel" onclick="closeModal()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+    </div>
+    <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
+</header>
+
+<nav class="sidebar">
+    <a href="dashboard.html" class="admin-only"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+    <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+    <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+    <a href="patients.html" class="admin-only"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html" class="admin-only"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+    <a href="ledger.html" class="admin-only"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+    <a href="reports.html" class="active"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+    <a href="hr.html" class="admin-only"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+    <a href="analytics.html" class="admin-only"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+    <a href="support.html" class="admin-only"><i class="fas fa-shield-alt"></i> الدعم وسجل المراقبة</a>
+</nav>
+
+<main class="main-content">
+    <div class="top-bar">
+        <h1><i class="fas fa-headset" style="color:#d4af37;"></i> إدارة متابعة المرضى (CRM)</h1>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span id="todayDateStr" style="font-weight:700; color:#888; font-size:0.88rem;"></span>
+            <!-- فلتر الفروع - يظهر للأدمن فقط -->
+            <div id="branchFilterWrap" style="display:none; gap:6px; flex-wrap:wrap;">
+                <button class="branch-btn active" onclick="filterBranch('all')">🏢 كل الفروع</button>
+                <button class="branch-btn" onclick="filterBranch('المهندسين')">المهندسين</button>
+                <button class="branch-btn" onclick="filterBranch('أكتوبر')">أكتوبر</button>
+                <button class="branch-btn" onclick="filterBranch('الهرم')">الهرم</button>
+                <button class="branch-btn" onclick="filterBranch('العبور')">العبور</button>
+                <button class="branch-btn" onclick="filterBranch('مدينة نصر')">مدينة نصر</button>
+                <button class="branch-btn" onclick="filterBranch('مستشفى الشروق')">مستشفى الشروق</button>
+                <button class="branch-btn" onclick="filterBranch('بني سويف')">بني سويف</button>
+            </div>
+            <div class="branch-pill"><i class="fas fa-map-marker-alt"></i> <span id="currentBranchName">...</span></div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon bg-red"><i class="fas fa-calendar-times"></i></div>
+            <div class="stat-info"><h4>حجوزات فائتة</h4><strong id="countMissed">0</strong></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-purple"><i class="fas fa-user-clock"></i></div>
+            <div class="stat-info"><h4>منقطعون عن الجلسات</h4><strong id="countStopped">0</strong></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info"><h4>تم التواصل اليوم</h4><strong id="countContacted">0</strong></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-blue"><i class="fas fa-users"></i></div>
+            <div class="stat-info"><h4>إجمالي المتابعة</h4><strong id="countTotal">0</strong></div>
+        </div>
+    </div>
+
+    <div class="crm-container">
+        <div class="crm-column">
+            <div class="crm-col-header red-theme">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    حجوزات فائتة
+                    <span class="col-badge" id="badgeMissed">0</span>
+                </div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button onclick="openBulkMissedReminder()" style="background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 12px; border-radius:8px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.78rem;"><i class="fab fa-whatsapp"></i> أبعت للجميع</button>
+                    <input type="date" id="missedDatePicker" class="missed-date-filter" onchange="calculateAll()">
+                </div>
+            </div>
+            <div class="ticket-list" id="missedListContainer">
+                <div class="empty-state"><i class="fas fa-calendar-check"></i><p>لا توجد حجوزات فائتة</p></div>
+            </div>
+        </div>
+
+        <div class="crm-column">
+            <div class="crm-col-header purple-theme">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-user-slash"></i>
+                    منقطعون عن الجلسات
+                    <span class="col-badge" id="badgeStopped">0</span>
+                </div>
+                <span style="font-size:0.8rem; opacity:0.8;">3+ أيام انقطاع</span>
+            </div>
+            <div class="ticket-list" id="stoppedListContainer">
+                <div class="empty-state"><i class="fas fa-user-check"></i><p>لا يوجد منقطعون</p></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    // فعّل الكاش قبل أي قراءة (عشان مايعملش error)
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+    // الرسائل القابلة للتعديل من السابورت
+    let CUSTOM_MSGS = {};
+    db.collection("settings").doc("system_settings").onSnapshot(doc => { if (doc.exists) CUSTOM_MSGS = doc.data(); });
+        // تأكيد الاتصال بعد 3 ثواني
+        setTimeout(() => {
+            const st = document.getElementById('serverStatus');
+            if (st && st.innerHTML.includes('جاري')) {
+                st.innerHTML = '<i class="fas fa-check-circle"></i> متصل';
+            }
+        }, 3000);
+
+    let globalBookings = [], globalPatients = [], globalReports = [];
+    let userBranch = "المهندسين";
+    let userRole = "";
+    let isCentralAdmin = false;
+    let activeTicket = { id: '', type: '', name: '' };
+
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-times-circle'}" style="color:${type === 'success' ? '#27ae60' : '#e74c3c'};"></i> ${msg}`;
+        c.appendChild(t);
+        setTimeout(() => t.classList.add('show'), 80);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        userBranch  = localStorage.getItem('userBranch') || "المهندسين";
+        userRole    = localStorage.getItem('userRole')   || "reception";
+        isCentralAdmin = (userRole === 'owner' || userBranch === 'الإدارة المركزية');
+
+        document.getElementById('currentBranchName').innerText = isCentralAdmin ? 'كل الفروع' : userBranch;
+
+        // إظهار فلتر الفروع للأدمن فقط
+        if (isCentralAdmin) {
+            document.getElementById('branchFilterWrap').style.display = 'flex';
+        }
+
+        let now = new Date();
+        document.getElementById('missedDatePicker').value = now.toISOString().split('T')[0];
+        document.getElementById('todayDateStr').innerText = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        fetchData();
+    });
+
+    let _calcTimer = null;
+    function debouncedCalc() {
+        clearTimeout(_calcTimer);
+        _calcTimer = setTimeout(() => { try { calculateAll(); } catch(e){ console.warn(e); } }, 200);
+    }
+
+    function fetchData() {
+        db.collection("reservations").orderBy("createdAt","desc").limit(1200).onSnapshot(snap => {
+            globalBookings = [];
+            snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalBookings.push(d); });
+            debouncedCalc();
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem;"></i> متصل';
+        }, err => {
+            db.collection("reservations").limit(1200).onSnapshot(snap => {
+                globalBookings = [];
+                snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalBookings.push(d); });
+                debouncedCalc();
+            });
+        });
+        db.collection("follow_up_reports").limit(600).onSnapshot(snap => {
+            globalReports = [];
+            snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalReports.push(d); });
+            debouncedCalc();
+        });
+        db.collection("patients_insu").limit(1200).onSnapshot(snap => { processPatients(snap, 'insu'); });
+        db.collection("patients_cash").limit(1200).onSnapshot(snap => { processPatients(snap, 'cash'); });
+    }
+
+    function processPatients(snap, type) {
+        snap.forEach(doc => {
+            let d = doc.data(); d.id = doc.id; d.dbType = type;
+            let idx = globalPatients.findIndex(p => p.id === d.id && p.dbType === type);
+            if (idx > -1) globalPatients[idx] = d; else globalPatients.push(d);
+        });
+        debouncedCalc();
+    }
+
+    let activeBranchFilter = 'all';
+
+    function filterBranch(branch) {
+        activeBranchFilter = branch;
+        document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('currentBranchName').innerText = branch === 'all' ? 'كل الفروع' : branch;
+        calculateAll();
+    }
+
+    function isMyBranch(branch) {
+        if (!isCentralAdmin) return branch === userBranch;
+        if (activeBranchFilter === 'all') return true;
+        return branch === activeBranchFilter;
+    }
+
+    function formatPhone(phone) {
+        let p = (phone || '').trim();
+        return p.startsWith("0") ? "2" + p : (p.startsWith("20") ? p : "20" + p);
+    }
+
+    // تحقق لو المريض اتتواصل معاه خلال 3 أيام (يختفي 3 أيام بعد التواصل)
+    function wasContactedInLast3Days(patientName) {
+        let now = new Date();
+        return globalReports.some(r => {
+            if (r.patientName !== patientName) return false;
+            if (!r.timestamp) return false;
+            let ts = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+            let diff = (now - ts) / (1000 * 60 * 60 * 24);
+            return diff <= 3; // اختفى لمدة 3 أيام بعد التواصل
+        });
+    }
+
+    // ===== تذكير جماعي للحجوزات الفائتة =====
+    let _missedBulkIndex = 0;
+    function openBulkMissedReminder() {
+        const list = window._missedList || [];
+        if (!list.length) { showToast && showToast('لا يوجد حالات فائتة بأرقام تليفون', 'error'); return; }
+        let modal = document.getElementById('bulkMissedModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'bulkMissedModal';
+            modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(11,19,43,0.85);backdrop-filter:blur(6px);z-index:99999;align-items:center;justify-content:center;padding:20px;';
+            document.body.appendChild(modal);
+        }
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div style="background:white;border-radius:18px;padding:26px;max-width:420px;width:100%;text-align:center;">
+                <div style="font-size:2rem;">📱</div>
+                <h3 style="color:#c0392b;font-weight:900;margin:10px 0;">تذكير جماعي — حجوزات فائتة</h3>
+                <p style="color:#888;font-size:0.85rem;margin-bottom:14px;">هيفتح رسالة واتساب لكل حالة على حدة</p>
+                <div style="background:#fdecea;border-radius:12px;padding:14px;margin-bottom:16px;font-weight:800;color:#c0392b;">عدد الحالات: ${list.length}</div>
+                <button onclick="_missedBulkIndex=0;showNextMissedReminder();" style="width:100%;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;padding:13px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';margin-bottom:10px;">ابدأ الإرسال</button>
+                <button onclick="document.getElementById('bulkMissedModal').style.display='none'" style="background:#eee;color:#555;border:none;padding:11px 22px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';">إلغاء</button>
+            </div>`;
+    }
+    window.openBulkMissedReminder = openBulkMissedReminder;
+
+    function showNextMissedReminder() {
+        const list = window._missedList || [];
+        const modal = document.getElementById('bulkMissedModal');
+        if (_missedBulkIndex >= list.length) {
+            modal.innerHTML = `<div style="background:white;border-radius:18px;padding:30px;text-align:center;max-width:340px;">
+                <div style="font-size:2.2rem;">✅</div><h3 style="color:#27ae60;margin:10px 0;">تم الانتهاء</h3>
+                <button onclick="document.getElementById('bulkMissedModal').style.display='none'" style="background:#0b132b;color:white;border:none;padding:12px 26px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';">إغلاق</button>
+            </div>`;
+            return;
+        }
+        const b = list[_missedBulkIndex];
+        modal.innerHTML = `
+            <div style="background:white;border-radius:18px;padding:26px;max-width:400px;width:100%;text-align:center;">
+                <div style="color:#888;font-size:0.8rem;margin-bottom:6px;">حالة ${_missedBulkIndex+1} من ${list.length}</div>
+                <div style="font-weight:900;font-size:1.2rem;color:#0b132b;margin-bottom:4px;">${b.patientName}</div>
+                <div style="color:#888;font-size:0.85rem;margin-bottom:18px;">📞 ${b.phone} — ⏰ ${b.time||'-'}</div>
+                <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:10px;margin-bottom:14px;font-size:0.78rem;color:#e65100;">
+                    ⚠️ عشان حسابك متتحظرش من واتساب، لازم تستنى شوية بين كل رسالة والتانية
+                </div>
+                <button id="btnMissedSend" onclick="sendMissedOne()" style="width:100%;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;padding:14px;border-radius:12px;font-weight:900;cursor:pointer;font-family:'Tajawal';font-size:1rem;margin-bottom:10px;"><i class="fab fa-whatsapp"></i> إرسال</button>
+                <button onclick="_missedBulkIndex++;showNextMissedReminder();" style="width:100%;background:#f0f0f0;color:#888;border:none;padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Tajawal';">تخطي</button>
+            </div>`;
+    }
+    window.showNextMissedReminder = showNextMissedReminder;
+
+    let _missedCooldown = false;
+    function sendMissedOne() {
+        if (_missedCooldown) return;
+        const list = window._missedList || [];
+        const b = list[_missedBulkIndex];
+        const waMsg = (CUSTOM_MSGS.msgLate || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, b.patientName||'').replace(/\{الساعة\}/g, b.time||'').replace(/\{الدكتور\}/g, b.doctor||'');
+        window.open(`https://wa.me/${formatPhone(b.phone)}?text=${encodeURIComponent(waMsg)}`, '_blank');
+        _missedBulkIndex++;
+        _missedCooldown = true;
+        const btn = document.getElementById('btnMissedSend');
+        let secondsLeft = 20;
+        if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            const tick = setInterval(() => {
+                secondsLeft--;
+                if (btn) btn.innerHTML = `<i class="fas fa-clock"></i> استنى ${secondsLeft} ثانية...`;
+                if (secondsLeft <= 0) { clearInterval(tick); }
+            }, 1000);
+        }
+        setTimeout(() => {
+            _missedCooldown = false;
+            showNextMissedReminder();
+        }, 20000);
+    }
+    window.sendMissedOne = sendMissedOne;
+
+    function calculateAll() {
+        let missedContainer   = document.getElementById('missedListContainer');
+        let stoppedContainer  = document.getElementById('stoppedListContainer');
+        missedContainer.innerHTML  = '';
+        stoppedContainer.innerHTML = '';
+        window._missedList = [];
+
+        let countMissed = 0, countStopped = 0, countContacted = 0;
+        let now = new Date();
+        let todayIso = now.toISOString().split('T')[0];
+        let selectedDate = document.getElementById('missedDatePicker').value || todayIso;
+
+        // ===== 1. حجوزات فائتة =====
+        globalBookings.forEach(b => {
+            if (!isMyBranch(b.branch)) return;
+            if (b.status === "حضر" || b.status === "تم التواصل") return;
+            if (b.date !== selectedDate) return;
+
+            let isMissed = false;
+            if (selectedDate === todayIso) {
+                try {
+                    let [time, ampm] = b.time.split(' ');
+                    let [h, m] = time.split(':');
+                    let hNum = parseInt(h);
+                    if (hNum === 12 && ampm === 'AM') hNum = 0;
+                    if (hNum !== 12 && ampm === 'PM') hNum += 12;
+                    let appt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hNum, parseInt(m));
+                    appt.setHours(appt.getHours() + 1);
+                    if (now > appt) isMissed = true;
+                } catch(e) { isMissed = false; }
+            } else if (new Date(selectedDate) < new Date(todayIso)) {
+                isMissed = true;
+            }
+
+            if (!isMissed) return;
+            countMissed++;
+            if (b.phone) window._missedList.push(b);
+
+            let waMsg = (CUSTOM_MSGS.msgLate || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, b.patientName||'').replace(/\{الساعة\}/g, b.time||'').replace(/\{الدكتور\}/g, b.doctor||'');
+
+            missedContainer.innerHTML += `
+            <div class="ticket-card">
+                <h3>${b.patientName}</h3>
+                <div class="ticket-details">
+                    <div><i class="fas fa-phone-alt"></i> ${b.phone || '-'}</div>
+                    <div><i class="far fa-clock"></i> الموعد: <span style="color:#e74c3c;font-weight:900;">${b.time}</span></div>
+                    ${b.doctor ? `<div><i class="fas fa-user-md"></i> ${b.doctor}</div>` : ''}
+                    ${b.company ? `<div><i class="fas fa-building"></i> ${b.company}</div>` : ''}
+                    ${isCentralAdmin ? `<div><i class="fas fa-map-marker-alt"></i> <span style="color:#d4af37;">${b.branch}</span></div>` : ''}
+                </div>
+                <div class="ticket-actions">
+                    <button class="btn-action btn-wa" onclick="window.open('https://wa.me/${formatPhone(b.phone)}?text=${encodeURIComponent(waMsg)}','_blank'); openReasonModal('${b.id}','reservation','${b.patientName.replace(/'/g,"\\'")}')" title="واتساب">
+                        <i class="fab fa-whatsapp"></i> واتساب
+                    </button>
+                    <a href="tel:${b.phone}" class="btn-action btn-call" title="اتصال">
+                        <i class="fas fa-phone"></i> اتصال
+                    </a>
+                    <button class="btn-action btn-done" onclick="openReasonModal('${b.id}','reservation','${b.patientName.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-check"></i> تم التواصل
+                    </button>
+                </div>
+            </div>`;
+        });
+
+        if (countMissed === 0) {
+            missedContainer.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-check"></i><p>لا توجد حجوزات فائتة في هذا اليوم</p></div>`;
+        }
+
+        // ===== 2. المنقطعون =====
+        // فلتر: نفس الفرع + لم يكتمل + غير مقفّل + انقطع 3+ أيام + لم يتم التواصل خلال 30 يوم
+        globalPatients.forEach(p => {
+            if (!isMyBranch(p.branch)) return;
+
+            // مقفّل أو خلّص جلساته → لا يظهر
+            if (p.isClosed === true) return;
+            if ((p.attended || 0) >= (p.totalSess || 0) && (p.totalSess || 0) > 0) return;
+
+            // محتاج lastSessionDate
+            if (!p.lastSessionDate) return;
+
+            let lastDate;
+            try {
+                lastDate = p.lastSessionDate.toDate ? p.lastSessionDate.toDate() : new Date(p.lastSessionDate);
+            } catch(e) { return; }
+
+            let diffDays = Math.ceil((now - lastDate) / (1000 * 60 * 60 * 24));
+
+            // أقل من 3 أيام → لا يظهر
+            if (diffDays < 3) return;
+
+            // تم التواصل معاه خلال 3 أيام → يختفي مؤقتاً (يرجع بعد 3 أيام)
+            if (wasContactedInLast3Days(p.id)) return;
+
+            // أكثر من 30 يوم انقطاع بدون تواصل → اختفى نهائياً
+            if (diffDays > 30) return;
+
+            countStopped++;
+            let daysColor = diffDays >= 14 ? 'red' : (diffDays >= 7 ? 'orange' : 'purple');
+            let waMsg = (CUSTOM_MSGS.msgAbsent || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nلاحظنا انقطاع حضرتك عن جلسات العلاج.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, p.id||'');
+
+            stoppedContainer.innerHTML += `
+            <div class="ticket-card purple">
+                <h3>${p.id}</h3>
+                <div class="ticket-details">
+                    <div><i class="fas fa-phone-alt"></i> ${p.phone || '-'}</div>
+                    <div><i class="far fa-calendar-times"></i> آخر جلسة: <span class="days-badge ${daysColor}"><i class="fas fa-clock"></i> منذ ${diffDays} يوم</span></div>
+                    <div><i class="fas fa-layer-group"></i> حضر ${p.attended || 0} من ${p.totalSess || 0} جلسة</div>
+                    ${p.dbType === 'insu' ? `<div><i class="fas fa-building"></i> ${p.comp || '-'}</div>` : ''}
+                    ${isCentralAdmin ? `<div><i class="fas fa-map-marker-alt"></i> <span style="color:#d4af37;">${p.branch || '-'}</span></div>` : ''}
+                </div>
+                <div class="ticket-actions">
+                    <button class="btn-action btn-wa" onclick="window.open('https://wa.me/${formatPhone(p.phone)}?text=${encodeURIComponent(waMsg)}','_blank'); openReasonModal('${p.id}','patient','${p.id.replace(/'/g,"\\'")}')">
+                        <i class="fab fa-whatsapp"></i> واتساب
+                    </button>
+                    <a href="tel:${p.phone}" class="btn-action btn-call">
+                        <i class="fas fa-phone"></i> اتصال
+                    </a>
+                    <button class="btn-action btn-done" onclick="openReasonModal('${p.id}','patient','${p.id.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-check"></i> تم التواصل
+                    </button>
+                </div>
+            </div>`;
+        });
+
+        if (countStopped === 0) {
+            stoppedContainer.innerHTML = `<div class="empty-state"><i class="fas fa-user-check"></i><p>لا يوجد منقطعون عن الجلسات</p></div>`;
+        }
+
+        // عدد التواصل اليوم
+        let todayContacted = globalReports.filter(r => {
+            if (!r.timestamp) return false;
+            let ts = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+            let ds = ts.toISOString().split('T')[0];
+            return ds === todayIso && isMyBranch(r.branch);
+        }).length;
+
+        document.getElementById('countMissed').innerText   = countMissed;
+        document.getElementById('countStopped').innerText  = countStopped;
+        document.getElementById('countContacted').innerText = todayContacted;
+        document.getElementById('countTotal').innerText    = countMissed + countStopped;
+        document.getElementById('badgeMissed').innerText   = countMissed;
+        document.getElementById('badgeStopped').innerText  = countStopped;
+    }
+
+    function openReasonModal(id, type, name) {
+        activeTicket = { id, type, name };
+        document.getElementById('reasonNotes').value = '';
+        document.getElementById('reasonModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('reasonModal').classList.remove('active');
+    }
+
+    async function saveReason() {
+        let reason = document.getElementById('reasonSelect').value;
+        let notes  = document.getElementById('reasonNotes').value;
+        try {
+            await db.collection("follow_up_reports").add({
+                patientName: activeTicket.name,
+                reason: reason,
+                notes: notes,
+                type: activeTicket.type,
+                branch: userBranch,
+                date: new Date().toISOString().split('T')[0],
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            if (activeTicket.type === 'patient') {
+                let p = globalPatients.find(x => x.id === activeTicket.id);
+                if (p) {
+                    await db.collection(p.dbType === 'insu' ? "patients_insu" : "patients_cash")
+                        .doc(activeTicket.id)
+                        .update({ lastSessionDate: firebase.firestore.FieldValue.serverTimestamp() });
+                }
+            } else {
+                await db.collection("reservations").doc(activeTicket.id).update({ status: "تم التواصل" });
+            }
+            closeModal();
+            showToast(`تم تسجيل التواصل مع ${activeTicket.name} ✅`);
+        } catch(e) {
+            showToast("خطأ في الحفظ!", "error");
+        }
+    }
+</script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+
+
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+
+</body>
+</html>

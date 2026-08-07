@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <link rel="stylesheet" href="update-style.css">
+    <meta charset="UTF-8">
+    <title>Life Sport - سجل الرقابة والأمان</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background-color: #f8f9fa; display: flex; }
+        .header { background-color: #0b132b; height: 75px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; border-bottom: 3px solid #d4af37; z-index: 1000; }
+        .sidebar { background-color: #1a1f36; width: 260px; height: 100vh; position: fixed; top: 75px; right: 0; padding-top: 30px; }
+        .sidebar a { display: flex; align-items: center; color: #a3aed1; text-decoration: none; padding: 16px 25px; transition: 0.3s; font-size: 1.05rem; }
+        .sidebar a.active { color: #d4af37; background: rgba(255,255,255,0.05); font-weight: 700; border-right: 4px solid #d4af37; }
+        .main-content { margin-right: 260px; margin-top: 75px; padding: 40px; width: 100%; }
+        .log-box { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th { background: #0b132b; color: #d4af37; padding: 15px; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-weight: 700; }
+        .time-text { color: #888; font-size: 0.85rem; direction: ltr; display: inline-block; }
+        .action-add { color: #27ae60; }
+        .action-del { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <header class="header"><div style="color:white; font-weight:800; font-size:1.3rem;">LIFE SPORT <span style="color:#d4af37">SECURITY</span></div></header>
+    <nav class="sidebar">
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+        <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+        <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+        <a href="analytics.html"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+        <a href="#" class="active"><i class="fas fa-shield-alt"></i> سجل الرقابة</a>
+    </nav>
+    <main class="main-content">
+        <div class="log-box">
+            <h2 style="margin-bottom:20px;"><i class="fas fa-history"></i> سجل مراقبة تحركات النظام</h2>
+            <table>
+                <thead><tr><th>الوقت والتاريخ</th><th>المستخدم</th><th>الفرع</th><th>الإجراء المتخذ</th></tr></thead>
+                <tbody id="logBody"></tbody>
+            </table>
+        </div>
+    </main>
+    <script>
+        function loadLogs() {
+            let logs = JSON.parse(localStorage.getItem('lsAuditLogs')) || [];
+            let body = document.getElementById('logBody');
+            body.innerHTML = logs.reverse().map(l => `
+                <tr>
+                    <td><span class="time-text">${l.time}</span></td>
+                    <td><i class="fas fa-user-circle"></i> ${l.user}</td>
+                    <td>${l.branch}</td>
+                    <td class="${l.type === 'حذف' ? 'action-del' : 'action-add'}">${l.action}</td>
+                </tr>
+            `).join('');
+        }
+        window.onload = loadLogs;
+    </script>
+    <script src="update-manager.js"></script>
+</body>
+</html>

@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - التحليل الشهري</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Tajawal',sans-serif; }
+        body { background:#f0f3f8; display:flex; overflow-x:hidden; color:#1c1e21; min-height:100vh; }
+
+        /* HEADER */
+        .header { background:linear-gradient(135deg,#0b132b,#1a2a5e); height:72px; width:100%; position:fixed; top:0; display:flex; justify-content:space-between; align-items:center; padding:0 35px; border-bottom:2px solid rgba(212,175,55,0.4); z-index:1000; box-shadow:0 4px 20px rgba(11,19,43,0.3); }
+        .header-title { color:white; font-size:1.2rem; font-weight:900; }
+        .header-title span { color:#d4af37; }
+        .server-status { display:flex; align-items:center; gap:7px; font-size:0.85rem; font-weight:700; color:#27ae60; background:rgba(39,174,96,0.12); padding:6px 14px; border-radius:20px; border:1px solid rgba(39,174,96,0.3); }
+
+        /* SIDEBAR */
+        .sidebar { background:#0b1120; width:255px; height:100vh; position:fixed; top:72px; right:0; padding-top:20px; z-index:900; border-left:1px solid rgba(255,255,255,0.05); }
+        .sidebar a { display:flex; align-items:center; gap:11px; color:rgba(163,174,209,0.8); text-decoration:none; padding:12px 20px; transition:0.22s; font-size:0.95rem; border-right:2px solid transparent; margin:1px 8px; border-radius:10px; font-weight:600; }
+        .sidebar a i { width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.88rem; background:rgba(255,255,255,0.06); border-radius:7px; }
+        .sidebar a:hover { color:#fff; background:rgba(255,255,255,0.05); }
+        .sidebar a.active { background:rgba(212,175,55,0.12); color:#d4af37; font-weight:800; border-right:2px solid #d4af37; }
+
+        /* MAIN */
+        .main-content { margin-right:255px; margin-top:72px; padding:24px 28px; width:100%; display:none; }
+        .main-content.unlocked { display:block; }
+
+      
+        /* PASSWORD MODAL */
+        .pin-overlay { position:fixed; inset:0; background:rgba(11,19,43,0.92); display:flex; align-items:center; justify-content:center; z-index:5000; backdrop-filter:blur(10px); transition:0.3s; }
+        .pin-overlay.hidden { opacity:0; pointer-events:none; }
+        .pin-box { background:white; padding:36px 32px; border-radius:22px; width:380px; max-width:94vw; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,0.3); border-top:4px solid #d4af37; animation:popIn 0.4s cubic-bezier(0.34,1.2,0.64,1); }
+        @keyframes popIn { from { transform:scale(0.85); opacity:0; } to { transform:scale(1); opacity:1; } }
+        .pin-box .pin-icon { width:70px; height:70px; background:linear-gradient(135deg,#0b132b,#1a2a5e); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; border:3px solid #d4af37; }
+        .pin-box .pin-icon i { font-size:1.8rem; color:#d4af37; }
+        .pin-box h3 { color:#0b132b; font-size:1.2rem; font-weight:900; margin-bottom:6px; }
+        .pin-box p { color:#888; font-size:0.85rem; font-weight:700; margin-bottom:20px; }
+        .pin-input { width:100%; padding:14px; border:2px solid #e0e4ea; border-radius:12px; text-align:center; font-size:1.8rem; letter-spacing:8px; outline:none; margin-bottom:16px; transition:0.22s; font-family:'Tajawal'; }
+        .pin-input:focus { border-color:#d4af37; box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
+        .btn-unlock { width:100%; padding:13px; background:linear-gradient(135deg,#0b132b,#1a2a5e); color:#d4af37; border:none; border-radius:12px; font-size:1rem; font-weight:900; cursor:pointer; font-family:'Tajawal'; transition:0.28s; }
+        .btn-unlock:hover { background:linear-gradient(135deg,#d4af37,#c49a2a); color:#0b132b; }
+
+        /* TOP BAR */
+        .top-bar { background:white; padding:14px 22px; border-radius:16px; border:1px solid #e4e9f0; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 12px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px; }
+        .top-bar h1 { color:#0b132b; font-size:1.15rem; font-weight:900; display:flex; align-items:center; gap:10px; margin:0; }
+
+        /* FILTERS */
+        .filters-row { background:white; padding:16px 22px; border-radius:14px; border:1px solid #e4e9f0; margin-bottom:18px; display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+        .fg { display:flex; flex-direction:column; gap:5px; flex:1; min-width:160px; }
+        .fg label { font-size:0.75rem; font-weight:800; color:#888; letter-spacing:0.5px; text-transform:uppercase; }
+        .fg select, .fg input { padding:9px 13px; border:1.5px solid #e0e4ea; border-radius:10px; outline:none; font-family:'Tajawal'; font-size:0.92rem; font-weight:700; color:#0b132b; background:#fafbfd; transition:0.22s; }
+        .fg select:focus, .fg input:focus { border-color:#d4af37; }
+
+        /* NET TOTAL */
+        .net-box { background:linear-gradient(135deg,#0b132b 0%,#1a2a5e 55%,#0f3460 100%); color:white; padding:28px 40px; border-radius:20px; text-align:center; margin-bottom:18px; border:1px solid rgba(212,175,55,0.2); box-shadow:0 16px 48px rgba(11,19,43,0.2); position:relative; overflow:hidden; }
+        .net-box::before { content:''; position:absolute; width:260px; height:260px; background:radial-gradient(circle,rgba(212,175,55,0.1),transparent 65%); top:-60px; left:-40px; }
+        .net-box::after  { content:''; position:absolute; width:160px; height:160px; background:radial-gradient(circle,rgba(80,130,255,0.07),transparent 65%); bottom:-30px; right:-20px; }
+        .net-box .net-lbl { font-size:0.78rem; color:rgba(212,175,55,0.7); font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:10px; }
+        .net-box .net-amt { font-size:3.4rem; font-weight:900; color:white; line-height:1; }
+        .net-box .net-sub { font-size:0.82rem; color:rgba(255,255,255,0.5); margin-top:8px; font-weight:700; }
+
+        /* KPI CARDS */
+        .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+        .kpi-card { background:white; padding:18px 20px; border-radius:16px; border:1px solid #e4e9f0; box-shadow:0 2px 12px rgba(0,0,0,0.05); position:relative; overflow:hidden; transition:0.28s; cursor:pointer; }
+        .kpi-card:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,0.1); }
+        .kpi-card::before { content:''; position:absolute; top:0; right:0; width:4px; height:100%; }
+        .kpi-card.green::before  { background:linear-gradient(180deg,#27ae60,rgba(39,174,96,0.2)); }
+        .kpi-card.orange::before { background:linear-gradient(180deg,#f39c12,rgba(243,156,18,0.2)); }
+        .kpi-card.blue::before   { background:linear-gradient(180deg,#2196f3,rgba(33,150,243,0.2)); }
+        .kpi-card.red::before    { background:linear-gradient(180deg,#e74c3c,rgba(231,76,60,0.2)); }
+        .kpi-card .kc-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:white; float:left; }
+        .kpi-card.green  .kc-icon { background:linear-gradient(135deg,#27ae60,#1e8449); }
+        .kpi-card.orange .kc-icon { background:linear-gradient(135deg,#f39c12,#d35400); }
+        .kpi-card.blue   .kc-icon { background:linear-gradient(135deg,#2196f3,#1565c0); }
+        .kpi-card.red    .kc-icon { background:linear-gradient(135deg,#e74c3c,#c0392b); }
+        .kpi-card .kc-lbl  { font-size:0.72rem; color:#9aa0b0; font-weight:800; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px; }
+        .kpi-card .kc-val  { font-size:1.7rem; font-weight:900; color:#0b132b; }
+        .kpi-card .kc-unit { font-size:0.78rem; color:#bbb; }
+
+        /* SECTIONS GRID */
+        .sections-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+        .section-box { background:white; padding:18px 20px; border-radius:16px; border:1px solid #e4e9f0; box-shadow:0 2px 12px rgba(0,0,0,0.05); }
+        .section-header { font-size:0.95rem; font-weight:900; color:#0b132b; border-bottom:1px solid #f0f4f8; padding-bottom:10px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+        .stat-line { display:flex; justify-content:space-between; padding:10px 14px; background:#f8fafc; border-radius:10px; margin-bottom:8px; border-right:3px solid #d4af37; }
+        .stat-line .sl-lbl { font-weight:700; color:#666; font-size:0.88rem; }
+        .stat-line .sl-val { font-weight:900; color:#0b132b; font-size:1rem; }
+
+        /* TABLE */
+        .table-wrap { overflow-x:auto; max-height:260px; overflow-y:auto; }
+        .table-wrap::-webkit-scrollbar { width:3px; }
+        .table-wrap::-webkit-scrollbar-thumb { background:#d4af37; border-radius:10px; }
+        table { width:100%; border-collapse:collapse; text-align:right; }
+        th { background:#f8fafc; padding:10px 12px; font-size:0.72rem; font-weight:800; color:#9aa0b0; border-bottom:2px solid #e8edf4; text-transform:uppercase; letter-spacing:0.8px; position:sticky; top:0; }
+        td { padding:9px 12px; border-bottom:1px solid #f0f4f8; font-size:0.88rem; font-weight:700; }
+        tr:hover td { background:#fdfcf5; }
+
+        /* BRANCH BUTTONS */
+        .branch-btns { display:flex; gap:7px; flex-wrap:wrap; }
+        .branch-btn { padding:6px 14px; border-radius:20px; border:1.5px solid #e0e4ea; background:white; color:#666; font-family:'Tajawal'; font-size:0.8rem; font-weight:800; cursor:pointer; transition:0.22s; }
+        .branch-btn:hover { border-color:#d4af37; color:#0b132b; }
+        .branch-btn.active { background:linear-gradient(135deg,#0b132b,#1a2a5e); color:#d4af37; border-color:#0b132b; box-shadow:0 3px 10px rgba(11,19,43,0.2); }
+
+        /* PRINT BTN */
+        .btn-print { background:linear-gradient(135deg,#27ae60,#1e8449); color:white; border:none; padding:10px 20px; border-radius:11px; font-size:0.92rem; font-weight:800; cursor:pointer; font-family:'Tajawal'; display:flex; align-items:center; gap:8px; transition:0.28s; box-shadow:0 4px 14px rgba(39,174,96,0.3); }
+        .btn-print:hover { transform:translateY(-2px); }
+
+        /* تحسين شكل زرار الطباعة */
+        .btn-print {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-print:hover {
+            box-shadow: 0 7px 22px rgba(39,174,96,0.45);
+        }
+        .btn-print::after {
+            content: ''; position: absolute; top: 0; left: -120%; width: 80%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-20deg); transition: left 0.75s ease;
+        }
+        .btn-print:hover::after { left: 130%; }
+
+        /* TOAST */
+        #toastContainer { position:fixed; bottom:24px; left:24px; z-index:9999; display:flex; flex-direction:column; gap:9px; }
+        .toast { background:#0b132b; color:white; padding:13px 20px; border-radius:14px; font-weight:700; font-size:0.92rem; display:flex; align-items:center; gap:10px; box-shadow:0 12px 35px rgba(11,19,43,0.25); transform:translateX(-200%); transition:0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-right:4px solid #d4af37; }
+        .toast.show { transform:translateX(0); }
+        .toast.success { border-right-color:#27ae60; }
+        .toast.error   { border-right-color:#e74c3c; }
+
+        /* PRINT */
+        @media print {
+            @page { size:A4 portrait; margin:8mm; }
+            body { zoom: 0.85; } /* تصغير المحتوى ليناسب الصفحة بشكل أفضل */
+            * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+            .header, .sidebar, .filters-row, .top-bar, .branch-btns, .btn-print, #toastContainer, #detailsModal { display:none !important; }
+            .main-content { margin:0 !important; padding:8px !important; width:100% !important; }
+            .print-header { display:block !important; }
+            .net-box { box-shadow:none !important; }
+            .kpi-grid { grid-template-columns:repeat(4,1fr) !important; }
+            .sections-grid { grid-template-columns:1fr 1fr !important; }
+        }
+        .print-header { display:none; background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; padding:12px 18px; border-radius:8px; margin-bottom:14px; }
+        .print-header h2 { color:#d4af37; font-size:1.1rem; margin:0; }
+        .print-header p { color:rgba(255,255,255,0.7); font-size:0.82rem; margin:3px 0 0; }
+    
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+    </style>
+
+    <style>
+
+
+
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            .stat-card, .kpi-card { min-width: 140px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+        }
+
+    </style>
+
+
+
+
+    <link rel="stylesheet" href="premium.css">
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<!-- PASSWORD MODAL -->
+<div class="pin-overlay auth-overlay-unified" id="pinOverlay">
+    <div class="pin-box auth-box-unified">
+        <button type="button" class="auth-close" onclick="window.location.href='dashboard.html'" aria-label="إغلاق والعودة للوحة القيادة"><i class="fas fa-times"></i></button>
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <h2>بوابة الإدارة والأمان</h2>
+        <p style="color:#777; margin-bottom:20px; font-weight:bold;">يرجى إدخال رمز التحقق الخاص بالتحليل الشهري</p>
+        <input type="password" id="pinInput" placeholder="****" maxlength="6"
+            onkeydown="if(event.key==='Enter') verifyPin()">
+        <button onclick="verifyPin()"><i class="fas fa-unlock"></i> فتح لوحة التحكم</button>
+    </div>
+</div>
+
+<header class="header">
+    <div style="display:flex;align-items:center;gap:14px;">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <img src="logo.png" style="height:44px;" onerror="this.style.display='none'">
+        <div class="header-title">LIFE SPORT <span>ANALYTICS</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
+        <div style="color:#d4af37;font-weight:800;font-size:0.88rem;">التحليل المالي الشهري</div>
+    </div>
+</header>
+
+<nav class="sidebar">
+    <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+    <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+    <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+    <a href="patients.html"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+    <a href="ledger.html"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+    <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+    <a href="hr.html"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+    <a href="analytics.html" class="active"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+    <a href="support.html"><i class="fas fa-shield-alt"></i> الدعم وسجل المراقبة</a>
+</nav>
+
+<main class="main-content" id="mainArea">
+
+    <!-- PRINT HEADER -->
+    <div class="print-header" id="printHeader">
+        <h2><i class="fas fa-chart-pie"></i> تقرير التحليل المالي الشهري — LIFE SPORT</h2>
+        <p id="printSubtitle">...</p>
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <h1><i class="fas fa-chart-pie" style="color:#d4af37;"></i> التحليل المالي والطبي الشهري</h1>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="ortho_vip.html" style="display:inline-flex;align-items:center;gap:10px;background:#0b132b;color:#d4af37;padding:11px 22px;border-radius:12px;font-weight:800;text-decoration:none;border:2px solid #d4af37;font-family:'Tajawal';font-size:0.92rem;"><i class="fas fa-crown"></i> تقارير أطباء العظام VIP</a>
+            <button class="btn-print" style="background:#087eaf;color:#fff;" onclick="document.getElementById('monthlyMovements').scrollIntoView({behavior:'smooth',block:'start'})"><i class="fas fa-exchange-alt"></i> سجل الحركات المالية الشهرية</button>
+            <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> طباعة التقرير</button>
+        </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-row">
+        <div class="fg">
+            <label><i class="fas fa-calendar-alt"></i> الشهر</label>
+            <input type="month" id="monthPicker" onchange="runReport()">
+        </div>
+        <div class="fg" style="flex:2;">
+            <label><i class="fas fa-map-marker-alt"></i> الفرع</label>
+            <div class="branch-btns" id="branchBtns">
+                <button class="branch-btn active" onclick="setBranch('all',this)">🏢 كل الفروع</button>
+                <button class="branch-btn" onclick="setBranch('المهندسين',this)">المهندسين</button>
+                <button class="branch-btn" onclick="setBranch('أكتوبر',this)">أكتوبر</button>
+                <button class="branch-btn" onclick="setBranch('الهرم',this)">الهرم</button>
+                <button class="branch-btn" onclick="setBranch('العبور',this)">العبور</button>
+                <button class="branch-btn" onclick="setBranch('مدينة نصر',this)">مدينة نصر</button>
+                <button class="branch-btn" onclick="setBranch('مستشفى الشروق',this)">مستشفى الشروق</button>
+                <button class="branch-btn" onclick="setBranch('بني سويف',this)">بني سويف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NET TOTAL -->
+    <div class="net-box">
+        <div class="net-lbl">الصافي النهائي للشهر</div>
+        <div class="net-amt" id="sumNet">0 <span style="font-size:1.4rem;opacity:0.55;">ج.م</span></div>
+        <div class="net-sub">(كاش + تحمل - مصروفات الكاش)</div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="kpi-card green" onclick="showDetailsModal('cash')">
+            <div class="kc-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="kc-lbl">إجمالي الكاش</div>
+            <div class="kc-val" id="sumCash">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#27ae60;margin-top:6px;cursor:pointer;">👁️ عرض التفاصيل</div>
+        </div>
+        <div class="kpi-card orange" onclick="showDetailsModal('copay')">
+            <div class="kc-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="kc-lbl">نسب التحمل</div>
+            <div class="kc-val" id="sumCopay">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#f39c12;margin-top:6px;cursor:pointer;">👁️ عرض التفاصيل</div>
+        </div>
+        <div class="kpi-card blue" onclick="showDetailsModal('companies')">
+            <div class="kc-icon"><i class="fas fa-building"></i></div>
+            <div class="kc-lbl">مطالبات الشركات</div>
+            <div class="kc-val" id="sumComp">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#2196f3;margin-top:6px;cursor:pointer;">👁️ عرض كشف المطالبات</div>
+        </div>
+        <div class="kpi-card" style="--c:#9b59b6;" onclick="showDetailsModal('instapay')">
+            <div class="kc-icon" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);"><i class="fas fa-mobile-alt"></i></div>
+            <div class="kc-lbl">إنستاباي قبل المصروفات</div>
+            <div class="kc-val" id="sumInstapay">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#9b59b6;margin-top:6px;cursor:pointer;">👁️ عرض التفاصيل</div>
+        </div>
+        <div class="kpi-card red" onclick="showDetailsModal('instapayExpenses')">
+            <div class="kc-icon"><i class="fas fa-minus-circle"></i></div>
+            <div class="kc-lbl">مصروفات إنستاباي</div>
+            <div class="kc-val" id="sumInstaExp">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#e74c3c;margin-top:6px;cursor:pointer;">👁️ عرض المصروفات</div>
+        </div>
+        <div class="kpi-card" style="--c:#6a1b9a;" onclick="showDetailsModal('instapay')">
+            <div class="kc-icon" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);"><i class="fas fa-wallet"></i></div>
+            <div class="kc-lbl">إنستاباي بعد المصروفات</div>
+            <div class="kc-val" id="sumInstaNet">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#6a1b9a;margin-top:6px;cursor:pointer;">👁️ عرض المدفوعات</div>
+        </div>
+        <div class="kpi-card red" onclick="showDetailsModal('expenses')">
+            <div class="kc-icon"><i class="fas fa-receipt"></i></div>
+            <div class="kc-lbl">مصروفات الكاش</div>
+            <div class="kc-val" id="sumExp">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#e74c3c;margin-top:6px;cursor:pointer;">👁️ عرض التفاصيل</div>
+        </div>
+        <div class="kpi-card red" onclick="showDetailsModal('allExpenses')">
+            <div class="kc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="kc-lbl">إجمالي المصروفات</div>
+            <div class="kc-val" id="sumTotalExp">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#e74c3c;margin-top:6px;cursor:pointer;">👁️ عرض كل المصروفات</div>
+        </div>
+        <div class="kpi-card" style="--c:#0b132b;">
+            <div class="kc-icon" style="background:linear-gradient(135deg,#d4af37,#c49a2a);"><i class="fas fa-calculator" style="color:#0b132b;"></i></div>
+            <div class="kc-lbl">الإجمالي الصافي</div>
+            <div class="kc-val" id="sumTotalNet">0 <span class="kc-unit">ج</span></div>
+            <div style="font-size:0.7rem;color:#0b132b;margin-top:6px;">(كاش+تحمل+انستا-مصروفات)</div>
+        </div>
+    </div>
+
+    <div id="financialAudit" style="background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:14px 18px;margin:-4px 0 18px;box-shadow:0 2px 12px rgba(0,0,0,.04);display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <div style="font-weight:900;color:#0b132b;"><i class="fas fa-clipboard-check" style="color:#d4af37;"></i> جرد الإجمالي النهائي</div>
+        <div id="auditFormula" style="font-weight:800;color:#566070;font-size:.88rem;"></div>
+        <div id="auditExcluded" style="color:#888;font-size:.78rem;"></div>
+    </div>
+
+    <div class="section-box" style="margin-bottom:18px;">
+        <div class="section-header"><i class="fas fa-sliders" style="color:#d4af37;"></i> إدارة أرصدة الإدارة المركزية</div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:12px;">
+            <div style="background:#f1f8f4;border:1px solid #c8e6c9;border-radius:12px;padding:14px;">
+                <div style="font-weight:900;color:#1e8449;margin-bottom:10px;">إضافة مبلغ للكاش</div>
+                <input id="centralCashNote" type="text" placeholder="البيان (اختياري)" style="width:100%;padding:9px;border:1px solid #dce7df;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                <input id="centralCashAmount" type="number" min="0" placeholder="المبلغ" style="width:100%;padding:9px;border:1px solid #dce7df;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                <select id="centralCashBranch" style="width:100%;padding:9px;border:1px solid #dce7df;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                    <option value="الإدارة المركزية">للإدارة المركزية</option><option value="المهندسين">المهندسين</option><option value="أكتوبر">أكتوبر</option><option value="الهرم">الهرم</option><option value="العبور">العبور</option><option value="مدينة نصر">مدينة نصر</option><option value="مستشفى الشروق">مستشفى الشروق</option><option value="بني سويف">بني سويف</option>
+                </select>
+                <button onclick="addCentralCash()" style="width:100%;background:#27ae60;color:#fff;border:0;border-radius:8px;padding:10px;font-family:Tajawal;font-weight:800;cursor:pointer;">إضافة للكاش</button>
+            </div>
+            <div style="background:#f5f0fb;border:1px solid #dfccef;border-radius:12px;padding:14px;">
+                <div style="font-weight:900;color:#6a1b9a;margin-bottom:10px;">تحويل من الكاش إلى إنستاباي</div>
+                <input id="cashTransferNote" type="text" placeholder="البيان (اختياري)" style="width:100%;padding:9px;border:1px solid #e5daef;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                <input id="cashTransferAmount" type="number" min="0" placeholder="المبلغ" style="width:100%;padding:9px;border:1px solid #e5daef;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                <select id="cashTransferBranch" style="width:100%;padding:9px;border:1px solid #e5daef;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                    <option value="الإدارة المركزية">الإدارة المركزية</option><option value="المهندسين">المهندسين</option><option value="أكتوبر">أكتوبر</option><option value="الهرم">الهرم</option><option value="العبور">العبور</option><option value="مدينة نصر">مدينة نصر</option><option value="مستشفى الشروق">مستشفى الشروق</option><option value="بني سويف">بني سويف</option>
+                </select>
+                <button onclick="transferCashToInstapay()" style="width:100%;background:#6a1b9a;color:#fff;border:0;border-radius:8px;padding:10px;font-family:Tajawal;font-weight:800;cursor:pointer;">تحويل لإنستاباي</button>
+            </div>
+            <div style="background:#eef8ff;border:1px solid #b8dff5;border-radius:12px;padding:14px;">
+                <div style="font-weight:900;color:#087eaf;margin-bottom:10px;">تحويل من إنستاباي إلى كاش</div>
+                <input id="instaTransferNote" type="text" placeholder="البيان (اختياري)" style="width:100%;padding:9px;border:1px solid #cfe7f5;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                <input id="instaTransferAmount" type="number" min="0" placeholder="المبلغ" style="width:100%;padding:9px;border:1px solid #cfe7f5;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                <select id="instaTransferBranch" style="width:100%;padding:9px;border:1px solid #cfe7f5;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                    <option value="الإدارة المركزية">الإدارة المركزية</option><option value="المهندسين">المهندسين</option><option value="أكتوبر">أكتوبر</option><option value="الهرم">الهرم</option><option value="العبور">العبور</option><option value="مدينة نصر">مدينة نصر</option><option value="مستشفى الشروق">مستشفى الشروق</option><option value="بني سويف">بني سويف</option>
+                </select>
+                <button onclick="transferInstapayToCash()" style="width:100%;background:#087eaf;color:#fff;border:0;border-radius:8px;padding:10px;font-family:Tajawal;font-weight:800;cursor:pointer;">تحويل للكاش</button>
+            </div>
+            <div style="background:#edf9f4;border:1px solid #bde4cf;border-radius:12px;padding:14px;">
+                <div style="font-weight:900;color:#16865b;margin-bottom:10px;">إضافة مبلغ يدوي للشركات</div>
+                <input id="companyCollectionName" type="text" placeholder="اسم شركة التأمين" style="width:100%;padding:9px;border:1px solid #cce9da;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                <input id="companyCollectionAmount" type="number" min="0" placeholder="المبلغ المضاف" style="width:100%;padding:9px;border:1px solid #cce9da;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                <select id="companyCollectionBranch" style="width:100%;padding:9px;border:1px solid #cce9da;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                    <option value="الإدارة المركزية">الإدارة المركزية</option><option value="المهندسين">المهندسين</option><option value="أكتوبر">أكتوبر</option><option value="الهرم">الهرم</option><option value="العبور">العبور</option><option value="مدينة نصر">مدينة نصر</option><option value="مستشفى الشروق">مستشفى الشروق</option><option value="بني سويف">بني سويف</option>
+                </select>
+                <button onclick="addCompanyCollection()" style="width:100%;background:#16865b;color:#fff;border:0;border-radius:8px;padding:10px;font-family:Tajawal;font-weight:800;cursor:pointer;">إضافة لإجمالي الشركات</button>
+            </div>
+            <div style="background:#fff5f5;border:1px solid #ffcdd2;border-radius:12px;padding:14px;">
+                <div style="font-weight:900;color:#c62828;margin-bottom:10px;"><i class="fas fa-minus-circle"></i> تسجيل مصروف</div>
+                <input id="centralInstaExpenseReason" type="text" placeholder="البيان (سبب المصروف)" style="width:100%;padding:9px;border:1px solid #f1d7d7;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                <input id="centralInstaExpenseAmount" type="number" min="0" placeholder="المبلغ" style="width:100%;padding:9px;border:1px solid #f1d7d7;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                <select id="centralExpensePayMethod" style="width:100%;padding:9px;border:1px solid #f1d7d7;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                    <option value="cash">💵 من الكاش (درج)</option>
+                    <option value="instapay">📱 من الإنستاباي</option>
+                </select>
+                <select id="centralInstaExpenseCategory" style="width:100%;padding:9px;border:1px solid #f1d7d7;border-radius:8px;margin-bottom:7px;font-family:Tajawal;">
+                    <option value="center">🏥 تبع المركز</option>
+                    <option value="doctor">👨‍⚕️ تبع د. قاسم</option>
+                    <option value="advance">💳 سلفة</option>
+                </select>
+                <select id="centralInstaExpenseBranch" style="width:100%;padding:9px;border:1px solid #f1d7d7;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                    <option value="الإدارة المركزية">للإدارة المركزية</option><option value="المهندسين">المهندسين</option><option value="أكتوبر">أكتوبر</option><option value="الهرم">الهرم</option><option value="العبور">العبور</option><option value="مدينة نصر">مدينة نصر</option><option value="مستشفى الشروق">مستشفى الشروق</option><option value="بني سويف">بني سويف</option>
+                </select>
+                <label style="display:block;font-size:.78rem;font-weight:800;color:#8b2a2a;margin:2px 0 4px;">تاريخ المصروف</label>
+                <input id="centralExpenseDate" type="date" style="width:100%;padding:9px;border:1px solid #f1d7d7;border-radius:8px;margin-bottom:9px;font-family:Tajawal;">
+                <button onclick="addCentralExpense()" style="width:100%;background:#c62828;color:#fff;border:0;border-radius:8px;padding:10px;font-family:Tajawal;font-weight:800;cursor:pointer;"><i class="fas fa-check"></i> اعتماد الصرف</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-box" id="monthlyMovements" style="margin:18px 0;">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><span><i class="fas fa-exchange-alt" style="color:#087eaf;"></i> سجل الحركات المالية للشهر</span><button onclick="printMonthlyMovementsPDF()" style="background:#087eaf;color:#fff;border:0;border-radius:8px;padding:7px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;"><i class="fas fa-file-pdf"></i> PDF سجل الحركات</button></div>
+        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;min-width:680px;"><thead><tr style="background:#087eaf;color:#fff;"><th style="padding:10px;">التاريخ</th><th>الفرع</th><th>نوع الحركة</th><th>البيان</th><th>المبلغ</th><th>طريقة / اتجاه</th></tr></thead><tbody id="monthlyTransactionsBody"><tr><td colspan="6" style="padding:18px;text-align:center;color:#888;">اختر الشهر لعرض الحركات</td></tr></tbody></table></div>
+    </div>
+    <div class="section-box" style="margin:18px 0;">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><span><i class="fas fa-heart-pulse" style="color:#6a1b9a;"></i> دكاترة التغذية والريكفري خلال الشهر</span><button onclick="printMonthlyServicesPDF('ريكفري')" style="background:#6a1b9a;color:#fff;border:0;border-radius:8px;padding:7px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;"><i class="fas fa-file-pdf"></i> PDF الريكفري</button></div>
+        <div id="monthlyServiceSummary" style="font-weight:800;color:#566070;margin-bottom:10px;">اختر الشهر لعرض الحالات.</div>
+        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;min-width:760px;"><thead><tr style="background:#6a1b9a;color:#fff;"><th style="padding:10px;">الخدمة</th><th>اسم الدكتور</th><th>المريض</th><th>الموبايل</th><th>اليوم</th><th>المبلغ</th><th>طريقة الدفع</th><th>ملاحظات</th></tr></thead><tbody id="monthlyServicesBody"><tr><td colspan="8" style="padding:18px;text-align:center;color:#888;">لا توجد بيانات بعد</td></tr></tbody></table></div>
+    </div>
+
+    <!-- SECTIONS -->
+    <div class="sections-grid">
+        <div class="section-box">
+            <div class="section-header"><i class="fas fa-stethoscope" style="color:#d4af37;"></i> تحليل الحالات الطبية</div>
+            <div class="stat-line"><span class="sl-lbl">حالات العلاج اليدوي</span><span class="sl-val" id="countManual">0</span></div>
+            <div class="stat-line"><span class="sl-lbl">حالات العمليات والتأهيل</span><span class="sl-val" id="countSurgery">0</span></div>
+            <div class="stat-line"><span class="sl-lbl">إجمالي المرضى النشطين</span><span class="sl-val" id="countTotal">0</span></div>
+            <div class="stat-line"><span class="sl-lbl">مرضى أكملوا الجلسات</span><span class="sl-val" id="countDone">0</span></div>
+            <div class="stat-line"><span class="sl-lbl">مرضى قيد العلاج</span><span class="sl-val" id="countActive">0</span></div>
+        </div>
+        <div class="section-box">
+            <div class="section-header"><i class="fas fa-user-check" style="color:#d4af37;"></i> موقف ملفات المرضى</div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>اسم المريض</th><th>الفرع</th><th>الموقف</th></tr></thead>
+                    <tbody id="patientBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="section-box" style="grid-column:1/-1;display:none;">
+            <div class="section-header"><i class="fas fa-user-md" style="color:#d4af37;"></i> دكاترة العظام المحوّلين — حالات اليوم والشهر</div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>#</th><th>اسم الدكتور</th><th>اليوم</th><th>الشهر</th><th>الكسب الفعلي</th><th>إجراءات</th></tr></thead>
+                    <tbody id="doctorsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: عرض التفاصيل ═══ -->
+    <div id="detailsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:5000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:18px;padding:24px;max-width:700px;width:94vw;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid #f0f0f0;padding-bottom:14px;">
+                <h2 id="modalTitle" style="font-size:1.3rem;font-weight:900;color:#0b132b;margin:0;">التفاصيل</h2>
+                <button onclick="closeDetailsModal()" style="background:none;border:none;font-size:1.5rem;color:#aaa;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>
+            <input id="detailsSearch" type="search" oninput="filterDetailsModal(this.value)" placeholder="ابحث بالاسم أو سبب المصروف..." style="width:100%;padding:11px 13px;border:1.5px solid #e0e4ea;border-radius:10px;margin-bottom:12px;font-family:Tajawal;font-weight:700;outline:none;">
+            <div style="max-height:500px;overflow-y:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+                    <thead>
+                        <tr style="background:#f8fafc;border-bottom:2px solid #e0e4ea;">
+                            <th style="padding:10px;text-align:right;font-weight:800;color:#666;">#</th>
+                            <th style="padding:10px;text-align:right;font-weight:800;color:#666;">الاسم</th>
+                            <th style="padding:10px;text-align:right;font-weight:800;color:#666;">المبلغ</th>
+                            <th style="padding:10px;text-align:right;font-weight:800;color:#666;">التاريخ</th>
+                            <th style="padding:10px;text-align:right;font-weight:800;color:#666;">الفرع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e0e4ea;display:flex;justify-content:space-between;align-items:center;">
+                <div id="modalSummary" style="font-weight:800;color:#0b132b;font-size:1rem;"></div>
+                <div style="display:flex; gap: 10px;">
+                    <button onclick="printModalPDF()" style="background:#c0392b;color:white;border:none;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'Tajawal';font-weight:800;display:flex;align-items:center;gap:8px;"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                    <button onclick="closeDetailsModal()" style="background:#0b132b;color:white;border:none;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'Tajawal';font-weight:800;">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+const FB = { apiKey:"AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain:"life-sport-system-hossamzahran.firebaseapp.com", projectId:"life-sport-system-hossamzahran", storageBucket:"life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId:"797045013311", appId:"1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+firebase.initializeApp(FB);
+const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+// Offline support);
+    // تأكيد الاتصال بعد 3 ثواني
+    setTimeout(() => {
+        const st = document.getElementById('serverStatus');
+        if (st && st.innerHTML.includes('جاري')) {
+            st.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60;"></i> متصل';
+        }
+    }, 3000);
+
+let ledger=[], expenses=[], insuDB={}, cashDB={};
+let selectedBranch = 'all';
+
+function toast(msg, type='success') {
+    const c=document.getElementById('toastContainer'), t=document.createElement('div');
+    t.className=`toast ${type}`;
+    t.innerHTML=`<i class="fas ${type==='success'?'fa-check-circle':'fa-times-circle'}" style="color:${type==='success'?'#27ae60':'#e74c3c'};"></i> ${msg}`;
+    c.appendChild(t); setTimeout(()=>t.classList.add('show'),80);
+    setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},3500);
+}
+
+// PASSWORD
+let ANALYTICS_PASS = '9999';
+db.collection("settings").doc("system_settings").get().then(doc => {
+    if (doc.exists && doc.data().passAnalytics) ANALYTICS_PASS = doc.data().passAnalytics;
+}).catch(()=>{});
+db.collection("settings").doc("system_settings").onSnapshot(doc => {
+    if (doc.exists && doc.data().passAnalytics) ANALYTICS_PASS = doc.data().passAnalytics;
+});
+function verifyPin() {
+    if (document.getElementById('pinInput').value === ANALYTICS_PASS) {
+        sessionStorage.setItem('analyticsOK','1');
+        document.getElementById('pinOverlay').classList.add('hidden');
+        document.getElementById('mainArea').classList.add('unlocked');
+        toast('تم فتح التقرير ✅');
+    } else {
+        toast('الرقم السري غير صحيح!','error');
+        document.getElementById('pinInput').value='';
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    // check role
+    const role   = localStorage.getItem('userRole') || 'owner';
+    const branch = localStorage.getItem('userBranch') || 'المهندسين';
+    if (role === 'reception') { window.location.href='reservations.html'; return; }
+
+    // lock branch for manager
+    if (role === 'manager') {
+        selectedBranch = branch;
+        document.querySelectorAll('.branch-btn').forEach(b=>{
+            b.classList.remove('active');
+            if (b.textContent.trim().includes(branch)) b.classList.add('active');
+        });
+        document.getElementById('branchBtns').style.pointerEvents='none';
+        document.getElementById('branchBtns').style.opacity='0.6';
+    }
+
+    // password check
+    if (sessionStorage.getItem('analyticsOK')==='1') {
+        document.getElementById('pinOverlay').classList.add('hidden');
+        document.getElementById('mainArea').classList.add('unlocked');
+    }
+
+    // set current month
+    document.getElementById('monthPicker').value = new Date().toISOString().substring(0,7);
+
+    fetchAll();
+});
+
+function setBranch(br, el) {
+    selectedBranch = br;
+    document.querySelectorAll('.branch-btn').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+    runReport();
+}
+
+function fetchAll() {
+    // التقرير الشهري يجب أن يقرأ كل الحركات، وليس آخر عدد محدود منها.
+    // الحد السابق كان يخفى أسماء الكاش والشركات في الأشهر التي بها حركات كثيرة.
+    db.collection("daily_ledger").onSnapshot(snap=>{
+        ledger=[]; snap.forEach(d=>ledger.push({...d.data(), _id:d.id})); runReport();
+        document.getElementById('serverStatus').innerHTML='<i class="fas fa-circle" style="font-size:0.6rem;"></i> متصل';
+    });
+    db.collection("daily_transactions").onSnapshot(snap=>{
+        expenses=[]; snap.forEach(d=>expenses.push({...d.data(), _id:d.id})); runReport();
+    });
+    db.collection("patients_insu").onSnapshot(snap=>{
+        insuDB={}; snap.forEach(d=>{insuDB[d.id]=d.data();}); runReport();
+    });
+    db.collection("patients_cash").onSnapshot(snap=>{
+        cashDB={}; snap.forEach(d=>{cashDB[d.id]=d.data();}); runReport();
+    });
+}
+
+function isInReportMonth(value, year, month) {
+    if (!value) return false;
+    if (value && typeof value.toDate === 'function') {
+        const date = value.toDate();
+        return date.getFullYear() === year && date.getMonth() + 1 === month;
+    }
+    const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+    const text = String(value).replace(/[٠-٩]/g, digit => arabicDigits.indexOf(digit)).trim();
+    const match = text.match(/(\d{1,4})[\/-](\d{1,2})[\/-](\d{1,4})/);
+    if (!match) return false;
+    const first = Number(match[1]), second = Number(match[2]), third = Number(match[3]);
+    // يدعم yyyy-mm-dd وكذلك dd/mm/yyyy.
+    const entryYear = String(match[1]).length === 4 ? first : third;
+    const entryMonth = String(match[1]).length === 4 ? second : second;
+    return entryYear === year && entryMonth === month;
+}
+
+function centralLedgerDate(isoDate = '') {
+    const now = isoDate ? new Date(isoDate + 'T00:00:00') : new Date();
+    return `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+}
+
+async function addCentralCash() {
+    const amount = parseFloat(document.getElementById('centralCashAmount').value) || 0;
+    const note = document.getElementById('centralCashNote').value.trim();
+    const branch = document.getElementById('centralCashBranch').value;
+    if (amount <= 0) return alert('اكتب مبلغ كاش صحيح');
+    await db.collection('daily_ledger').add({
+        patientName: `إضافة كاش — ${note || branch}`, amount, type:'كاش', method:'كاش',
+        date:centralLedgerDate(), branch: branch, notes:note || `إضافة رصيد كاش مباشر لفرع ${branch}`,
+        isPaymentOnly:true, timestamp:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('centralCashAmount').value = '';
+    document.getElementById('centralCashNote').value = '';
+    toast('تمت إضافة المبلغ إلى الكاش');
+}
+
+async function transferCashToInstapay() {
+    const amount = parseFloat(document.getElementById('cashTransferAmount').value) || 0;
+    const note = document.getElementById('cashTransferNote').value.trim();
+    const branch = document.getElementById('cashTransferBranch').value;
+    if (amount <= 0) return alert('اكتب مبلغ التحويل صحيح');
+    await db.collection('daily_transactions').add({
+        reason:note || 'تحويل من الكاش إلى إنستاباي', amount, type:'instapay', isTransfer:true,
+        transferDirection:'cash_to_instapay', branch, date:centralLedgerDate(), timestamp:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('cashTransferAmount').value = '';
+    document.getElementById('cashTransferNote').value = '';
+    toast('تم التحويل من الكاش إلى إنستاباي');
+}
+
+async function transferInstapayToCash() {
+    const amount = parseFloat(document.getElementById('instaTransferAmount').value) || 0;
+    const note = document.getElementById('instaTransferNote').value.trim();
+    const branch = document.getElementById('instaTransferBranch').value;
+    if (amount <= 0) return alert('اكتب مبلغ التحويل صحيح');
+    await db.collection('daily_transactions').add({
+        reason:note || 'تحويل من إنستاباي إلى الكاش', amount, type:'cash', isTransfer:true,
+        transferDirection:'instapay_to_cash', branch, date:centralLedgerDate(), timestamp:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('instaTransferAmount').value = '';
+    document.getElementById('instaTransferNote').value = '';
+    toast('تم التحويل من إنستاباي إلى الكاش');
+}
+
+async function addCompanyCollection() {
+    const amount = parseFloat(document.getElementById('companyCollectionAmount').value) || 0;
+    const company = document.getElementById('companyCollectionName').value.trim();
+    const branch = document.getElementById('companyCollectionBranch').value;
+    if (amount <= 0 || !company) return alert('اكتب اسم الشركة والمبلغ');
+    await db.collection('daily_ledger').add({
+        patientName:`إضافة شركات — ${company}`, amount, type:'إضافة شركات', method:'-',
+        date:centralLedgerDate(), branch, notes:`إضافة يدوية لإجمالي الشركات: ${company}`,
+        isPaymentOnly:true, isCompanyAddition:true, timestamp:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('companyCollectionAmount').value = '';
+    document.getElementById('companyCollectionName').value = '';
+    toast('تمت إضافة المبلغ إلى إجمالي الشركات فقط');
+}
+
+async function deleteExpense(id, reason) {
+    if (!id) return alert('لا يمكن حذف هذا السجل لأنه قديم ولا يحمل رقمًا معرفًا.');
+    if (!confirm(`هل تريد حذف المصروف: ${reason}؟`)) return;
+    try {
+        await db.collection('daily_transactions').doc(id).delete();
+        toast('تم حذف المصروف');
+        closeDetailsModal();
+    } catch (error) {
+        console.error(error);
+        alert('تعذر حذف المصروف، حاول مرة أخرى');
+    }
+}
+
+async function addCentralExpense() {
+    const amount   = parseFloat(document.getElementById('centralInstaExpenseAmount').value) || 0;
+    const reason   = document.getElementById('centralInstaExpenseReason').value.trim();
+    const branch   = document.getElementById('centralInstaExpenseBranch').value;
+    const category = document.getElementById('centralInstaExpenseCategory').value || 'center';
+    const payMethod = document.getElementById('centralExpensePayMethod').value; // cash أو instapay
+    const selectedDate = document.getElementById('centralExpenseDate').value;
+    if (!reason) return alert('اكتب سبب المصروف');
+    if (amount <= 0) return alert('اكتب مبلغ صحيح');
+    const isInstapayPay = payMethod === 'instapay';
+    await db.collection('daily_transactions').add({
+        reason, amount,
+        type:   isInstapayPay ? 'instapay' : 'expense',
+        method: isInstapayPay ? 'instapay' : 'cash',
+        isTransfer: false, category,
+        branch, date: centralLedgerDate(selectedDate),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('centralInstaExpenseAmount').value = '';
+    document.getElementById('centralInstaExpenseReason').value = '';
+    toast(`✅ تم تسجيل المصروف (${isInstapayPay ? 'إنستاباي' : 'كاش'}) لفرع ${branch} بتاريخ ${centralLedgerDate(selectedDate)}`);
+}
+// احتفظ بالاسم القديم للتوافق مع أي مكان تاني
+const addCentralInstapayExpense = addCentralExpense;
+
+function runReport() {
+    const month = document.getElementById('monthPicker').value;
+    if (!month) return;
+    const [year, mon] = month.split('-').map(Number);
+    const expenseDateInput = document.getElementById('centralExpenseDate');
+    if (expenseDateInput && (!expenseDateInput.value || expenseDateInput.value.slice(0,7) !== month)) {
+        const today = new Date().toISOString().slice(0,10);
+        expenseDateInput.value = today.slice(0,7) === month ? today : `${month}-01`;
+    }
+    // امنع الشهور المستقبلية
+    const nowMonth = new Date().toISOString().substring(0,7);
+    const isFuture = month > nowMonth;
+    const monthName = new Date(year,mon-1,1).toLocaleDateString('ar-EG',{month:'long',year:'numeric'});
+    const branchLbl = selectedBranch==='all'?'كل الفروع':selectedBranch;
+    document.getElementById('printSubtitle').innerText = `شهر ${monthName} | فرع ${branchLbl}`;
+
+    let fin = { cash:0, copay:0, comp:0, exp:0, instapay:0, instaExp:0 };
+    let med = { manual:0, surgery:0, done:0, active:0, total:0 };
+    const processedPatients = new Set(); 
+    const processedCompanyClaims = new Set();
+    const processedExpenses = new Set(); // لتجنب تكرار المصروفات
+    let cashPaymentsList = [];
+    let copayPaymentsList = [];
+    let instapayPaymentsList = [];
+    let expensesList = [];
+    let cashExpensesList = [];
+    let companyClaimsList = [];
+    const isInstapay = value => {
+        const text = String(value || '').toLowerCase();
+        return text.includes('instapay') || text.includes('إنستاباي') || text.includes('انستاباي');
+    };
+
+    // ═══ معالجة اليومية (ledger) فقط ═══
+    ledger.forEach(e => {
+        if (!e.date) return;
+        if (!isInReportMonth(e.date, year, mon)) return;
+        if (selectedBranch!=='all' && (e.branch||'المهندسين')!==selectedBranch) return;
+        
+        const amt = parseFloat(e.amount||0);
+        const etype = (e.type || '').toLowerCase();
+        const emethod = (e.method || '').toLowerCase();
+        const isInsurance = etype.includes('تحمل') || etype.includes('تأمين') || etype.includes('شركة');
+
+        // إضافة الإدارة اليدوية للشركات: تؤثر في إجمالي الشركات فقط،
+        // ولا تدخل كاش أو تحمل أو الإجمالي المالي النهائي.
+        if (e.isCompanyAddition === true) {
+            fin.comp += amt;
+            companyClaimsList.push({name:e.patientName || 'إضافة شركات', amount:amt, date:e.date, branch:e.branch||'-', company:'إضافة يدوية'});
+            return;
+        }
+
+        // مطالبة الشركة = سعر جلسة التأمين في كل حضور فعلي، لا مبلغ التحمل المدفوع.
+        // نستثني الدفعات المنفصلة والاستردادات كي لا تتكرر المطالبة.
+        if (isInsurance && !e.isPaymentOnly && !e.isRefund) {
+            const claimKey = `${e.date}|${e.patientName || ''}`;
+            if (!processedCompanyClaims.has(claimKey)) {
+                processedCompanyClaims.add(claimKey);
+                const patient = insuDB[e.patientName] || {};
+                const claimAmount = parseFloat(patient.price || patient.sessPrice || 0);
+                fin.comp += claimAmount;
+                companyClaimsList.push({
+                    name: e.patientName || 'غير محدد', amount: claimAmount, date: e.date,
+                    branch: e.branch || '-', company: patient.comp || 'تأمين / شركة'
+                });
+            }
+        }
+        
+        // ✅ احسب حسب طريقة الدفع أولاً
+        if (isInstapay(emethod)) {
+            fin.instapay += amt;
+            instapayPaymentsList.push({ name: e.patientName || 'غير محدد', amount: amt, date: e.date, branch: e.branch || '-', id: e._id });
+        } else {
+            // غير إنستاباي = كاش/تحمل/شركة
+            if (isInsurance) {
+                fin.copay += amt;
+                copayPaymentsList.push({ name: e.patientName || 'غير محدد', amount: amt, date: e.date, branch: e.branch || '-' });
+            } else {
+                // الكاش (كاش، كورس، أو غير محدد)
+                fin.cash += amt;
+                cashPaymentsList.push({ name: e.patientName, amount: amt, date: e.date, branch: e.branch||'-' });
+            }
+        }
+        
+        // احسب الحالات الطبية (مرة واحدة لكل مريض)
+        if (!processedPatients.has(e.patientName)) {
+            processedPatients.add(e.patientName);
+            const p = insuDB[e.patientName] || cashDB[e.patientName] || {};
+            if (p.type) {
+                if (p.type.includes('يدوي')) med.manual++;
+                if (p.type.includes('عملية') || p.type.includes('تأهيل')) med.surgery++;
+            }
+        }
+    });
+
+    // ═══ معالجة المصروفات (كاش فقط - منفصلة عن إنستاباي) ═══
+    expenses.forEach(ex => {
+        if (!ex.date) return;
+        if (!isInReportMonth(ex.date, year, mon)) return;
+        if (selectedBranch!=='all' && (ex.branch||'المهندسين')!==selectedBranch) return;
+        // التحويل الداخلي ينقص الكاش ويزيد إنستاباي، ولا يُسجل كمصروف.
+        if (ex.isTransfer === true) {
+            const transferAmount = parseFloat(ex.amount || 0);
+            const toCash = ex.transferDirection === 'instapay_to_cash';
+            fin.cash += toCash ? transferAmount : -transferAmount;
+            fin.instapay += toCash ? -transferAmount : transferAmount;
+            cashPaymentsList.push({ name:toCash ? (ex.reason || 'تحويل من إنستاباي') : 'تحويل إلى إنستاباي', amount:toCash ? transferAmount : -transferAmount, date:ex.date, branch:ex.branch || '-' });
+            instapayPaymentsList.push({ name:toCash ? 'تحويل إلى الكاش' : (ex.reason || 'تحويل من الكاش'), amount:toCash ? -transferAmount : transferAmount, date:ex.date, branch:ex.branch || '-', id:ex._id });
+            return;
+        }
+        
+        const exkey = ex._id || `${ex.date}_${ex.reason}_${ex.amount}_${ex.branch || ''}`;
+        if (processedExpenses.has(exkey)) return;
+        processedExpenses.add(exkey);
+        
+        const amt = parseFloat(ex.amount||0);
+        const extype = (ex.type || '').toLowerCase();
+        const exmethod = (ex.method || '').toLowerCase();
+        const category = ex.category || 'center'; // center / doctor / advance
+        
+        const instapayExpense = isInstapay(extype) || isInstapay(exmethod);
+        const catLabel = category === 'doctor' ? 'د. قاسم' : category === 'advance' ? 'سلفة' : 'المركز';
+        const expenseRecord = {
+            reason: ex.reason || 'مصروف', amount: amt, date: ex.date,
+            branch: ex.branch || '-',
+            paymentMethod: instapayExpense ? 'إنستاباي' : 'كاش',
+            category, catLabel, id: ex._id
+        };
+        expensesList.push(expenseRecord);
+        if (instapayExpense) fin.instaExp += amt;
+        else {
+            fin.exp += amt;
+            cashExpensesList.push(expenseRecord);
+        }
+    });
+
+    // ============ احفظ البيانات للعرض ============
+    window._cashPaymentsList = cashPaymentsList;
+    window._copayPaymentsList = copayPaymentsList;
+    window._instaPayments = instapayPaymentsList;
+    window._instaExpenses = expensesList.filter(ex => ex.paymentMethod === 'إنستاباي');
+    window._cashExpensesList = cashExpensesList;
+    window._expensesList = cashExpensesList;
+    window._companyClaimsList = companyClaimsList;
+    // تصنيف المصروفات حسب category
+    window._expDoctor  = expensesList.filter(ex => ex.category === 'doctor');
+    window._expAdvance = expensesList.filter(ex => ex.category === 'advance');
+    window._expCenter  = expensesList.filter(ex => !ex.category || ex.category === 'center');
+
+    // كشف منظم في آخر التحليل: لا يغيّر أي إجمالي، للعرض والمراجعة فقط.
+    const monthActions = [];
+    ledger.forEach(e=>{
+        if(!isInReportMonth(e.date,year,mon)||(selectedBranch!=='all'&&(e.branch||'المهندسين')!==selectedBranch))return;
+        if(e.isCompanyAddition) monthActions.push({date:e.date,branch:e.branch||'-',kind:'إضافة للشركات',title:e.patientName||'إضافة شركات',amount:parseFloat(e.amount||0),method:'إضافة يدوية'});
+        else if(String(e.patientName||'').startsWith('إضافة كاش')) monthActions.push({date:e.date,branch:e.branch||'-',kind:'إضافة كاش',title:e.patientName,amount:parseFloat(e.amount||0),method:'كاش'});
+    });
+    expenses.forEach(e=>{
+        if(!isInReportMonth(e.date,year,mon)||(selectedBranch!=='all'&&(e.branch||'المهندسين')!==selectedBranch))return;
+        if(e.isTransfer) monthActions.push({date:e.date,branch:e.branch||'-',kind:'تحويل',title:e.reason||'تحويل داخلي',amount:parseFloat(e.amount||0),method:e.transferDirection==='instapay_to_cash'?'إنستاباي ← كاش':'كاش ← إنستاباي'});
+        else monthActions.push({date:e.date,branch:e.branch||'-',kind:'مصروف',title:e.reason||'مصروف',amount:parseFloat(e.amount||0),method:isInstapay(e.type)||isInstapay(e.method)?'إنستاباي':'كاش'});
+    });
+    monthActions.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    window._monthlyMovements = monthActions;
+    const movementBody=document.getElementById('monthlyTransactionsBody');
+    movementBody.innerHTML=monthActions.length?monthActions.map(x=>`<tr style="border-bottom:1px solid #e7eef3;"><td style="padding:9px;">${x.date||'-'}</td><td>${x.branch}</td><td><b style="color:${x.kind==='مصروف'?'#c0392b':x.kind==='تحويل'?'#6a1b9a':'#087eaf'};">${x.kind}</b></td><td>${x.title}</td><td style="font-weight:900;">${x.amount.toLocaleString()} ج</td><td>${x.method}</td></tr>`).join(''):'<tr><td colspan="6" style="padding:18px;text-align:center;color:#888;">لا توجد حركات في هذا الشهر</td></tr>';
+    const serviceRows=ledger.filter(e=>isInReportMonth(e.date,year,mon)&&(selectedBranch==='all'||(e.branch||'المهندسين')===selectedBranch)&&(String(e.type||'').includes('تغذية')||String(e.type||'').includes('ريكفري'))).map(e=>{const p=insuDB[e.patientName]||cashDB[e.patientName]||{};return{service:String(e.type||'').includes('تغذية')?'تغذية':'ريكفري',doctor:p.serviceDoctor||p.refDoctor||'غير مسجل',name:e.patientName||'-',phone:p.phone||'-',date:e.date||'-',amount:parseFloat(e.amount||0),method:e.method||'-',notes:e.notes||'-'};});
+    window._monthlyServiceRows = serviceRows;
+    document.getElementById('monthlyServiceSummary').innerText=`التغذية: ${serviceRows.filter(x=>x.service==='تغذية').length} حالة | الريكفري: ${serviceRows.filter(x=>x.service==='ريكفري').length} حالة`;
+    document.getElementById('monthlyServicesBody').innerHTML=serviceRows.length?serviceRows.map(x=>`<tr style="border-bottom:1px solid #eee;"><td style="padding:9px;font-weight:900;color:${x.service==='تغذية'?'#16865b':'#6a1b9a'};">${x.service}</td><td>${x.doctor}</td><td>${x.name}</td><td>${x.phone}</td><td>${x.date}</td><td style="font-weight:900;">${x.amount.toLocaleString()} ج</td><td>${x.method==='instapay'?'إنستاباي':'كاش'}</td><td>${x.notes}</td></tr>`).join(''):'<tr><td colspan="8" style="padding:18px;text-align:center;color:#888;">لا توجد حالات تغذية أو ريكفري في هذا الشهر</td></tr>';
+
+    // patients table
+    const allPatients = { ...insuDB, ...cashDB };
+    let tableHtml = '';
+    Object.entries(allPatients).forEach(([name, p]) => {
+        if (!p) return;
+        if (selectedBranch!=='all' && (p.branch||'المهندسين')!==selectedBranch) return;
+        const att = parseInt(p.attended||0), total = parseInt(p.totalSess||0);
+        if (att > 0 || total > 0) {
+            med.total++;
+            if (att >= total && total > 0) {
+                med.done++;
+                tableHtml += `<tr><td>${name}</td><td style="font-size:0.75rem;color:#888;">${p.branch||'-'}</td><td><span style="color:#27ae60;font-weight:800;font-size:0.82rem;">✅ مكتمل</span></td></tr>`;
+            } else if (att > 0) {
+                med.active++;
+                tableHtml += `<tr><td>${name}</td><td style="font-size:0.75rem;color:#888;">${p.branch||'-'}</td><td><span style="color:#f39c12;font-weight:800;font-size:0.82rem;">⏳ ${att}/${total}</span></td></tr>`;
+            }
+        }
+    });
+
+    // المطالبات مبالغ مستحقة من الشركات وليست تحصيلًا نقديًا بعد.
+    const totalExp = fin.exp + fin.instaExp;
+    const mainBoxNet = fin.cash + fin.copay - fin.exp;
+    const net = fin.cash + fin.copay + fin.instapay - totalExp;
+    document.getElementById('sumNet').innerHTML   = mainBoxNet.toLocaleString() + ' <span style="font-size:1.4rem;opacity:0.55;">ج.م</span>';
+    document.getElementById('sumCash').innerHTML  = fin.cash.toLocaleString()  + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumCopay').innerHTML = fin.copay.toLocaleString() + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumComp').innerHTML  = fin.comp.toLocaleString()  + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumInstapay').innerHTML = fin.instapay.toLocaleString() + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumInstaExp').innerHTML = fin.instaExp.toLocaleString() + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumInstaNet').innerHTML = (fin.instapay - fin.instaExp).toLocaleString() + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumExp').innerHTML   = fin.exp.toLocaleString()   + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumTotalExp').innerHTML = totalExp.toLocaleString() + ' <span class="kc-unit">ج</span>';
+    document.getElementById('sumTotalNet').innerHTML = net.toLocaleString() + ' <span class="kc-unit">ج</span>';
+    document.getElementById('auditFormula').innerText =
+        `${fin.cash.toLocaleString()} كاش + ${fin.copay.toLocaleString()} تحمل + ${fin.instapay.toLocaleString()} إنستاباي − ${fin.exp.toLocaleString()} مصروفات كاش − ${fin.instaExp.toLocaleString()} مصروفات إنستاباي = ${net.toLocaleString()} ج`;
+    document.getElementById('auditExcluded').innerText =
+        `إنستاباي: ${fin.instapay.toLocaleString()} قبل − ${fin.instaExp.toLocaleString()} مصروفات = ${(fin.instapay-fin.instaExp).toLocaleString()} ج · التحويلات الداخلية مستبعدة`;
+    document.getElementById('countManual').innerText  = med.manual;
+    document.getElementById('countSurgery').innerText = med.surgery;
+    document.getElementById('countTotal').innerText   = med.total;
+    document.getElementById('countDone').innerText    = med.done;
+    document.getElementById('countActive').innerText  = med.active;
+    document.getElementById('patientBody').innerHTML  = tableHtml || '<tr><td colspan="3" style="text-align:center;color:#bbb;padding:20px;">لا توجد بيانات</td></tr>';
+
+    // ===== دكاترة العظام المحوّلين =====
+    const todayStr = new Date().toLocaleDateString('en-GB'); // dd/mm/yyyy
+    const docData = {}; // {دكتور: {count, todayCount, revenue, patients:[]}}
+    if (!isFuture) Object.entries(allPatients).forEach(([name, p]) => {
+        if (!p || !p.refDoctor) return;
+        if (selectedBranch!=='all' && (p.branch||'المهندسين')!==selectedBranch) return;
+        let dn = p.refDoctor.replace(/^(د\.|د\s|دكتور\s|دكتورة\s)/,'').trim();
+        if (!dn || dn === '-' || dn === 'لم يحدد') return;
+        if (!docData[dn]) docData[dn] = { count:0, todayCount:0, revenue:0, patients:[] };
+        docData[dn].count++;
+        // حالات اليوم: المرضى اللي اتسجلوا في اليومية النهاردة لهذا الدكتور
+        const rev = parseFloat(p.copayPaid||0) + parseFloat(p.paid||0);
+        docData[dn].revenue += rev;
+        docData[dn].patients.push({ name, rev, branch: p.branch||'-', phone: p.phone||'', injury: p.injury||p.notes||'', sessions: `${p.attended||0}/${p.totalSess||0}` });
+    });
+    // عدّ حالات اليوم من اليومية (مين اتسجل النهاردة)
+    ledger.forEach(e => {
+        if (e.date !== todayStr) return;
+        if (selectedBranch!=='all' && (e.branch||'المهندسين')!==selectedBranch) return;
+        if (e.isPaymentOnly || e.isRefund) return;
+        const p = insuDB[e.patientName] || cashDB[e.patientName];
+        if (!p || !p.refDoctor) return;
+        let dn = p.refDoctor.replace(/^(د\.|د\s|دكتور\s|دكتورة\s)/,'').trim();
+        if (docData[dn]) docData[dn].todayCount++;
+    });
+    window._docData = docData;
+    const docArr = Object.entries(docData).sort((a,b) => b[1].count-a[1].count);
+    const totalCases = docArr.reduce((a,d)=>a+d[1].count,0) || 1;
+    let docHtml = docArr.map(([name, info], i) => {
+        const pct = Math.round((info.count/totalCases)*100);
+        const medal = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':`${i+1}`));
+        const safeName = name.replace(/'/g,"\\'");
+        return `<tr>
+            <td style="font-weight:900;color:#d4af37;">${medal}</td>
+            <td style="font-weight:800;">د. ${name}</td>
+            <td><span style="background:#fff3e0;color:#e65100;padding:3px 12px;border-radius:12px;font-weight:900;">${info.todayCount} اليوم</span></td>
+            <td><span style="background:#e3f2fd;color:#1565c0;padding:3px 12px;border-radius:12px;font-weight:900;">${info.count} الشهر</span></td>
+            <td><span style="color:#27ae60;font-weight:900;">${info.revenue.toLocaleString()} ج</span></td>
+            <td>
+                <button onclick="sendDoctorWhatsApp('${safeName}')" style="background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;padding:6px 12px;border-radius:8px;font-weight:800;cursor:pointer;font-family:'Tajawal';font-size:0.78rem;margin:2px;"><i class="fab fa-whatsapp"></i> واتساب</button>
+                <button onclick="printDoctorCases('${safeName}')" style="background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#d4af37;border:none;padding:6px 12px;border-radius:8px;font-weight:800;cursor:pointer;font-family:'Tajawal';font-size:0.78rem;margin:2px;"><i class="fas fa-print"></i> طباعة</button>
+            </td>
+        </tr>`;
+    }).join('');
+    document.getElementById('doctorsBody').innerHTML = docHtml || '<tr><td colspan="6" style="text-align:center;color:#bbb;padding:20px;">لا يوجد دكاترة محوّلين مسجّلين</td></tr>';
+
+}
+
+function printMonthlyServicesPDF(service) {
+    const rows = (window._monthlyServiceRows || []).filter(x => x.service === service);
+    if (!rows.length) return alert(`لا توجد حالات ${service} في الشهر المختار.`);
+    const month = document.getElementById('monthPicker').value;
+    const branch = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
+    const total = rows.reduce((sum,x)=>sum+(parseFloat(x.amount)||0),0);
+    const body = rows.map((x,i)=>`<tr><td>${i+1}</td><td>${x.doctor}</td><td>${x.name}</td><td dir="ltr">${x.phone}</td><td>${x.date}</td><td>${x.amount.toLocaleString()} ج</td><td>${x.method==='instapay'?'إنستاباي':'كاش'}</td><td>${x.notes}</td></tr>`).join('');
+    const w = window.open('', '_blank');
+    if (!w) return alert('اسمح بفتح نافذة الطباعة أولاً.');
+    w.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>تقرير ${service}</title><style>@page{size:A4;margin:12mm}body{font-family:Tajawal,Arial;color:#0b132b}h1{margin:0;color:#6a1b9a}p{color:#566070;font-weight:bold}table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}th{background:#6a1b9a;color:#fff}th,td{border:1px solid #dce2eb;padding:8px;text-align:right}tr:nth-child(even){background:#f7f2fb}.total{background:#f0e8f8;padding:12px;border-radius:10px;font-weight:900;margin-top:14px}.no-print{margin-top:20px;text-align:center}@media print{.no-print{display:none}}</style></head><body><h1>تقرير دكاترة ${service}</h1><p>الشهر: ${month} | الفرع: ${branch} | عدد الحالات: ${rows.length}</p><table><thead><tr><th>#</th><th>الدكتور</th><th>المريض</th><th>الموبايل</th><th>التاريخ</th><th>المبلغ</th><th>الدفع</th><th>ملاحظات</th></tr></thead><tbody>${body}</tbody></table><div class="total">إجمالي مبالغ ${service}: ${total.toLocaleString()} ج.م</div><div class="no-print"><button onclick="window.print()">طباعة / حفظ PDF</button></div></body></html>`);
+    w.document.close();
+}
+
+function printMonthlyMovementsPDF() {
+    const rows = window._monthlyMovements || [];
+    if (!rows.length) return alert('لا توجد حركات مالية في الشهر المختار.');
+    const month = document.getElementById('monthPicker').value;
+    const branch = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
+    const totalExpenses = rows.filter(x=>x.kind==='مصروف').reduce((s,x)=>s+(parseFloat(x.amount)||0),0);
+    const body = rows.map((x,i)=>`<tr><td>${i+1}</td><td>${x.date||'-'}</td><td>${x.branch}</td><td>${x.kind}</td><td>${x.title}</td><td>${x.amount.toLocaleString()} ج</td><td>${x.method}</td></tr>`).join('');
+    const w = window.open('', '_blank');
+    if (!w) return alert('اسمح بفتح نافذة الطباعة أولاً.');
+    w.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>سجل الحركات المالية الشهري</title><style>@page{size:A4;margin:12mm}body{font-family:Tajawal,Arial;color:#0b132b}h1{margin:0;color:#087eaf}p{color:#566070;font-weight:bold}table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}th{background:#087eaf;color:#fff}th,td{border:1px solid #dce2eb;padding:8px;text-align:right}tr:nth-child(even){background:#f4fbff}.total{background:#eef8ff;padding:12px;border-radius:10px;font-weight:900;margin-top:14px}.no-print{margin-top:20px;text-align:center}@media print{.no-print{display:none}}</style></head><body><h1>سجل الحركات المالية للشهر</h1><p>الشهر: ${month} | الفرع: ${branch} | عدد الحركات: ${rows.length}</p><table><thead><tr><th>#</th><th>التاريخ</th><th>الفرع</th><th>النوع</th><th>البيان</th><th>المبلغ</th><th>الطريقة / الاتجاه</th></tr></thead><tbody>${body}</tbody></table><div class="total">إجمالي المصروفات المسجلة: ${totalExpenses.toLocaleString()} ج.م</div><div class="no-print"><button onclick="window.print()">طباعة / حفظ PDF</button></div></body></html>`);
+    w.document.close();
+}
+
+// ===== إرسال حالات دكتور على الواتساب =====
+function sendDoctorWhatsApp(docName) {
+    const data = (window._docData||{})[docName];
+    if (!data) { alert('لا توجد بيانات لهذا الدكتور'); return; }
+    const branchTxt = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
+    const monthSel = document.getElementById('monthSelect');
+    const monthTxt = monthSel ? monthSel.options[monthSel.selectedIndex].text : '';
+    const L = '━━━━━━━━━━━━━━━';
+
+    let msg = `✨ *أهلاً وسهلاً د. ${docName}* ✨\n`;
+    msg += `🌿 _تحية طيبة من مركز لايف سبورت_\n`;
+    msg += `${L}\n`;
+    msg += `📋 *كشف الحالات المحوّلة من حضرتك*\n`;
+    msg += `📍 ${branchTxt} — ${monthTxt}\n`;
+    msg += `${L}\n\n`;
+    msg += `📊 *ملخص:*\n`;
+    msg += `🔵 حالات اليوم: *${data.todayCount}*\n`;
+    msg += `🗓️ إجمالي الشهر: *${data.count}*\n`;
+    msg += `${L}\n\n`;
+    msg += `👥 *تفاصيل الحالات:*\n\n`;
+    data.patients.forEach((pt, i) => {
+        msg += `*${i+1}.* ${pt.name}\n`;
+        if (pt.injury) msg += `   🩺 ${pt.injury}\n`;
+        msg += `   📊 الجلسات: ${pt.sessions}\n`;
+        if (pt.branch && pt.branch !== '-') msg += `   📍 ${pt.branch}\n`;
+        msg += `\n`;
+    });
+    msg += `${L}\n`;
+    msg += `🙏 *شكراً لثقتكم وتعاونكم*\n`;
+    msg += `🌿 _مركز لايف سبورت للعلاج الطبيعي_`;
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ===== طباعة حالات دكتور معين =====
+function printDoctorCases(docName) {
+    const data = (window._docData||{})[docName];
+    if (!data) return;
+    const branchTxt = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
+    const monthPicker = document.getElementById('monthPicker');
+    const monthTxt = monthPicker ? new Date(monthPicker.value + '-02').toLocaleDateString('ar-EG',{month:'long',year:'numeric'}) : '';
+    let rows = data.patients.map((pt,i) => `<tr><td>${i+1}</td><td>${pt.name}</td><td style="font-size:0.85rem;">${pt.injury||'-'}</td><td>${pt.sessions||'-'}</td><td>${pt.branch}</td><td style="color:#27ae60;font-weight:bold;">${pt.rev.toLocaleString()} ج</td></tr>`).join('');
+    
+    const printContent = `<html dir="rtl"><head><meta charset="utf-8"><title>حالات د. ${docName}</title>
+    <style>
+        @page { size: A4; margin: 12mm; }
+        body { font-family:'Tajawal',Arial,sans-serif; padding:20px; color:#0b132b; }
+        .head { display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #d4af37; padding-bottom:14px; margin-bottom:18px; }
+        .head h1 { font-size:1.4rem; color:#0b132b; }
+        .head .sub { color:#888; font-size:0.9rem; margin-top:4px; }
+        .stats { display:flex; gap:14px; margin-bottom:20px; }
+        .st { flex:1; border:2px solid #eee; border-radius:12px; padding:14px; text-align:center; }
+        .st .n { font-size:1.5rem; font-weight:900; color:#d4af37; }
+        .st .l { font-size:0.8rem; color:#888; margin-top:4px; }
+        table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        th { background:#0b132b !important; color:#d4af37 !important; padding:11px; text-align:right; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        td { padding:10px 11px; border-bottom:1px solid #eee; }
+        .foot { margin-top:20px; text-align:center; color:#aaa; font-size:0.8rem; }
+        @media print { .no-print { display:none; } }
+    </style></head><body>
+        <div class="head">
+            <div><h1>👨‍⚕️ كشف حالات د. ${docName}</h1><div class="sub">${branchTxt} — ${monthTxt}</div></div>
+            <img src="logo.png" style="height:50px;" onerror="this.style.display='none'">
+        </div>
+        <div class="stats">
+            <div class="st"><div class="n" style="color:#e65100;">${data.todayCount}</div><div class="l">حالات اليوم</div></div>
+            <div class="st"><div class="n">${data.count}</div><div class="l">إجمالي حالات الشهر</div></div>
+            <div class="st"><div class="n" style="color:#27ae60;">${data.revenue.toLocaleString()} ج</div><div class="l">الكسب الفعلي منهم</div></div>
+        </div>
+        <table>
+            <thead><tr><th>#</th><th>اسم المريض</th><th>التشخيص</th><th>الجلسات</th><th>الفرع</th><th>المدفوع</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div class="foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>
+        <div class="no-print" style="text-align:center;margin-top:18px;"><button onclick="window.print()" style="background:#0b132b;color:#d4af37;border:none;padding:12px 36px;border-radius:10px;font-size:15px;cursor:pointer;font-family:Tajawal;font-weight:bold;">🖨️ طباعة / PDF</button></div>
+    </body></html>`;
+
+    let iframe = document.getElementById('print-iframe');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'print-iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    const iframeDoc = iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(printContent);
+    iframeDoc.close();
+    setTimeout(() => {
+        try {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        } catch (e) {
+            console.error("Print failed:", e);
+            alert('فشلت عملية الطباعة. قد يكون المتصفح يمنعها. حاول مرة أخرى أو استخدم متصفح آخر.');
+        }
+    }, 500);
+}
+
+function printInstapay() {
+    const pays = window._instaPayments||[];
+    const exps = window._instaExpenses||[];
+    if (!pays.length && !exps.length) { alert('لا توجد حركات إنستاباي للطباعة'); return; }
+    const branchTxt = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
+    const monthSel = document.getElementById('monthSelect');
+    const monthTxt = monthSel ? monthSel.options[monthSel.selectedIndex].text : '';
+    let totalIn = pays.reduce((a,p)=>a+p.amount,0);
+    let totalOut = exps.reduce((a,e)=>a+e.amount,0);
+
+    let rows = '';
+    let i = 0;
+    pays.forEach(p => { i++; rows += `<tr><td>${i}</td><td>${p.name}</td><td style="color:#2e7d32;font-weight:bold;">+${p.amount.toLocaleString()} ج</td><td>دفعة إنستاباي</td><td>${p.date}</td><td>${p.branch}</td></tr>`; });
+    exps.forEach(e => { i++; rows += `<tr style="background:#fff5f5;"><td>${i}</td><td>${e.reason}</td><td style="color:#c62828;font-weight:bold;">-${e.amount.toLocaleString()} ج</td><td>مصروف إنستاباي</td><td>${e.date}</td><td>${e.branch}</td></tr>`; });
+
+    const win = window.open('', '_blank');
+    win.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>كشف الإنستاباي</title>
+    <style>
+        @page { size: A4; margin: 12mm; }
+        body { font-family: 'Tajawal', Arial, sans-serif; padding: 20px; color: #0b132b; }
+        .head { display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #6a1b9a; padding-bottom:14px; margin-bottom:18px; }
+        .head h1 { font-size: 1.4rem; color:#6a1b9a; }
+        .head .sub { color:#888; font-size:0.9rem; margin-top:4px; }
+        .summary { display:flex; gap:14px; margin-bottom:20px; }
+        .sm { flex:1; border:2px solid #eee; border-radius:12px; padding:14px; text-align:center; }
+        .sm .n { font-size:1.4rem; font-weight:900; }
+        .sm .l { font-size:0.8rem; color:#888; margin-top:4px; }
+        table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        th { background:#6a1b9a; color:white; padding:10px; text-align:right; }
+        td { padding:9px 10px; border-bottom:1px solid #eee; }
+        .foot { margin-top:20px; text-align:center; color:#aaa; font-size:0.8rem; }
+    </style></head><body>
+        <div class="head">
+            <div><h1>📱 كشف حركة الإنستاباي</h1><div class="sub">${branchTxt} — ${monthTxt}</div></div>
+            <img src="logo.png" style="height:50px;" onerror="this.style.display='none'">
+        </div>
+        <div class="summary">
+            <div class="sm"><div class="n" style="color:#2e7d32;">${totalIn.toLocaleString()} ج</div><div class="l">إجمالي الداخل</div></div>
+            <div class="sm"><div class="n" style="color:#c62828;">${totalOut.toLocaleString()} ج</div><div class="l">إجمالي المصروفات</div></div>
+            <div class="sm"><div class="n" style="color:#6a1b9a;">${(totalIn-totalOut).toLocaleString()} ج</div><div class="l">الصافي</div></div>
+        </div>
+        <table>
+            <thead><tr><th>#</th><th>الاسم / البيان</th><th>المبلغ</th><th>النوع</th><th>التاريخ</th><th>الفرع</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div class="foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>
+        <div style="text-align:center;margin-top:18px;"><button onclick="window.print()" style="background:#6a1b9a;color:white;border:none;padding:12px 36px;border-radius:10px;font-size:15px;cursor:pointer;font-family:Tajawal;">🖨️ طباعة / PDF</button></div>
+    </body></html>`);
+    win.document.close();
+}
+</script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+
+
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    // ═══ دوال عرض التفاصيل في المودال ═══
+    let currentModalType = null;
+
+    function showDetailsModal(type) {
+        currentModalType = type;
+        const modal = document.getElementById('detailsModal');
+        const tbody = document.getElementById('modalTableBody');
+        const title = document.getElementById('modalTitle');
+        const summary = document.getElementById('modalSummary');
+        const search = document.getElementById('detailsSearch');
+        
+        tbody.innerHTML = '';
+        if (search) search.value = '';
+        let rows = [];
+        let total = 0;
+        let titleText = '';
+        let expenseCategorySummary = '';
+        
+        if (type === 'cash') {
+            titleText = '🏧 تفاصيل المدفوعات — كاش';
+            (window._cashPaymentsList||[]).forEach((p, i) => {
+                rows.push(`<tr>
+                    <td style="padding:10px;text-align:right;font-weight:800;color:#27ae60;">${i+1}</td>
+                    <td style="padding:10px;text-align:right;font-weight:700;">${p.name}</td>
+                    <td style="padding:10px;text-align:right;color:#27ae60;font-weight:900;">${p.amount.toLocaleString()} ج</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${p.date}</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${p.branch}</td>
+                </tr>`);
+                total += p.amount;
+            });
+            
+        } else if (type === 'copay') {
+            titleText = '📋 تفاصيل مدفوعات التحمل (التأمين)';
+            (window._copayPaymentsList||[]).forEach((p, i) => {
+                rows.push(`<tr>
+                    <td style="padding:10px;text-align:right;font-weight:800;color:#f39c12;">${i+1}</td>
+                    <td style="padding:10px;text-align:right;font-weight:700;">${p.name}</td>
+                    <td style="padding:10px;text-align:right;color:#f39c12;font-weight:900;">${p.amount.toLocaleString()} ج</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${p.date}</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${p.branch}</td>
+                </tr>`);
+                total += p.amount;
+            });
+
+        } else if (type === 'instapay') {
+            titleText = '📱 تفاصيل المدفوعات — إنستاباي';
+            (window._instaPayments || []).forEach((e, i) => {
+                const amt = Number(e.amount) || 0;
+                rows.push(`<tr>
+                    <td style="padding:10px;text-align:right;font-weight:800;color:#9b59b6;">${i+1}</td>
+                    <td style="padding:10px;text-align:right;font-weight:700;">${e.name}</td>
+                    <td style="padding:10px;text-align:right;color:#9b59b6;font-weight:900;">${amt.toLocaleString()} ج</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${e.date}</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${e.branch||'-'}</td>
+                </tr>`);
+                total += amt;
+            });
+            
+        } else if (type === 'expenses') {
+            titleText = '💸 تفاصيل مصروفات الكاش';
+            const allCashExp = (window._expensesList||[]).slice().sort((a,b) => b.amount - a.amount);
+            // تجميع حسب category
+            const byDoctor  = allCashExp.filter(ex => ex.category === 'doctor');
+            const byAdvance = allCashExp.filter(ex => ex.category === 'advance');
+            const byCenter  = allCashExp.filter(ex => !ex.category || ex.category === 'center');
+            const groups = [
+                { label: '🏥 تبع المركز', color: '#2980b9', list: byCenter },
+                { label: '👨‍⚕️ تبع د. قاسم', color: '#8e44ad', list: byDoctor },
+                { label: '💳 سلف', color: '#e67e22', list: byAdvance },
+            ];
+            let idx = 0;
+            groups.forEach(g => {
+                if (!g.list.length) return;
+                rows.push(`<tr><td colspan="5" style="padding:8px 10px;background:#f0f4f8;font-weight:900;color:${g.color};font-size:0.85rem;">${g.label} (${g.list.length})</td></tr>`);
+                g.list.forEach(ex => {
+                    idx++;
+                    rows.push(`<tr style="background:#fff8f8;">
+                        <td style="padding:10px;text-align:right;font-weight:800;color:${g.color};">${idx}</td>
+                        <td style="padding:10px;text-align:right;font-weight:700;">${ex.reason}</td>
+                        <td style="padding:10px;text-align:right;color:#e74c3c;font-weight:900;">-${ex.amount.toLocaleString()} ج</td>
+                        <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${ex.date} — ${ex.paymentMethod}</td>
+                        <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${ex.branch}<br><button onclick="deleteExpense('${ex.id}','مصروف كاش')" style="margin-top:5px;background:#fff;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;padding:3px 8px;font-family:Tajawal;font-weight:800;cursor:pointer;">حذف</button></td>
+                    </tr>`);
+                    total += ex.amount;
+                });
+            });
+        } else if (type === 'instapayExpenses') {
+            titleText = '📱 تفاصيل مصروفات إنستاباي';
+            (window._instaExpenses||[]).slice().sort((a,b) => b.amount - a.amount).forEach((ex, i) => {
+                rows.push(`<tr style="background:#fff8f8;">
+                    <td style="padding:10px;text-align:right;font-weight:800;color:#9b59b6;">${i+1}</td>
+                    <td style="padding:10px;text-align:right;font-weight:700;">${ex.reason}</td>
+                    <td style="padding:10px;text-align:right;color:#e74c3c;font-weight:900;">-${ex.amount.toLocaleString()} ج</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${ex.date}</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${ex.branch}<br><button onclick="deleteExpense('${ex.id}','مصروف إنستاباي')" style="margin-top:5px;background:#fff;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;padding:3px 8px;font-family:Tajawal;font-weight:800;cursor:pointer;">حذف</button></td>
+                </tr>`);
+                total += ex.amount;
+            });
+        } else if (type === 'companies') {
+            titleText = '🏢 كشف مطالبات الشركات';
+            (window._companyClaimsList||[]).forEach((claim, i) => {
+                rows.push(`<tr>
+                    <td style="padding:10px;text-align:right;font-weight:800;color:#2196f3;">${i+1}</td>
+                    <td style="padding:10px;text-align:right;font-weight:700;">${claim.name}</td>
+                    <td style="padding:10px;text-align:right;color:#2196f3;font-weight:900;">${claim.amount.toLocaleString()} ج</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${claim.date} — ${claim.company}</td>
+                    <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${claim.branch}</td>
+                </tr>`);
+                total += claim.amount;
+            });
+        } else if (type === 'allExpenses') {
+            titleText = '💸 تفاصيل كل المصروفات (كاش وإنستاباي)';
+            const allExp = [...(window._expensesList||[]), ...(window._instaExpenses||[])];
+            // تجميع حسب category
+            const gCenter  = allExp.filter(ex => !ex.category || ex.category === 'center');
+            const gDoctor  = allExp.filter(ex => ex.category === 'doctor');
+            const gAdvance = allExp.filter(ex => ex.category === 'advance');
+            const grps = [
+                { label: '🏥 تبع المركز', color: '#2980b9', list: gCenter },
+                { label: '👨‍⚕️ تبع د. قاسم', color: '#8e44ad', list: gDoctor },
+                { label: '💳 سلف', color: '#e67e22', list: gAdvance },
+            ];
+            expenseCategorySummary = grps.map(g => {
+                const groupTotal = g.list.reduce((sum, ex) => sum + (parseFloat(ex.amount) || 0), 0);
+                return `<span style="color:${g.color};white-space:nowrap;">${g.label}: ${groupTotal.toLocaleString()} ج</span>`;
+            }).join(' <span style="color:#cbd5e1;">|</span> ');
+            let gi = 0;
+            grps.forEach(g => {
+                if (!g.list.length) return;
+                const groupTotal = g.list.reduce((sum, ex) => sum + (parseFloat(ex.amount) || 0), 0);
+                rows.push(`<tr><td colspan="5" style="padding:9px 10px;background:#f0f4f8;font-weight:900;color:${g.color};font-size:0.88rem;">${g.label} — ${g.list.length} حركة <span style="float:left;">الإجمالي: ${groupTotal.toLocaleString()} ج</span></td></tr>`);
+                g.list.forEach(ex => {
+                    gi++;
+                    const isInsta = ex.paymentMethod === 'إنستاباي';
+                    const color = isInsta ? '#9b59b6' : '#e74c3c';
+                    rows.push(`<tr style="background:#fff8f8;">
+                        <td style="padding:10px;text-align:right;font-weight:800;color:${color};">${gi}</td>
+                        <td style="padding:10px;text-align:right;font-weight:700;">${ex.reason}</td>
+                        <td style="padding:10px;text-align:right;color:#e74c3c;font-weight:900;">-${ex.amount.toLocaleString()} ج</td>
+                        <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${ex.date} — ${ex.paymentMethod}</td>
+                        <td style="padding:10px;text-align:right;font-size:0.8rem;color:#888;">${ex.branch}<br><button onclick="deleteExpense('${ex.id}','${ex.reason}')" style="margin-top:5px;background:#fff;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;padding:3px 8px;font-family:Tajawal;font-weight:800;cursor:pointer;">حذف</button></td>
+                    </tr>`);
+                    total += ex.amount;
+                });
+            });
+        }
+        
+        title.innerHTML = titleText;
+        tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="5" style="text-align:center;padding:30px;color:#bbb;">لا توجد بيانات</td></tr>';
+        
+        let sumaryText = '';
+        if (type === 'cash') {
+            sumaryText = `<span style="color:#27ae60;">🏧 إجمالي الكاش: ${total.toLocaleString()} ج</span>`;
+        } else if (type === 'instapay') {
+            sumaryText = `<span style="color:#9b59b6;">📱 إجمالي الإنستاباي: ${total.toLocaleString()} ج</span>`;
+        } else if (type === 'copay') {
+            sumaryText = `<span style="color:#f39c12;">📋 إجمالي التحمل: ${total.toLocaleString()} ج</span>`;
+        } else if (type === 'expenses') {
+            sumaryText = `<span style="color:#e74c3c;">💸 إجمالي مصروفات الكاش: ${total.toLocaleString()} ج</span>`;
+        } else if (type === 'instapayExpenses') {
+            sumaryText = `<span style="color:#9b59b6;">📱 إجمالي مصروفات إنستاباي: ${total.toLocaleString()} ج</span>`;
+        } else if (type === 'companies') {
+            sumaryText = `<span style="color:#2196f3;">🏢 إجمالي مطالبات الشركات: ${total.toLocaleString()} ج</span>`;
+        } else if (type === 'allExpenses') {
+            sumaryText = `<div style="display:flex;flex-wrap:wrap;gap:7px 12px;align-items:center;"><span style="color:#e74c3c;">💸 إجمالي المصروفات: ${total.toLocaleString()} ج</span><span style="color:#cbd5e1;">|</span>${expenseCategorySummary}</div>`;
+        }
+        summary.innerHTML = sumaryText;
+        
+        modal.style.display = 'flex';
+    }
+
+    function closeDetailsModal() {
+        document.getElementById('detailsModal').style.display = 'none';
+        currentModalType = null;
+    }
+
+    function filterDetailsModal(query) {
+        const term = String(query || '').trim().toLowerCase();
+        document.querySelectorAll('#modalTableBody tr').forEach(row => {
+            row.style.display = !term || row.innerText.toLowerCase().includes(term) ? '' : 'none';
+        });
+    }
+
+    // يفتح نافذة الطباعة مباشرة؛ من نافذة المتصفح يمكن اختيار Save as PDF.
+    function printModalPDF() {
+        const title = document.getElementById('modalTitle')?.innerText || 'التفاصيل';
+        const summary = document.getElementById('modalSummary')?.innerText || '';
+        const rows = document.getElementById('modalTableBody')?.innerHTML || '';
+        const head = document.querySelector('#detailsModal table thead')?.innerHTML || '';
+
+        if (!rows.trim()) {
+            alert('لا توجد بيانات لتصديرها.');
+            return;
+        }
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert('تعذّر فتح نافذة الطباعة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.');
+            return;
+        }
+
+        const escapeHtml = value => String(value || '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[char]));
+        const subtitle = document.getElementById('printSubtitle')?.innerText || '';
+
+        printWindow.document.write(`<!doctype html>
+            <html lang="ar" dir="rtl"><head><meta charset="utf-8">
+            <title>${escapeHtml(title)}</title>
+            <style>
+                @page { size: A4 portrait; margin: 14mm; }
+                * { box-sizing: border-box; }
+                body { font-family: Arial, sans-serif; color: #172033; margin: 0; }
+                h1 { margin: 0 0 6px; font-size: 22px; }
+                .subtitle { color: #667085; margin: 0 0 18px; font-size: 13px; }
+                .summary { background: #f1f5f9; border-radius: 8px; padding: 10px 12px; font-weight: 700; margin-bottom: 14px; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                th, td { border: 1px solid #d7dee8; padding: 8px; text-align: right; vertical-align: top; }
+                th { background: #f1f5f9; font-weight: 800; }
+                button, .no-print { display: none !important; }
+            </style></head><body>
+                <h1>${escapeHtml(title)}</h1>
+                <p class="subtitle">${escapeHtml(subtitle)}</p>
+                <div class="summary">${escapeHtml(summary)}</div>
+                <table><thead>${head}</thead><tbody>${rows}</tbody></table>
+            </body></html>`);
+        printWindow.document.close();
+        printWindow.onload = () => setTimeout(() => printWindow.print(), 250);
+    }
+
+    // إغلاق المودال عند الضغط خارجه
+    document.getElementById('detailsModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeDetailsModal();
+    });
+
+    </script>
+
+</body>
+</html>

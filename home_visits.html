@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - الجلسات المنزلية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Tajawal',sans-serif; }
+        body { background:#f0f3f8; min-height:100vh; }
+
+        /* ===== PORTAL MODE ===== */
+        #portalMode { display:none; min-height:100vh; }
+        .portal-header { background:linear-gradient(135deg,#0b132b,#1a2a5e); padding:14px 24px; display:flex; align-items:center; gap:14px; border-bottom:2px solid rgba(212,175,55,0.4); }
+        .portal-header h1 { color:white; font-size:1.05rem; font-weight:900; margin:0; }
+        .portal-header span { color:#d4af37; font-size:0.85rem; }
+        .portal-body { max-width:680px; margin:24px auto; padding:0 16px; }
+        .portal-welcome { background:linear-gradient(135deg,#7b1fa2,#9c27b0); color:white; padding:20px 24px; border-radius:16px; margin-bottom:18px; }
+        .portal-welcome h2 { font-size:1.2rem; font-weight:900; margin-bottom:4px; }
+        .portal-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+        .ps-card { background:white; border-radius:14px; padding:14px; text-align:center; border:1px solid #e4e9f0; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+        .ps-num { font-size:1.6rem; font-weight:900; }
+        .ps-lbl { font-size:0.7rem; color:#9aa0b0; font-weight:700; margin-top:3px; text-transform:uppercase; }
+        .case-card { background:white; border-radius:14px; border:1px solid #e4e9f0; padding:16px 18px; margin-bottom:12px; border-right:4px solid #9c27b0; box-shadow:0 2px 10px rgba(0,0,0,0.05); transition:0.22s; }
+        .case-card.closed { border-right-color:#ccc; opacity:0.7; }
+        .case-meta { font-size:0.78rem; color:#999; margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; }
+        .case-meta i { color:#d4af37; }
+        .btn-session { background:linear-gradient(135deg,#7b1fa2,#9c27b0); color:white; border:none; padding:9px 18px; border-radius:9px; font-size:0.82rem; font-weight:800; cursor:pointer; font-family:'Tajawal'; margin-top:10px; transition:0.22s; }
+        .btn-wa-patient { background:linear-gradient(135deg,#25D366,#1ebd5a); color:white; border:none; padding:7px 14px; border-radius:9px; font-size:0.78rem; font-weight:800; cursor:pointer; font-family:'Tajawal'; margin-top:6px; display:inline-flex; align-items:center; gap:5px; transition:0.22s; }
+
+        /* ===== ADMIN MODE ===== */
+        #adminMode { display:none; }
+        .header { background:linear-gradient(135deg,#0b132b,#1a2a5e); height:72px; width:100%; position:fixed; top:0; display:flex; justify-content:space-between; align-items:center; padding:0 35px; border-bottom:2px solid rgba(212,175,55,0.4); z-index:1000; }
+        .header-title { color:white; font-size:1.2rem; font-weight:900; }
+        .header-title span { color:#d4af37; }
+        .sidebar { background:#0b1120; width:255px; height:100vh; position:fixed; top:72px; right:0; padding-top:20px; z-index:900; border-left:1px solid rgba(255,255,255,0.05); }
+        .sidebar a { display:flex; align-items:center; gap:11px; color:rgba(163,174,209,0.8); text-decoration:none; padding:12px 20px; transition:0.22s; font-size:0.95rem; border-right:2px solid transparent; margin:1px 8px; border-radius:10px; font-weight:600; }
+        .sidebar a i { width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.88rem; background:rgba(255,255,255,0.06); border-radius:7px; }
+        .sidebar a:hover { color:#fff; background:rgba(255,255,255,0.05); }
+        .sidebar a.active { background:rgba(212,175,55,0.12); color:#d4af37; font-weight:800; border-right:2px solid #d4af37; }
+        .main-content { margin-right:255px; margin-top:72px; padding:24px 28px; }
+
+        .top-bar { background:white; padding:14px 22px; border-radius:16px; border:1px solid #e4e9f0; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 12px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px; }
+        .top-bar h1 { color:#0b132b; font-size:1.15rem; font-weight:900; display:flex; align-items:center; gap:10px; margin:0; }
+
+        /* MONTH FILTER */
+        .month-bar { background:white; padding:14px 22px; border-radius:14px; border:1px solid #e4e9f0; margin-bottom:18px; display:flex; align-items:center; gap:14px; box-shadow:0 2px 10px rgba(0,0,0,0.04); flex-wrap:wrap; }
+        .month-bar label { font-size:0.78rem; font-weight:800; color:#888; letter-spacing:0.5px; }
+        .month-select { padding:9px 14px; border:1.5px solid #e0e4ea; border-radius:10px; outline:none; font-family:'Tajawal'; font-size:0.92rem; font-weight:700; color:#0b132b; background:#fafbfd; transition:0.22s; }
+        .month-select:focus { border-color:#9c27b0; }
+        .month-nav { display:flex; gap:6px; }
+        .btn-month { background:white; border:1.5px solid #e0e4ea; color:#555; padding:7px 12px; border-radius:9px; font-size:0.8rem; font-weight:800; cursor:pointer; font-family:'Tajawal'; transition:0.22s; }
+        .btn-month:hover { border-color:#9c27b0; color:#7b1fa2; }
+        .btn-month.active { background:linear-gradient(135deg,#7b1fa2,#9c27b0); color:white; border-color:#7b1fa2; }
+        .current-month-label { background:#f3e5f5; color:#7b1fa2; padding:5px 14px; border-radius:20px; font-size:0.82rem; font-weight:900; }
+
+        /* SUMMARY */
+        .summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+        .sum-card { background:white; padding:16px 18px; border-radius:14px; border:1px solid #e4e9f0; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+        .sum-card .sc-lbl { font-size:0.72rem; color:#9aa0b0; font-weight:800; letter-spacing:0.8px; margin-bottom:6px; text-transform:uppercase; }
+        .sum-card .sc-val { font-size:1.6rem; font-weight:900; }
+
+        /* DOCTOR CARDS */
+        .doctors-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; margin-bottom:24px; }
+        .doc-card { background:white; border-radius:16px; border:1px solid #e4e9f0; padding:18px; box-shadow:0 2px 12px rgba(0,0,0,0.05); border-top:4px solid #9c27b0; transition:0.25s; }
+        .doc-card:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(0,0,0,0.1); }
+        .doc-code { background:linear-gradient(135deg,#7b1fa2,#9c27b0); color:white; padding:4px 12px; border-radius:20px; font-size:0.82rem; font-weight:900; letter-spacing:2px; }
+        .doc-stats { display:flex; gap:8px; margin:10px 0 12px; flex-wrap:wrap; }
+        .doc-stat { background:#f8f9fc; border:1px solid #e4e9f0; border-radius:8px; padding:5px 10px; font-size:0.78rem; font-weight:700; color:#555; }
+        .doc-stat strong { color:#7b1fa2; }
+        .doc-actions { display:flex; gap:7px; flex-wrap:wrap; }
+        .btn-wa { background:linear-gradient(135deg,#25D366,#1ebd5a); color:white; border:none; padding:7px 13px; border-radius:9px; font-size:0.8rem; font-weight:800; cursor:pointer; font-family:'Tajawal'; transition:0.22s; display:flex; align-items:center; gap:5px; }
+        .btn-outline { background:white; border:1.5px solid #e0e4ea; color:#555; padding:7px 12px; border-radius:9px; font-size:0.8rem; font-weight:800; cursor:pointer; font-family:'Tajawal'; transition:0.22s; }
+        .btn-outline:hover { border-color:#7b1fa2; color:#7b1fa2; }
+        .btn-outline.purple { border-color:#e1bee7; color:#7b1fa2; background:#f3e5f5; }
+        .btn-outline.red { border-color:#ffcdd2; color:#c62828; background:#ffebee; }
+
+        /* CASES TABLE */
+        .cases-section { background:white; border-radius:16px; border:1px solid #e4e9f0; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.05); }
+        .cs-header { background:#f8fafc; padding:14px 20px; border-bottom:1px solid #e8edf4; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+        .cs-header h3 { font-size:0.95rem; font-weight:900; color:#0b132b; margin:0; }
+        table { width:100%; border-collapse:collapse; text-align:right; }
+        th { background:#f8fafc; padding:11px 14px; font-size:0.72rem; font-weight:800; color:#9aa0b0; border-bottom:2px solid #e8edf4; letter-spacing:0.8px; text-transform:uppercase; white-space:nowrap; }
+        td { padding:12px 14px; border-bottom:1px solid #f0f4f8; font-size:0.88rem; font-weight:700; vertical-align:middle; }
+        tr:hover td { background:#fdfcf5; }
+
+        .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+        .badge-cash { background:#e8f5e9; color:#2e7d32; }
+        .badge-comp { background:#e3f2fd; color:#1565c0; }
+        .badge-closed { background:#ffebee; color:#c62828; }
+        .badge-archived { background:#f0f2f5; color:#888; }
+
+        /* MODALS */
+        .overlay { position:fixed; inset:0; background:rgba(11,19,43,0.88); display:flex; align-items:center; justify-content:center; z-index:5000; opacity:0; pointer-events:none; transition:0.3s; backdrop-filter:blur(8px); }
+        .overlay.active { opacity:1; pointer-events:auto; }
+        .modal-box { background:white; padding:26px; border-radius:20px; width:500px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.3); border-top:4px solid #9c27b0; transform:scale(0.9); transition:0.32s cubic-bezier(0.34,1.2,0.64,1); }
+        .overlay.active .modal-box { transform:scale(1); }
+        .modal-box h3 { color:#0b132b; margin-bottom:14px; font-size:1.05rem; font-weight:900; padding-bottom:10px; border-bottom:1px solid #f0f2f5; display:flex; align-items:center; gap:8px; }
+        .lbl { font-size:0.75rem; font-weight:800; color:#888; margin-bottom:5px; display:block; }
+        .inp { width:100%; padding:10px 13px; border:1.5px solid #e0e4ea; border-radius:10px; outline:none; font-family:'Tajawal'; font-size:0.92rem; font-weight:700; margin-bottom:12px; transition:0.22s; }
+        .inp:focus { border-color:#9c27b0; box-shadow:0 0 0 3px rgba(156,39,176,0.1); }
+        .mfooter { display:flex; gap:10px; margin-top:14px; }
+        .mfooter button { flex:1; padding:11px; border-radius:10px; font-weight:800; font-size:0.92rem; border:none; cursor:pointer; font-family:'Tajawal'; transition:0.25s; }
+        .btn-save { background:linear-gradient(135deg,#7b1fa2,#9c27b0); color:white; }
+        .btn-gray { background:#f0f2f5; color:#666; }
+        .preview-box { background:#f3e5f5; border:1px solid #e1bee7; border-radius:10px; padding:12px; margin-top:8px; font-size:0.88rem; font-weight:700; color:#7b1fa2; }
+
+        /* DOCS IN CASE */
+        .case-doc-thumb { width:60px; height:60px; border-radius:8px; object-fit:cover; border:2px solid #e1bee7; cursor:pointer; transition:0.22s; }
+        .case-doc-thumb:hover { transform:scale(1.08); border-color:#9c27b0; }
+        .file-upload-area { background:#f8f9fc; border:1.5px dashed #c8d4e8; border-radius:10px; padding:12px; text-align:center; cursor:pointer; position:relative; transition:0.22s; font-size:0.82rem; font-weight:700; color:#888; }
+        .file-upload-area:hover { background:#f3e5f5; border-color:#9c27b0; }
+        .file-upload-area input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
+
+        /* TOAST */
+        #toastContainer { position:fixed; bottom:24px; left:24px; z-index:9999; display:flex; flex-direction:column; gap:9px; }
+        .toast { background:#0b132b; color:white; padding:13px 20px; border-radius:14px; font-weight:700; font-size:0.92rem; display:flex; align-items:center; gap:10px; box-shadow:0 12px 35px rgba(11,19,43,0.25); transform:translateX(-200%); transition:0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-right:4px solid #9c27b0; }
+        .toast.show { transform:translateX(0); }
+        .toast.success { border-right-color:#27ae60; }
+        .toast.error   { border-right-color:#e74c3c; }
+
+        .server-status { display:flex; align-items:center; gap:7px; font-size:0.85rem; font-weight:700; color:#27ae60; background:rgba(39,174,96,0.12); padding:6px 14px; border-radius:20px; border:1px solid rgba(39,174,96,0.3); }
+        .hidden { display:none !important; }
+
+        /* Image viewer */
+        .img-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; z-index:8000; opacity:0; pointer-events:none; transition:0.3s; }
+        .img-overlay.active { opacity:1; pointer-events:auto; }
+        .img-overlay img { max-width:88%; max-height:88vh; border-radius:12px; border:3px solid #d4af37; }
+        .img-close { position:absolute; top:20px; right:24px; color:white; font-size:2.5rem; cursor:pointer; background:rgba(255,255,255,0.1); width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+
+        /* PRINT */
+        @media print {
+            @page { size: A4 portrait; margin: 8mm; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            #adminMode .header, #adminMode .sidebar, #adminMode .top-bar,
+            #adminMode .month-bar, #adminMode .doc-actions, #adminMode .cs-header select,
+            #toastContainer, .overlay, .img-overlay { display: none !important; }
+            #adminMode .main-content { margin: 0 !important; padding: 8px !important; width: 100% !important; }
+            .print-header { display: block !important; }
+            .no-print { display: none !important; }
+            .doc-card { break-inside: avoid; }
+            table { font-size: 11px; }
+            th { background: #0b132b !important; color: #d4af37 !important; }
+        }
+        .print-header { display: none; background: linear-gradient(135deg,#0b132b,#1a2a5e); color: white; padding: 12px 18px; border-radius: 8px; margin-bottom: 14px; }
+        .print-header h2 { color: #d4af37; font-size: 1.1rem; margin: 0; }
+        .print-header p { color: rgba(255,255,255,0.7); font-size: 0.82rem; margin: 3px 0 0; }
+
+        /* كرت المتابعة */
+        .fc-card-head { display:flex; align-items:center; gap:12px; border-bottom:2px solid #9c27b0; padding-bottom:12px; margin-bottom:14px; }
+        .fc-logo { width:54px; height:54px; object-fit:contain; }
+        .fc-title { font-size:1.05rem; font-weight:900; color:#0b132b; }
+        .fc-sub { color:#9c27b0; font-weight:700; font-size:0.82rem; margin-top:2px; }
+        .fc-info { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:14px; font-size:0.85rem; }
+        .fc-info span { color:#999; }
+        .fc-stats { display:flex; gap:10px; margin-bottom:14px; }
+        .fc-stat { flex:1; text-align:center; background:#f7f8fa; border-radius:10px; padding:10px; }
+        .fc-stat-num { font-size:1.5rem; font-weight:900; }
+        .fc-stat-lbl { font-size:0.72rem; color:#999; }
+        .fc-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:7px; max-height:46vh; overflow-y:auto; padding:3px; }
+        .fc-box { aspect-ratio:1; border-radius:9px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; }
+        .fc-done { background:linear-gradient(135deg,#27ae60,#1e8449); color:white; box-shadow:0 2px 6px rgba(39,174,96,0.25); }
+        .fc-empty { background:#f0f2f5; color:#bbb; border:2px dashed #d5d9e0; }
+        .fc-num { font-size:0.62rem; opacity:0.85; }
+        .fc-date { font-size:0.85rem; }
+        .fc-check { font-size:0.55rem; opacity:0.85; }
+        .fc-dash { font-size:1.1rem; }
+        .fc-foot { text-align:center; margin-top:14px; color:#aaa; font-size:0.72rem; }
+
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+    </style>
+
+    <style>
+
+    
+    </style>
+    <link rel="stylesheet" href="premium.css">
+</head>
+<body>
+<canvas id="canvas" style="display:none;"></canvas>
+<div id="toastContainer"></div>
+
+<!-- Image viewer -->
+<div id="imgOverlay" class="img-overlay" onclick="closeImgOverlay()">
+    <div class="img-close" onclick="closeImgOverlay()">&times;</div>
+    <img id="imgOverlayEl" src="" onclick="event.stopPropagation()">
+</div>
+
+<!-- ===== PORTAL ===== -->
+<div id="portalMode">
+    <div class="portal-header">
+        <img src="logo.png" style="height:36px;" onerror="this.style.display='none'">
+        <div><h1>LIFE SPORT — بوابة الدكتور</h1><span id="portalDocLabel"></span></div>
+    </div>
+    <div class="portal-body">
+        <div class="portal-welcome">
+            <h2>أهلاً د. <span id="portalName"></span> 👋</h2>
+            <p>شوف حالاتك وسجل جلساتك المنزلية بسهولة</p>
+        </div>
+        <div class="portal-stats">
+            <div class="ps-card"><div class="ps-num" id="pStats1" style="color:#7b1fa2;">0</div><div class="ps-lbl">حالاتك النشطة</div></div>
+            <div class="ps-card"><div class="ps-num" id="pStats2" style="color:#27ae60;">0</div><div class="ps-lbl">جلسات الشهر</div></div>
+            <div class="ps-card"><div class="ps-num" id="pStats3" style="color:#2196f3;">0</div><div class="ps-lbl">إجمالي الحضور</div></div>
+        </div>
+        <div id="portalCases"></div>
+    </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div id="adminMode">
+    <header class="header">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+            <img src="logo.png" style="height:44px;" onerror="this.style.display='none'">
+            <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="headerInfo" style="color:#d4af37;font-weight:800;background:rgba(212,175,55,0.1);padding:7px 16px;border-radius:20px;border:1px solid rgba(212,175,55,0.3);font-size:0.88rem;"></div>
+        </div>
+    </header>
+    <nav class="sidebar">
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+        <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+        <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+        <a href="patients.html"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+        <a href="ledger.html"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+        <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+        <a href="hr.html"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+        <a href="support.html"><i class="fas fa-shield-alt"></i> الدعم</a>
+    </nav>
+    <main class="main-content">
+        <div class="top-bar">
+            <h1><i class="fas fa-home" style="color:#9c27b0;"></i> الجلسات المنزلية</h1>
+            <div style="display:flex;gap:10px;">
+                <button onclick="printHomeVisits()" style="background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;padding:10px 20px;border-radius:11px;font-size:0.92rem;font-weight:800;cursor:pointer;font-family:'Tajawal';display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(39,174,96,0.3);">
+                    <i class="fas fa-print"></i> طباعة الشهر
+                </button>
+                <button onclick="document.getElementById('addDoctorModal').classList.add('active')" style="background:linear-gradient(135deg,#7b1fa2,#9c27b0);color:white;border:none;padding:10px 20px;border-radius:11px;font-size:0.92rem;font-weight:800;cursor:pointer;font-family:'Tajawal';display:flex;align-items:center;gap:8px;">
+                    <i class="fas fa-user-plus"></i> إضافة دكتور
+                </button>
+            </div>
+        </div>
+
+        <!-- PRINT HEADER -->
+        <div class="print-header" id="printHeader">
+            <h2><i class="fas fa-home"></i> تقرير الجلسات المنزلية</h2>
+            <p id="printHeaderMonth">...</p>
+        </div>
+
+        <!-- MONTH FILTER -->
+        <div class="month-bar">
+            <i class="fas fa-calendar-alt" style="color:#9c27b0;font-size:1.2rem;"></i>
+            <label>عرض شهر:</label>
+            <select id="monthFilter" class="month-select" onchange="onMonthChange()"></select>
+            <div class="month-nav">
+                <button class="btn-month" onclick="shiftMonth(-1)"><i class="fas fa-chevron-right"></i> الشهر السابق</button>
+                <button class="btn-month active" onclick="setCurrentMonth()">الشهر الحالي</button>
+                <button class="btn-month" onclick="shiftMonth(1)">الشهر التالي <i class="fas fa-chevron-left"></i></button>
+            </div>
+            <span class="current-month-label" id="monthLabel">...</span>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-grid">
+            <div class="sum-card"><div class="sc-lbl">الدكاترة</div><div class="sc-val" style="color:#7b1fa2;" id="sumDocs">0</div></div>
+            <div class="sum-card"><div class="sc-lbl">الحالات النشطة</div><div class="sc-val" style="color:#1565c0;" id="sumCases">0</div></div>
+            <div class="sum-card"><div class="sc-lbl">جلسات الشهر</div><div class="sc-val" style="color:#27ae60;" id="sumSessions">0</div></div>
+            <div class="sum-card"><div class="sc-lbl">إجمالي المستحقات</div><div class="sc-val" style="color:#c49a2a;" id="sumEarnings">0 ج</div></div>
+        </div>
+
+        <!-- DOCTORS GRID -->
+        <div class="doctors-grid" id="doctorsGrid"></div>
+
+        <!-- CASES TABLE -->
+        <div class="cases-section">
+            <div class="cs-header">
+                <h3><i class="fas fa-list" style="color:#9c27b0;"></i> سجل الحالات</h3>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <select id="filterDocCases" class="inp" style="width:auto;margin:0;padding:7px 12px;" onchange="renderCasesTable()">
+                        <option value="all">كل الدكاترة</option>
+                    </select>
+                    <select id="filterCaseStatus" class="inp" style="width:auto;margin:0;padding:7px 12px;" onchange="renderCasesTable()">
+                        <option value="active">نشطة</option>
+                        <option value="closed">مغلقة</option>
+                        <option value="archived">أرشيف</option>
+                        <option value="all">الكل</option>
+                    </select>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr>
+                        <th>المريض</th><th>الدكتور</th><th>النوع</th><th>السعر</th>
+                        <th>جلسات الشهر</th><th>مستحقات الدكتور</th><th>الصور</th><th>إجراء</th>
+                    </tr></thead>
+                    <tbody id="casesBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ADD DOCTOR MODAL -->
+<div id="addDoctorModal" class="overlay">
+    <div class="modal-box">
+        <h3><i class="fas fa-stethoscope" style="color:#9c27b0;"></i> إضافة دكتور جلسات منزلية</h3>
+        <span class="lbl">اختر من الموظفين المسجلين</span>
+        <select id="hvEmpSel" class="inp" onchange="onEmpSelect()">
+            <option value="">-- اختر موظف --</option>
+        </select>
+        <span class="lbl">أو اكتب اسم دكتور جديد</span>
+        <input type="text" id="hvDocName" class="inp" placeholder="د. اسم الدكتور...">
+        <span class="lbl">رقم التليفون</span>
+        <input type="tel" id="hvDocPhone" class="inp" placeholder="01XXXXXXXXX">
+        <span class="lbl">نسبته من كل جلسة (%)</span>
+        <input type="number" id="hvDocPct" class="inp" min="1" max="100" placeholder="مثال: 60">
+        <div class="mfooter">
+            <button class="btn-save" onclick="addDoctor()"><i class="fas fa-check"></i> إضافة وإنشاء الكود</button>
+            <button class="btn-gray" onclick="closeO('addDoctorModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- ADD CASE MODAL -->
+<div id="addCaseModal" class="overlay">
+    <div class="modal-box" style="width:530px;">
+        <h3><i class="fas fa-user-injured" style="color:#9c27b0;"></i> إضافة حالة — <span id="caseDocLabel" style="color:#9c27b0;"></span></h3>
+        <span class="lbl">نوع الحالة</span>
+        <select id="cType" class="inp" onchange="toggleComp()">
+            <option value="cash">كاش</option>
+            <option value="company">شركة تأمين</option>
+        </select>
+        <span class="lbl">اسم المريض</span>
+        <input type="text" id="cName" class="inp" placeholder="الاسم الكامل...">
+        <span class="lbl">رقم التليفون</span>
+        <input type="tel" id="cPhone" class="inp" placeholder="01XXXXXXXXX">
+        <span class="lbl">العنوان</span>
+        <input type="text" id="cAddr" class="inp" placeholder="مثال: المهندسين، ش أحمد عرابي...">
+        <span class="lbl">التشخيص</span>
+        <input type="text" id="cDiag" class="inp" placeholder="مثال: ألم أسفل الظهر...">
+        <span class="lbl">سعر الجلسة (ج.م)</span>
+        <input type="number" id="cPrice" class="inp" min="0" placeholder="مثال: 300" oninput="calcShare()">
+        <div id="compF" style="display:none;">
+            <span class="lbl">اسم الشركة</span>
+            <input type="text" id="cComp" class="inp" placeholder="مثال: نيكست كير">
+            <span class="lbl">عدد الجلسات الموافقة</span>
+            <input type="number" id="cApproved" class="inp" min="1" placeholder="مثال: 12">
+            <span class="lbl">نسبة تحمل الشركة (%)</span>
+            <input type="number" id="cCoverage" class="inp" min="0" max="100" placeholder="مثال: 80" oninput="calcShare()">
+        </div>
+        <span class="lbl">صور الموافقة / الأوراق</span>
+        <div class="file-upload-area" id="caseDocsArea">
+            <i class="fas fa-images" style="font-size:1.4rem;display:block;margin-bottom:5px;color:#9c27b0;"></i>
+            <span id="cDocsLbl">إرفاق صور الموافقة</span>
+            <input type="file" id="caseDocs" multiple accept="image/*,.pdf" onchange="onCaseDocs()">
+        </div>
+        <div id="sharePreview" class="preview-box" style="display:none;margin-top:10px;"></div>
+        <div class="mfooter">
+            <button class="btn-save" id="caseSaveBtn" onclick="submitCaseForm()"><i class="fas fa-check"></i> إضافة الحالة</button>
+            <button class="btn-gray" onclick="closeO('addCaseModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW CASES MODAL -->
+<div id="viewCasesModal" class="overlay">
+    <div class="modal-box" style="width:620px;">
+        <h3><i class="fas fa-folder-open" style="color:#9c27b0;"></i> حالات د. <span id="vcDocName" style="color:#9c27b0;"></span></h3>
+        <div id="vcList" style="max-height:450px;overflow-y:auto;"></div>
+        <div class="mfooter"><button class="btn-gray" onclick="closeO('viewCasesModal')">إغلاق</button></div>
+    </div>
+</div>
+
+<!-- FOLLOW-UP CARD MODAL -->
+<div id="followCardModal" class="overlay">
+    <div class="modal-box" style="width:560px;">
+        <div id="fcContent"></div>
+    </div>
+</div>
+
+<!-- REGISTER SESSION MODAL -->
+<div id="regModal" class="overlay" style="z-index:9100;">
+    <div class="modal-box">
+        <h3><i class="fas fa-calendar-check" style="color:#9c27b0;"></i> تسجيل جلسة</h3>
+        <div id="regInfo" class="preview-box" style="margin-bottom:14px;"></div>
+        <span class="lbl">تاريخ الجلسة</span>
+        <input type="date" id="regDate" class="inp">
+        <span class="lbl">ملاحظات (اختياري)</span>
+        <input type="text" id="regNotes" class="inp" placeholder="ملاحظات...">
+        <div class="mfooter">
+            <button class="btn-save" onclick="saveSession()"><i class="fas fa-check"></i> تسجيل</button>
+            <button class="btn-gray" onclick="closeO('regModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+const FB = { apiKey:"AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain:"life-sport-system-hossamzahran.firebaseapp.com", projectId:"life-sport-system-hossamzahran", storageBucket:"life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId:"797045013311", appId:"1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+firebase.initializeApp(FB);
+const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+
+// ===== المتغيرات العامة (لازم تتعرّف صريح عشان الكود يشتغل بثبات) =====
+let docs = [], cases = [], sessions = [], employees = [];
+let activeDocId = null, activeCaseId = null, portalDoc = null, selectedMonth = '';
+
+// ===== دالة التنبيهات (كانت مفقودة تماماً وبتسبب كراش بعد كل حفظ) =====
+function toast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    if (!c) return;
+    const t = document.createElement('div');
+    t.style.cssText = `background:${type==='error'?'#c0392b':'#0b132b'};color:white;padding:13px 20px;border-radius:10px;font-weight:800;font-size:0.9rem;box-shadow:0 8px 25px rgba(0,0,0,0.25);border-right:4px solid ${type==='error'?'#e74c3c':'#d4af37'};display:flex;align-items:center;gap:8px;opacity:0;transform:translateX(-100%);transition:0.35s;`;
+    t.innerHTML = `<i class="fas ${type==='error'?'fa-times-circle':'fa-check-circle'}"></i> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '1'; t.style.transform = 'translateX(0)'; }, 30);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-100%)'; setTimeout(() => t.remove(), 400); }, 3200);
+}
+
+// تأكيد الاتصال بعد 3 ثواني
+setTimeout(() => {
+    const st = document.getElementById('serverStatus');
+    if (st && st.innerHTML.includes('جاري')) {
+        st.innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem;"></i> متصل';
+    }
+}, 3000);
+function closeO(id) { document.getElementById(id).classList.remove('active'); }
+function openImg(src) { document.getElementById('imgOverlayEl').src=src; document.getElementById('imgOverlay').classList.add('active'); }
+function closeImgOverlay() { document.getElementById('imgOverlay').classList.remove('active'); }
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', async () => {
+    const code = new URLSearchParams(window.location.search).get('doc');
+    if (code) {
+        // PORTAL MODE
+        document.getElementById('portalMode').style.display = 'block';
+        await initPortal(code);
+    } else {
+        // ADMIN MODE
+        document.getElementById('adminMode').style.display = 'block';
+        document.getElementById('headerInfo').innerText = `أهلاً: ${localStorage.getItem('userName')||'مستخدم'}`;
+        initMonthFilter();
+        fetchAll();
+    }
+});
+
+// ===== MONTH FILTER =====
+function initMonthFilter() {
+    const sel = document.getElementById('monthFilter');
+    const now = new Date();
+    let opts = '';
+    for (let i = -6; i <= 3; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        const lbl = d.toLocaleDateString('ar-EG', {month:'long', year:'numeric'});
+        opts += `<option value="${val}" ${i===0?'selected':''}>${lbl}</option>`;
+    }
+    sel.innerHTML = opts;
+    selectedMonth = sel.value;
+    updateMonthLabel();
+}
+
+function onMonthChange() {
+    selectedMonth = document.getElementById('monthFilter').value;
+    updateMonthLabel();
+    renderDoctors();
+    renderCasesTable();
+}
+
+function setCurrentMonth() {
+    const now = new Date();
+    selectedMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    document.getElementById('monthFilter').value = selectedMonth;
+    updateMonthLabel();
+    renderDoctors(); renderCasesTable();
+}
+
+function shiftMonth(dir) {
+    const [y,m] = selectedMonth.split('-').map(Number);
+    const d = new Date(y, m-1+dir, 1);
+    selectedMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    document.getElementById('monthFilter').value = selectedMonth;
+    updateMonthLabel();
+    renderDoctors(); renderCasesTable();
+}
+
+function updateMonthLabel() {
+    const [y,m] = selectedMonth.split('-').map(Number);
+    const lbl = new Date(y,m-1,1).toLocaleDateString('ar-EG',{month:'long',year:'numeric'});
+    document.getElementById('monthLabel').innerText = lbl;
+}
+
+function getMonthSessions(docId) {
+    const [y,m] = selectedMonth.split('-').map(Number);
+    return sessions.filter(s => {
+        if (!s.date || (docId && s.docId !== docId)) return false;
+        const d = new Date(s.date);
+        return d.getFullYear()===y && d.getMonth()+1===m;
+    });
+}
+
+// ===== FETCH =====
+function fetchAll() {
+    db.collection("employees").limit(500).onSnapshot(snap => {
+        employees=[]; snap.forEach(d=>{let x=d.data();x.id=d.id;employees.push(x);});
+        populateEmpSelect();
+    });
+    db.collection("hv_doctors").limit(500).onSnapshot(snap => {
+        docs=[]; snap.forEach(d=>{let x=d.data();x.id=d.id;docs.push(x);});
+        renderDoctors(); updateCaseFilter();
+        document.getElementById('serverStatus').innerHTML='<i class="fas fa-circle" style="font-size:0.6rem;"></i> متصل';
+    });
+    db.collection("hv_cases").limit(1500).onSnapshot(snap => {
+        cases=[]; snap.forEach(d=>{let x=d.data();x.id=d.id;cases.push(x);});
+        renderDoctors(); renderCasesTable();
+    });
+    db.collection("hv_sessions").orderBy("timestamp","desc").limit(1500).onSnapshot(snap => {
+        sessions=[]; snap.forEach(d=>{let x=d.data();x.id=d.id;sessions.push(x);});
+        renderDoctors(); renderCasesTable();
+    }, err => {
+        db.collection("hv_sessions").limit(1500).onSnapshot(snap => {
+            sessions=[]; snap.forEach(d=>{let x=d.data();x.id=d.id;sessions.push(x);});
+            renderDoctors(); renderCasesTable();
+        });
+    });
+}
+
+function populateEmpSelect() {
+    const sel = document.getElementById('hvEmpSel');
+    sel.innerHTML = '<option value="">-- اختر موظف --</option>' +
+        employees.filter(e=>['consultant','specialist','intern','rehab'].includes(e.role))
+        .map(e=>`<option value="${e.name}" data-phone="${e.phone||''}">${e.name} (${e.branch||''})</option>`).join('');
+}
+
+function onEmpSelect() {
+    const sel = document.getElementById('hvEmpSel');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.value) {
+        document.getElementById('hvDocName').value = opt.value;
+        document.getElementById('hvDocPhone').value = opt.getAttribute('data-phone')||'';
+    }
+}
+
+function updateCaseFilter() {
+    const sel = document.getElementById('filterDocCases');
+    const val = sel.value;
+    sel.innerHTML = '<option value="all">كل الدكاترة</option>' +
+        docs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    sel.value = val;
+}
+
+// ===== RENDER DOCTORS =====
+function renderDoctors() {
+    const grid = document.getElementById('doctorsGrid');
+    if (!docs.length) {
+        grid.innerHTML=`<div style="text-align:center;padding:40px;color:#bbb;grid-column:1/-1;"><i class="fas fa-stethoscope" style="font-size:2.5rem;display:block;margin-bottom:12px;color:#e0e0e0;"></i><p style="font-weight:700;">لا يوجد دكاترة — اضغط "إضافة دكتور"</p></div>`;
+        document.getElementById('sumDocs').innerText=0; return;
+    }
+    let totE=0, totS=0, totC=0;
+    grid.innerHTML = docs.map(doc => {
+        const dCases = cases.filter(c=>c.docId===doc.id&&!c.isArchived&&!c.isClosed);
+        const mSess  = getMonthSessions(doc.id);
+        const earn   = mSess.reduce((a,s)=>a+(s.docShare||0),0);
+        totE+=earn; totS+=mSess.length; totC+=dCases.length;
+        return `<div class="doc-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <div>
+                    <div style="font-size:1rem;font-weight:900;color:#0b132b;"><i class="fas fa-user-md" style="color:#9c27b0;margin-left:5px;"></i> د. ${doc.name}</div>
+                    <div style="font-size:0.76rem;color:#999;margin-top:2px;">نسبته: <strong style="color:#9c27b0;">${doc.percent}%</strong> | كود: <strong style="letter-spacing:2px;">${doc.code}</strong></div>
+                </div>
+                <span class="doc-code">${doc.code}</span>
+            </div>
+            <div class="doc-stats">
+                <div class="doc-stat">حالات: <strong>${dCases.length}</strong></div>
+                <div class="doc-stat">جلسات الشهر: <strong>${mSess.length}</strong></div>
+                <div class="doc-stat">مستحقاته: <strong>${earn.toLocaleString()} ج</strong></div>
+            </div>
+            <div class="doc-actions">
+                <button class="btn-wa" onclick="sendLink('${doc.id}')"><i class="fab fa-whatsapp"></i> اللينك</button>
+                <button class="btn-outline purple" onclick="openAddCase('${doc.id}')"><i class="fas fa-plus"></i> حالة</button>
+                <button class="btn-outline purple" onclick="viewCases('${doc.id}')"><i class="fas fa-folder-open"></i> الحالات</button>
+                <button class="btn-outline" onclick="copyLink('${doc.code}')"><i class="fas fa-copy"></i></button>
+                <button class="btn-outline red" onclick="delDoc('${doc.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('');
+    document.getElementById('sumDocs').innerText    = docs.length;
+    document.getElementById('sumCases').innerText   = totC;
+    document.getElementById('sumSessions').innerText = totS;
+    document.getElementById('sumEarnings').innerText = totE.toLocaleString()+' ج';
+}
+
+// ===== RENDER CASES TABLE =====
+// ===== كرت المتابعة (التواريخ) =====
+function openFollowCard(caseId) {
+    const c = cases.find(x => x.id === caseId);
+    if (!c) { toast("الحالة غير موجودة","error"); return; }
+    const doc = docs.find(d => d.id === c.docId) || (portalDoc && portalDoc.id===c.docId ? portalDoc : null);
+
+    const caseSessions = sessions
+        .filter(s => s.caseId === caseId && s.date)
+        .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    const totalBoxes = c.type === 'company' ? (c.approvedSessions || 24) : Math.max(24, caseSessions.length);
+
+    let boxesHtml = '';
+    for (let i = 0; i < totalBoxes; i++) {
+        const sess = caseSessions[i];
+        if (sess) {
+            const d = new Date(sess.date);
+            const dateStr = `${d.getDate()}/${d.getMonth()+1}`;
+            boxesHtml += `<div class="fc-box fc-done">
+                <div class="fc-num">${i+1}</div>
+                <div class="fc-date">${dateStr}</div>
+                <div class="fc-check">✓</div>
+            </div>`;
+        } else {
+            boxesHtml += `<div class="fc-box fc-empty"><div class="fc-num">${i+1}</div><div class="fc-dash">−</div></div>`;
+        }
+    }
+
+    const attended = caseSessions.length;
+    const remaining = Math.max(0, totalBoxes - attended);
+    window._fcData = { c, doc, boxesHtml, attended, remaining, totalBoxes };
+
+    const modal = document.getElementById('followCardModal');
+    document.getElementById('fcContent').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <h2 style="margin:0;color:#0b132b;font-size:1.2rem;"><i class="fas fa-calendar-check" style="color:#9c27b0;"></i> كرت متابعة الجلسات</h2>
+            <button onclick="closeO('followCardModal')" style="background:#f0f0f0;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1rem;">✕</button>
+        </div>
+        <div id="fcPrintable">
+            <div class="fc-card-head">
+                <img src="logo.png" onerror="this.style.display='none'" class="fc-logo">
+                <div class="fc-center">
+                    <div class="fc-title">LIFE SPORT — العلاج الطبيعي</div>
+                    <div class="fc-sub">كرت متابعة الجلسات المنزلية</div>
+                </div>
+            </div>
+            <div class="fc-info">
+                <div><span>👤 المريض:</span> <b>${c.patientName}</b></div>
+                ${doc?`<div><span>🩺 الدكتور:</span> <b>د. ${doc.name}</b></div>`:''}
+                ${c.diagnosis?`<div><span>🔬 الإصابة:</span> <b>${c.diagnosis}</b></div>`:''}
+                <div><span>🏥 النوع:</span> <b>${c.type==='cash'?'كاش':'شركة'+(c.company?' ('+c.company+')':'')}</b></div>
+                ${c.address?`<div><span>📍 العنوان:</span> <b>${c.address}</b></div>`:''}
+            </div>
+            <div class="fc-stats">
+                <div class="fc-stat"><div class="fc-stat-num" style="color:#27ae60;">${attended}</div><div class="fc-stat-lbl">حضر</div></div>
+                <div class="fc-stat"><div class="fc-stat-num" style="color:#e67e22;">${remaining}</div><div class="fc-stat-lbl">متبقي</div></div>
+                <div class="fc-stat"><div class="fc-stat-num" style="color:#0b132b;">${totalBoxes}</div><div class="fc-stat-lbl">الإجمالي</div></div>
+            </div>
+            <div class="fc-grid">${boxesHtml}</div>
+            <div class="fc-foot">Life Sport System — ${new Date().toLocaleDateString('ar-EG')}</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <button onclick="printFollowCard()" style="flex:1;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;font-family:'Tajawal';font-size:0.95rem;"><i class="fas fa-print"></i> طباعة / PDF</button>
+            <button onclick="closeO('followCardModal')" style="background:#eee;color:#555;border:none;padding:12px 24px;border-radius:12px;font-weight:800;cursor:pointer;font-family:'Tajawal';">إغلاق</button>
+        </div>
+    `;
+    modal.classList.add('active');
+}
+
+function printFollowCard() {
+    const d = window._fcData; if (!d) return;
+    const { c, doc, boxesHtml, attended, remaining, totalBoxes } = d;
+    const win = window.open('', '_blank');
+    win.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>كرت متابعة - ${c.patientName}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+        body { font-family:'Tajawal',sans-serif; padding:30px; color:#0b132b; }
+        .head { display:flex; align-items:center; gap:16px; border-bottom:3px solid #9c27b0; padding-bottom:16px; margin-bottom:18px; }
+        .head img { width:70px; height:70px; object-fit:contain; }
+        .head .t { font-size:22px; font-weight:900; }
+        .head .s { color:#9c27b0; font-weight:700; margin-top:4px; }
+        .info { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px; font-size:15px; }
+        .info span { color:#888; }
+        .stats { display:flex; gap:12px; margin-bottom:18px; }
+        .stat { flex:1; text-align:center; background:#f7f8fa; border-radius:12px; padding:14px; }
+        .stat .n { font-size:26px; font-weight:900; }
+        .stat .l { font-size:12px; color:#888; }
+        .grid { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
+        .box { aspect-ratio:1; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; }
+        .done { background:linear-gradient(135deg,#27ae60,#1e8449); color:white; }
+        .empty { background:#f0f2f5; color:#bbb; border:2px dashed #d5d9e0; }
+        .box .num { font-size:0.7rem; opacity:0.85; }
+        .box .dt { font-size:0.95rem; }
+        .box .ck { font-size:0.6rem; }
+        .foot { text-align:center; margin-top:20px; color:#999; font-size:12px; }
+        @media print { button { display:none; } }
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            .stat-card, .kpi-card { min-width: 140px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+        }
+
+    </style>
+
+
+
+</head><body>
+        <div class="head">
+            <img src="logo.png" onerror="this.style.display='none'">
+            <div><div class="t">LIFE SPORT — العلاج الطبيعي</div><div class="s">كرت متابعة الجلسات المنزلية</div></div>
+        </div>
+        <div class="info">
+            <div><span>👤 المريض:</span> <b>${c.patientName}</b></div>
+            ${doc?`<div><span>🩺 الدكتور:</span> <b>د. ${doc.name}</b></div>`:''}
+            ${c.diagnosis?`<div><span>🔬 الإصابة:</span> <b>${c.diagnosis}</b></div>`:''}
+            <div><span>🏥 النوع:</span> <b>${c.type==='cash'?'كاش':'شركة'}</b></div>
+            ${c.address?`<div><span>📍 العنوان:</span> <b>${c.address}</b></div>`:''}
+            <div><span>💰 سعر الجلسة:</span> <b>${c.sessionPrice} ج</b></div>
+        </div>
+        <div class="stats">
+            <div class="stat"><div class="n" style="color:#27ae60;">${attended}</div><div class="l">حضر</div></div>
+            <div class="stat"><div class="n" style="color:#e67e22;">${remaining}</div><div class="l">متبقي</div></div>
+            <div class="stat"><div class="n">${totalBoxes}</div><div class="l">الإجمالي</div></div>
+        </div>
+        <div class="grid">${boxesHtml.replace(/fc-box fc-done/g,'box done').replace(/fc-box fc-empty/g,'box empty').replace(/fc-num/g,'num').replace(/fc-date/g,'dt').replace(/fc-check/g,'ck').replace(/fc-dash/g,'dt')}</div>
+        <div class="foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>
+        <div style="text-align:center;margin-top:24px;"><button onclick="window.print()" style="background:#9c27b0;color:white;border:none;padding:13px 38px;border-radius:10px;font-size:15px;cursor:pointer;font-family:'Tajawal';">🖨️ طباعة / حفظ PDF</button></div>
+    </body></html>`);
+    win.document.close();
+}
+
+function renderCasesTable() {
+    const filterDoc = document.getElementById('filterDocCases').value;
+    const filterSt  = document.getElementById('filterCaseStatus').value;
+    const tbody = document.getElementById('casesBody');
+    let filtered = cases.filter(c => {
+        if (filterDoc !== 'all' && c.docId !== filterDoc) return false;
+        if (filterSt === 'active')   return !c.isClosed && !c.isArchived;
+        if (filterSt === 'closed')   return c.isClosed && !c.isArchived;
+        if (filterSt === 'archived') return c.isArchived;
+        return true;
+    });
+    if (!filtered.length) {
+        tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:#bbb;"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>لا توجد حالات</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = filtered.map(c => {
+        const doc  = docs.find(d=>d.id===c.docId);
+        const mSess = getMonthSessions(null).filter(s=>s.caseId===c.id);
+        const earn = mSess.reduce((a,s)=>a+(s.docShare||0),0);
+        const docs_ = c.approvalDocs||[];
+        const status = c.isArchived ? 'archived' : c.isClosed ? 'closed' : 'active';
+        const statusMap = {active:'badge-cash',closed:'badge-closed',archived:'badge-archived'};
+        const statusTxt = {active:'نشطة',closed:'مغلقة',archived:'أرشيف'};
+        return `<tr>
+            <td><div style="font-weight:900;color:#0b132b;">${c.patientName}</div><div style="font-size:0.75rem;color:#999;">${c.address||''}</div></td>
+            <td style="color:#7b1fa2;font-weight:800;">${doc?'د. '+doc.name:'-'}</td>
+            <td><span class="badge ${c.type==='cash'?'badge-cash':'badge-comp'}">${c.type==='cash'?'كاش':'شركة'}</span></td>
+            <td style="font-weight:900;color:#27ae60;">${c.sessionPrice} ج</td>
+            <td style="font-weight:900;">${mSess.length}</td>
+            <td style="font-weight:900;color:#c49a2a;">${earn.toLocaleString()} ج</td>
+            <td>
+                ${docs_.length>0 ? `<div style="display:flex;gap:4px;flex-wrap:wrap;">${docs_.slice(0,3).map(d=>`<img src="${d.data}" class="case-doc-thumb" onclick="openImg('${d.data}')" title="${d.name}">`).join('')}${docs_.length>3?`<div style="width:40px;height:40px;border-radius:8px;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-weight:800;color:#777;font-size:0.75rem;">+${docs_.length-3}</div>`:''}</div>` : '<span style="color:#ccc;font-size:0.78rem;">لا يوجد</span>'}
+            </td>
+            <td>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <span class="badge ${statusMap[status]}">${statusTxt[status]}</span>
+                    <button class="btn-outline purple" style="padding:4px 8px;font-size:0.75rem;" onclick="openFollowCard('${c.id}')"><i class="fas fa-calendar-check"></i> كرت المتابعة</button>
+                    <button class="btn-outline" style="padding:4px 8px;font-size:0.75rem;border-color:#90caf9;color:#1565c0;" onclick="openEditCase('${c.id}')"><i class="fas fa-edit"></i> تعديل</button>
+                    ${status==='active'?`<button class="btn-outline" style="padding:4px 8px;font-size:0.75rem;" onclick="toggleCase('${c.id}','close')"><i class="fas fa-lock"></i> تقفيل</button>`:''}
+                    ${status==='closed'?`<button class="btn-outline purple" style="padding:4px 8px;font-size:0.75rem;" onclick="toggleCase('${c.id}','open')"><i class="fas fa-lock-open"></i> فتح</button>`:''}
+                    ${status!=='archived'?`<button class="btn-outline" style="padding:4px 8px;font-size:0.75rem;border-color:#ffcc80;color:#e65100;" onclick="toggleCase('${c.id}','archive')"><i class="fas fa-archive"></i> أرشيف</button>`:`<button class="btn-outline purple" style="padding:4px 8px;font-size:0.75rem;" onclick="toggleCase('${c.id}','restore')"><i class="fas fa-box-open"></i> استرجاع</button>`}
+                    <button class="btn-outline" style="padding:4px 8px;font-size:0.75rem;border-color:#ef9a9a;color:#c62828;" onclick="deleteCase('${c.id}')"><i class="fas fa-trash"></i> مسح</button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+// ===== DOCTOR ACTIONS =====
+async function addDoctor() {
+    const name  = document.getElementById('hvDocName').value.trim();
+    const phone = document.getElementById('hvDocPhone').value.trim();
+    const pct   = parseFloat(document.getElementById('hvDocPct').value);
+    if (!name)  return toast("اكتب اسم الدكتور!","error");
+    if (!phone) return toast("اكتب رقم التليفون!","error");
+    if (!pct||pct<1||pct>100) return toast("اكتب نسبة صحيحة (1-100)!","error");
+    const already = docs.find(d=>d.name===name);
+    if (already) return toast(`د. ${name} مسجل بالفعل — كوده: ${already.code}`,"error");
+    const code = Math.floor(1000+Math.random()*9000).toString();
+    try {
+        await db.collection("hv_doctors").add({name,phone,percent:pct,code,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        closeO('addDoctorModal');
+        ['hvDocName','hvDocPhone','hvDocPct'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('hvEmpSel').value='';
+        toast(`✅ تم إضافة د. ${name} — الكود: ${code}`);
+    } catch(e) { console.error(e); toast("خطأ في الحفظ!","error"); }
+}
+
+async function delDoc(id) {
+    if (!confirm("حذف الدكتور وكل حالاته؟")) return;
+    await db.collection("hv_doctors").doc(id).delete();
+    toast("تم الحذف.");
+}
+
+function sendLink(docId) {
+    const doc=docs.find(d=>d.id===docId); if(!doc) return;
+    const link = `${window.location.href.split('?')[0]}?doc=${doc.code}`;
+    const msg  = `أهلاً د. ${doc.name} 😊\n\nرابط بوابتك في نظام لايف سبورت:\n${link}\n\nكودك السري: *${doc.code}*\n\nافتح الرابط وهتلاقي حالاتك وتقدر تسجل جلساتك.`;
+    let phone = doc.phone.trim();
+    if (phone.startsWith('0')) phone='2'+phone;
+    else if (!phone.startsWith('20')) phone='20'+phone;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function copyLink(code) {
+    const link = `${window.location.href.split('?')[0]}?doc=${code}`;
+    navigator.clipboard ? navigator.clipboard.writeText(link).then(()=>toast("✅ تم نسخ اللينك")).catch(()=>prompt("اللينك:",link)) : prompt("اللينك:",link);
+}
+
+// ===== CASE ACTIONS =====
+function openAddCase(docId) {
+    const doc=docs.find(d=>d.id===docId); if(!doc) return;
+    activeDocId=docId;
+    editingCaseId=null;
+    document.getElementById('caseDocLabel').innerText='د. '+doc.name;
+    ['cName','cPhone','cAddr','cDiag','cPrice','cComp','cApproved','cCoverage'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('cType').value='cash';
+    document.getElementById('compF').style.display='none';
+    document.getElementById('sharePreview').style.display='none';
+    document.getElementById('cDocsLbl').innerText='إرفاق صور الموافقة';
+    document.getElementById('caseDocs').value='';
+    // رجّع الزرار لوضع الإضافة
+    const saveBtn = document.querySelector('#addCaseModal .btn-save');
+    if (saveBtn) { saveBtn.innerHTML = '<i class="fas fa-check"></i> إضافة الحالة'; }
+    document.getElementById('addCaseModal').classList.add('active');
+}
+
+function toggleComp() {
+    document.getElementById('compF').style.display = document.getElementById('cType').value==='company'?'block':'none';
+    calcShare();
+}
+
+function calcShare() {
+    const doc=docs.find(d=>d.id===activeDocId); if(!doc) return;
+    const price=parseFloat(document.getElementById('cPrice').value)||0;
+    if (!price) { document.getElementById('sharePreview').style.display='none'; return; }
+    const share=Math.round(price*doc.percent/100);
+    const el=document.getElementById('sharePreview');
+    el.style.display='block';
+    el.innerHTML=`<i class="fas fa-calculator"></i> نصيب الدكتور: <strong>${share} ج</strong>/جلسة (${doc.percent}% من ${price} ج)`;
+}
+
+function onCaseDocs() {
+    const files=document.getElementById('caseDocs').files;
+    document.getElementById('cDocsLbl').innerText = files.length>0 ? `✓ ${files.length} صورة مرفقة` : 'إرفاق صور الموافقة';
+}
+
+// دالة ذكية: تقرر تضيف حالة جديدة ولا تحفظ تعديل — بدون تغيير onclick
+function submitCaseForm() {
+    if (editingCaseId) {
+        saveEditCase();
+    } else {
+        addCase();
+    }
+}
+window.submitCaseForm = submitCaseForm;
+
+async function addCase() {
+    const doc=docs.find(d=>d.id===activeDocId); if(!doc) return;
+    const name=document.getElementById('cName').value.trim();
+    const price=parseFloat(document.getElementById('cPrice').value);
+    if (!name)  return toast("اكتب اسم المريض!","error");
+    if (!price||price<=0) return toast("اكتب سعر الجلسة!","error");
+    const type=document.getElementById('cType').value;
+
+    const saveBtn = document.querySelector('#addCaseModal .btn-save');
+    const oldBtnHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) { saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...'; saveBtn.disabled = true; }
+    // أمان: فك القفل بعد 15 ثانية مهما حصل
+    const unlockTimer = setTimeout(() => { if (saveBtn) { saveBtn.innerHTML = oldBtnHtml; saveBtn.disabled = false; } }, 15000);
+
+    // رفع الصور (لو فشل ملف، كمّل من غير ما يوقف الحفظ كله)
+    let approvalDocs=[];
+    const files=document.getElementById('caseDocs').files;
+    for (let f of files) {
+        try {
+            const b64=await readB64(f);
+            approvalDocs.push({name:f.name,type:f.type,data:b64});
+        } catch(e) { console.warn('فشل قراءة ملف:', f.name, e); }
+    }
+
+    const data={docId:activeDocId,docName:doc.name,patientName:name,phone:document.getElementById('cPhone').value,address:document.getElementById('cAddr').value,diagnosis:document.getElementById('cDiag').value,sessionPrice:price,type,isClosed:false,isArchived:false,sessionsCount:0,approvalDocs,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    if (type==='company') {
+        data.company=document.getElementById('cComp').value;
+        data.approvedSessions=parseInt(document.getElementById('cApproved').value)||0;
+        data.companyCoverage=parseFloat(document.getElementById('cCoverage').value)||0;
+    }
+    try {
+        await db.collection("hv_cases").add(data);
+        closeO('addCaseModal');
+        toast(`✅ تم إضافة حالة ${name}`);
+    } catch(e) { console.error(e); toast("خطأ!","error"); }
+    finally {
+        clearTimeout(unlockTimer);
+        if (saveBtn) { saveBtn.innerHTML = oldBtnHtml; saveBtn.disabled = false; }
+    }
+}
+
+async function toggleCase(caseId, action) {
+    const updates = {
+        close:   {isClosed:true},
+        open:    {isClosed:false},
+        archive: {isArchived:true, isClosed:true},
+        restore: {isArchived:false, isClosed:false}
+    };
+    await db.collection("hv_cases").doc(caseId).update(updates[action]);
+    toast(action==='close'?'تم تقفيل الحالة':action==='open'?'تم فتح الحالة':action==='archive'?'تم الأرشفة 📁':'تم الاسترجاع ✅');
+}
+
+// ===== مسح الحالة نهائياً =====
+async function deleteCase(caseId) {
+    const c = cases.find(x=>x.id===caseId);
+    if (!c) return;
+    if (!confirm(`متأكد إنك عايز تمسح حالة "${c.patientName}" نهائياً؟\nده هيمسح كل جلساتها كمان ولا يمكن التراجع.`)) return;
+    try {
+        // امسح جلسات الحالة الأول
+        const snap = await db.collection("hv_sessions").where("caseId","==",caseId).get();
+        const batch = db.batch();
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        // امسح الحالة
+        await db.collection("hv_cases").doc(caseId).delete();
+        toast(`تم مسح حالة ${c.patientName} نهائياً 🗑️`);
+    } catch(e) { console.error(e); toast("خطأ أثناء المسح","error"); }
+}
+
+// ===== تعديل الحالة =====
+let editingCaseId = null;
+function openEditCase(caseId) {
+    const c = cases.find(x=>x.id===caseId);
+    if (!c) return;
+    editingCaseId = caseId;
+    activeDocId = c.docId;
+    // افتح نفس مودال إضافة الحالة لكن بالبيانات
+    document.getElementById('cName').value = c.patientName || '';
+    document.getElementById('cPhone').value = c.phone || '';
+    document.getElementById('cAddr').value = c.address || '';
+    document.getElementById('cDiag').value = c.diagnosis || '';
+    document.getElementById('cPrice').value = c.sessionPrice || '';
+    document.getElementById('cType').value = c.type || 'cash';
+    document.getElementById('compF').style.display = c.type==='company' ? 'block' : 'none';
+    if (c.type==='company') {
+        if (document.getElementById('cComp')) document.getElementById('cComp').value = c.company || '';
+        if (document.getElementById('cApproved')) document.getElementById('cApproved').value = c.approvedSessions || '';
+        if (document.getElementById('cCoverage')) document.getElementById('cCoverage').value = c.companyCoverage || '';
+    }
+    // غيّر عنوان وزرار المودال
+    const saveBtn = document.querySelector('#addCaseModal .btn-save');
+    if (saveBtn) { saveBtn.innerHTML = '<i class="fas fa-save"></i> حفظ التعديل'; }
+    document.getElementById('addCaseModal').classList.add('active');
+}
+
+async function saveEditCase() {
+    if (!editingCaseId) return;
+    const name=document.getElementById('cName').value.trim();
+    const price=parseFloat(document.getElementById('cPrice').value);
+    if (!name) return toast("اكتب اسم المريض!","error");
+    if (!price||price<=0) return toast("اكتب سعر الجلسة!","error");
+    const type=document.getElementById('cType').value;
+    const data = {
+        patientName:name, phone:document.getElementById('cPhone').value,
+        address:document.getElementById('cAddr').value, diagnosis:document.getElementById('cDiag').value,
+        sessionPrice:price, type
+    };
+    if (type==='company') {
+        data.company=document.getElementById('cComp').value;
+        data.approvedSessions=parseInt(document.getElementById('cApproved').value)||0;
+        data.companyCoverage=parseFloat(document.getElementById('cCoverage').value)||0;
+    }
+    const saveBtn = document.querySelector('#addCaseModal .btn-save');
+    const oldBtnHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) { saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...'; saveBtn.disabled = true; }
+    const unlockTimer = setTimeout(() => { if (saveBtn) { saveBtn.innerHTML = oldBtnHtml; saveBtn.disabled = false; } }, 15000);
+    try {
+        await db.collection("hv_cases").doc(editingCaseId).update(data);
+        toast(`✅ تم تعديل حالة ${name}`);
+        editingCaseId = null;
+        closeO('addCaseModal');
+        // رجّع الزرار لحالته
+        if (saveBtn) { saveBtn.innerHTML = '<i class="fas fa-check"></i> إضافة الحالة'; }
+    } catch(e) { console.error(e); toast("خطأ أثناء التعديل","error"); }
+    finally {
+        clearTimeout(unlockTimer);
+        if (saveBtn && saveBtn.disabled) { saveBtn.disabled = false; }
+    }
+}
+
+// ===== VIEW CASES MODAL =====
+function viewCases(docId) {
+    const doc=docs.find(d=>d.id===docId); if(!doc) return;
+    document.getElementById('vcDocName').innerText=doc.name;
+    const dcases=cases.filter(c=>c.docId===docId);
+    const list=document.getElementById('vcList');
+    if (!dcases.length) { list.innerHTML='<p style="text-align:center;color:#999;padding:20px;">لا توجد حالات</p>'; }
+    else {
+        list.innerHTML=dcases.map(c=>{
+            const cSess=sessions.filter(s=>s.caseId===c.id);
+            const docs_=c.approvalDocs||[];
+            return `<div style="background:${c.isArchived?'#f0f2f5':'#f8fafc'};border:1px solid #e4e9f0;padding:14px;border-radius:12px;margin-bottom:10px;opacity:${c.isArchived?'0.65':'1'};">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <div>
+                        <span style="font-weight:900;color:#0b132b;">${c.patientName}</span>
+                        <span class="badge ${c.type==='cash'?'badge-cash':'badge-comp'}" style="margin-right:8px;">${c.type==='cash'?'كاش':'شركة'}</span>
+                        ${c.isArchived?'<span class="badge badge-archived">أرشيف</span>':c.isClosed?'<span class="badge badge-closed">مغلقة</span>':'<span class="badge badge-cash">نشطة</span>'}
+                    </div>
+                    <div style="display:flex;gap:5px;">
+                        ${c.isArchived?`<button class="btn-outline purple" style="padding:5px 10px;font-size:0.75rem;" onclick="toggleCase('${c.id}','restore');viewCases('${docId}')"><i class="fas fa-box-open"></i> استرجاع</button>`:
+                          `<button class="btn-outline" style="padding:5px 10px;font-size:0.75rem;border-color:#ffcc80;color:#e65100;" onclick="toggleCase('${c.id}','archive');viewCases('${docId}')"><i class="fas fa-archive"></i> أرشيف</button>`}
+                    </div>
+                </div>
+                <div style="font-size:0.78rem;color:#777;">${c.sessionPrice} ج/جلسة | ${cSess.length} جلسة مسجلة | ${c.address||''}</div>
+                ${docs_.length>0?`<div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;">${docs_.map(d=>`<img src="${d.data}" class="case-doc-thumb" onclick="openImg('${d.data}')" title="${d.name}">`).join('')}</div>`:''}
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('viewCasesModal').classList.add('active');
+}
+
+// ===== PORTAL =====
+async function initPortal(code) {
+    const snap = await db.collection("hv_doctors").where("code","==",code).get();
+    if (snap.empty) {
+        document.getElementById('portalMode').innerHTML=`<div style="text-align:center;padding:60px;"><i class="fas fa-times-circle" style="font-size:3rem;color:#e74c3c;display:block;margin-bottom:14px;"></i><h2>كود غير صحيح!</h2><p style="color:#888;">تأكد من الرابط.</p></div>`;
+        return;
+    }
+    portalDoc=snap.docs[0].data(); portalDoc.id=snap.docs[0].id;
+    document.getElementById('portalDocLabel').innerText='د. '+portalDoc.name;
+    document.getElementById('portalName').innerText=portalDoc.name;
+
+    // فقط حالات هذا الدكتور
+    db.collection("hv_cases").where("docId","==",portalDoc.id).onSnapshot(snap=>{
+        cases=[]; snap.forEach(d=>{let x=d.data();x.id=d.id;cases.push(x);}); renderPortal();
+    });
+    db.collection("hv_sessions").where("docId","==",portalDoc.id).onSnapshot(snap=>{
+        sessions=[]; snap.forEach(d=>{let x=d.data();x.id=d.id;sessions.push(x);}); renderPortal();
+    });
+}
+
+function renderPortal() {
+    if (!portalDoc) return;
+    const now=new Date(), ms=new Date(now.getFullYear(),now.getMonth(),1);
+    const mSess=sessions.filter(s=>new Date(s.date)>=ms);
+    // الحالات النشطة فقط (المقفولة والمؤرشفة تختفي)
+    const activeCases=cases.filter(c=>!c.isArchived && !c.isClosed);
+    const totalAttendance = sessions.length; // كل حضوره
+    document.getElementById('pStats1').innerText=activeCases.length;
+    document.getElementById('pStats2').innerText=mSess.length;
+    document.getElementById('pStats3').innerText=totalAttendance;
+
+    const list=document.getElementById('portalCases');
+    if (!activeCases.length) { list.innerHTML=`<div style="text-align:center;padding:30px;color:#bbb;"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i><p>لا توجد حالات نشطة</p></div>`; return; }
+
+    list.innerHTML=activeCases.map(c=>{
+        const cSess=sessions.filter(s=>s.caseId===c.id);
+        const rem=c.type==='company'?Math.max(0,(c.approvedSessions||0)-cSess.length):null;
+        let waPhone=c.phone?c.phone.trim():'';
+        if (waPhone.startsWith('0')) waPhone='2'+waPhone;
+        else if (!waPhone.startsWith('20')&&waPhone) waPhone='20'+waPhone;
+
+        return `<div class="case-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                <div style="font-size:1rem;font-weight:900;color:#0b132b;">${c.patientName}</div>
+                <span class="badge ${c.type==='cash'?'badge-cash':'badge-comp'}">${c.type==='cash'?'كاش':'شركة'}</span>
+            </div>
+            <div class="case-meta">
+                ${c.address?`<span><i class="fas fa-map-marker-alt"></i> ${c.address}</span>`:''}
+                ${c.diagnosis?`<span><i class="fas fa-diagnoses"></i> ${c.diagnosis}</span>`:''}
+                <span><i class="fas fa-calendar-check"></i> حضر <strong>${cSess.length}</strong> جلسة${rem!==null?' | متبقي: '+rem:''}</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                <button class="btn-session" onclick="openReg('${c.id}')"><i class="fas fa-plus"></i> تسجيل حضور جلسة</button>
+                <button class="btn-session" style="background:linear-gradient(135deg,#7b1fa2,#9c27b0);" onclick="openFollowCard('${c.id}')"><i class="fas fa-calendar-check"></i> كرت المتابعة</button>
+                ${waPhone?`<button class="btn-wa-patient" onclick="window.open('https://wa.me/${waPhone}','_blank')"><i class="fab fa-whatsapp"></i> تواصل مع المريض</button>`:''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openReg(caseId) {
+    const c=cases.find(x=>x.id===caseId); if(!c||!portalDoc) return;
+    activeCaseId=caseId;
+    document.getElementById('regInfo').innerHTML=`<strong>${c.patientName}</strong>${c.address?' | '+c.address:''}`;
+    document.getElementById('regDate').value=new Date().toISOString().split('T')[0];
+    document.getElementById('regNotes').value='';
+    document.getElementById('regModal').classList.add('active');
+}
+
+async function saveSession() {
+    const c=cases.find(x=>x.id===activeCaseId); if(!c||!portalDoc) return;
+    const date=document.getElementById('regDate').value;
+    if (!date) return toast("اختر التاريخ!","error");
+    // النصيب بيتحسب ويتخزن للإدارة بس — الدكتور مايشوفهوش
+    const share=Math.round(c.sessionPrice*portalDoc.percent/100);
+    const saveBtn = document.querySelector('#regModal .btn-save');
+    const oldHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) { saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; saveBtn.disabled = true; }
+    const unlockTimer = setTimeout(() => { if (saveBtn) { saveBtn.innerHTML = oldHtml; saveBtn.disabled = false; } }, 12000);
+    try {
+        await db.collection("hv_sessions").add({docId:portalDoc.id,docName:portalDoc.name,caseId:activeCaseId,patientName:c.patientName,sessionPrice:c.sessionPrice,docShare:share,date,notes:document.getElementById('regNotes').value,timestamp:firebase.firestore.FieldValue.serverTimestamp()});
+        await db.collection("hv_cases").doc(activeCaseId).update({sessionsCount:(c.sessionsCount||0)+1});
+        closeO('regModal');
+        toast(`✅ تم تسجيل حضور الجلسة بتاريخ ${date}`);
+    } catch(e) { toast("خطأ!","error"); }
+    finally {
+        clearTimeout(unlockTimer);
+        if (saveBtn) { saveBtn.innerHTML = oldHtml; saveBtn.disabled = false; }
+    }
+}
+
+function readB64(file) {
+    return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        const to = setTimeout(() => reject(new Error('timeout قراءة الملف')), 10000);
+        fr.onload = e => { clearTimeout(to); resolve(e.target.result); };
+        fr.onerror = () => { clearTimeout(to); reject(new Error('فشل قراءة الملف')); };
+        try { fr.readAsDataURL(file); } catch(e) { clearTimeout(to); reject(e); }
+    });
+}
+
+// ===== PRINT =====
+function printHomeVisits() {
+    const [y,m] = selectedMonth.split('-').map(Number);
+    const monthName = new Date(y,m-1,1).toLocaleDateString('ar-EG',{month:'long',year:'numeric'});
+    document.getElementById('printHeaderMonth').innerText =
+        `شهر ${monthName} | تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}`;
+    window.print();
+}
+</script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+
+
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+
+</body>
+</html>

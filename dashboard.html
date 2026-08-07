@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - لوحة القيادة التحليلية</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="premium.css">
+    <script>
+        if (localStorage.getItem('userRole') === 'reception' || localStorage.getItem('userRole') === 'receptionist') {
+            window.location.href = "reservations.html";
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f3f8; display: flex; overflow-x: hidden; color: #1c1e21; min-height: 100vh; }
+
+        /* HEADER */
+        .header { background: linear-gradient(135deg, #0b132b 0%, #12204a 100%); height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 35px; border-bottom: 2px solid rgba(212,175,55,0.5); z-index: 1000; box-shadow: 0 4px 30px rgba(11,19,43,0.35); }
+        .header-logo { display: flex; align-items: center; gap: 14px; }
+        .header-logo img { height: 46px; }
+        .header-title { color: white; font-size: 1.25rem; font-weight: 900; letter-spacing: 2px; }
+        .header-title span { color: #d4af37; }
+
+        /* SIDEBAR */
+        .sidebar { background: #0e1628; width: 255px; height: 100vh; position: fixed; top: 72px; right: 0; padding-top: 22px; border-left: 1px solid rgba(212,175,55,0.07); }
+        .sidebar a { display: flex; align-items: center; color: rgba(163,174,209,0.8); text-decoration: none; padding: 13px 22px; transition: 0.22s; font-size: 0.95rem; border-right: 2px solid transparent; margin-bottom: 2px; gap: 11px; font-weight: 600; }
+        .sidebar a i { width: 18px; text-align: center; font-size: 0.88rem; }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.04); border-right-color: rgba(212,175,55,0.5); }
+        .sidebar a.active { color: #d4af37; background: rgba(212,175,55,0.09); border-right: 2px solid #d4af37; font-weight: 800; }
+
+        /* MAIN */
+        .main-content { margin-right: 255px; margin-top: 72px; padding: 26px 30px; width: calc(100% - 255px); }
+
+        /* ACTIONS */
+        .action-buttons { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
+        .btn-print-main { background: linear-gradient(135deg, #d4af37, #b8952a); color: #0b132b; border: none; padding: 11px 22px; border-radius: 12px; font-size: 0.95rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(212,175,55,0.4); transition: 0.3s; font-family: 'Tajawal'; }
+        .btn-print-main:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.5); }
+
+        #ratioBanner, #ratioBanner.show { display: none !important; }
+
+        /* FILTERS */
+        .filters-container { display: flex; gap: 14px; margin-bottom: 20px; }
+        .filter-box { flex: 1; background: white; padding: 14px 20px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e4e9f0; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .filter-box h3 { font-size: 0.8rem; color: #aaa; font-weight: 800; letter-spacing: 0.5px; }
+        .filter-input { padding: 8px 13px; font-size: 0.92rem; font-weight: 700; border: 1.5px solid #e4e9f0; border-radius: 9px; outline: none; background: #f8fafc; font-family: 'Tajawal'; transition: 0.25s; color: #0b132b; }
+        .filter-input:focus { border-color: #d4af37; background: white; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+
+        /* NET TOTAL */
+        .net-total-box { background: linear-gradient(135deg, #0b132b 0%, #1a2a5e 55%, #0f3460 100%); color: white; padding: 34px 44px; border-radius: 22px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(212,175,55,0.22); box-shadow: 0 16px 48px rgba(11,19,43,0.22), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; overflow: hidden; }
+        .net-total-box::before { content:''; position:absolute; width:280px; height:280px; background: radial-gradient(circle, rgba(212,175,55,0.11) 0%, transparent 65%); top:-70px; left:-50px; pointer-events:none; }
+        .net-total-box::after  { content:''; position:absolute; width:180px; height:180px; background: radial-gradient(circle, rgba(80,130,255,0.07) 0%, transparent 65%); bottom:-40px; right:-30px; pointer-events:none; }
+        .net-total-box h2 { font-size: 0.78rem; margin-bottom: 12px; color: rgba(212,175,55,0.65); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+        .net-total-box .amount { font-size: 3.8rem; font-weight: 900; color: white; line-height: 1; letter-spacing: -1px; }
+        .net-total-box .amount small { font-size: 1.3rem; opacity: 0.55; font-weight: 700; }
+
+        /* KPI GRID */
+        .grid-kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+        .grid-3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-bottom: 16px; }
+
+        /* KPI CARDS — ألوان مختلفة لكل نوع */
+        .stat-card { background: white; padding: 14px 16px; border-radius: 14px; border: 1px solid #eef1f6; position: relative; overflow: hidden; box-shadow: 0 3px 12px rgba(11,19,43,0.06); transition: 0.25s cubic-bezier(0.34,1.2,0.64,1); }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(11,19,43,0.12); }
+        .stat-card.clickable { cursor: pointer; }
+        .stat-card.clickable::after { content: '👆 تفاصيل'; position: absolute; bottom: 6px; left: 8px; font-size: 0.58rem; color: #d4af37; font-weight: 800; opacity: 0.75; }
+        .kpi-modal-overlay { position: fixed; inset: 0; background: rgba(11,19,43,0.75); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+        .kpi-modal-box { background: white; border-radius: 20px; padding: 26px; max-width: 540px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .kpi-modal-box table { width: 100%; border-collapse: collapse; }
+        .kpi-modal-box th { background: #0b132b; color: #d4af37; padding: 10px 14px; font-size: 0.8rem; font-weight: 800; text-align: right; }
+        .kpi-modal-box td { padding: 9px 14px; border-bottom: 1px solid #f0f2f5; font-size: 0.88rem; font-weight: 700; }
+        .kpi-modal-box tr:hover td { background: #fdfcf5; }
+        .kpi-modal-empty { text-align: center; padding: 30px; color: #aaa; font-size: 0.95rem; }
+        .stat-card::before { content:''; position:absolute; top:0; right:0; width:4px; height:100%; background: linear-gradient(180deg, #d4af37, rgba(212,175,55,0.2)); }
+        .stat-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .stat-title { color: #9aa0b0; font-size: 0.68rem; margin-bottom: 6px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.3; }
+        .stat-value { color: #0b132b; font-size: 1.5rem; font-weight: 900; line-height: 1; }
+        .stat-note  { display: none !important; }
+
+        /* SECTION BOXES */
+        .section-box { background: white; padding: 18px 20px; border-radius: 16px; border: 1px solid #e8edf4; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .section-header { border-bottom: 1px solid #f0f4f8; padding-bottom: 10px; margin-bottom: 13px; color: #0b132b; font-size: 0.98rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+
+        /* SCROLLABLE */
+        .scrollable-box { max-height: 230px; overflow-y: auto; }
+        .scrollable-box::-webkit-scrollbar { width: 3px; }
+        .scrollable-box::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th { background: #f8fafc; padding: 10px 12px; border-bottom: 1px solid #edf1f6; color: #9aa0b0; position: sticky; top: 0; font-weight: 800; font-size: 0.76rem; letter-spacing: 0.8px; text-transform: uppercase; }
+        td { padding: 9px 12px; border-bottom: 1px solid #f4f7fb; font-weight: 700; font-size: 0.92rem; }
+        tr:hover td { background: #fdfcf5; }
+
+        /* MED STATS */
+        .med-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .med-stat { background: #f8fafc; padding: 10px 13px; border-radius: 11px; border: 1px solid #edf1f6; display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: #777; font-size: 0.83rem; transition: 0.2s; }
+        .med-stat:hover { background: #fdfdf5; border-color: rgba(212,175,55,0.25); }
+        .med-stat span { color: #0b132b; font-size: 1.2rem; font-weight: 900; }
+
+        /* HOUR ROW */
+        .booking-hour-row { display: flex; justify-content: space-between; padding: 8px 12px; background: #f8fafc; border-radius: 9px; margin-bottom: 5px; font-weight: 700; border: 1px solid #edf1f6; font-size: 0.86rem; transition: 0.2s; }
+        .booking-hour-row:hover { background: #f0f4ff; border-color: rgba(100,130,255,0.2); }
+
+        .manager-owner-only { display: none; }
+        .print-only { display: none; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 6mm; }
+            body { background: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .header, .sidebar, .filters-container, .action-buttons, #serverStatus, #ratioBanner, .sidebar-overlay, .mobile-menu-btn { display: none !important; }
+            .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; background: #ffffff !important; }
+            /* كل قسم يفضل كامل ومايتقطعش نصّه، لكن يقدر ينزل للصفحة اللي بعده بشكل نظيف */
+            .grid-kpi, .grid-3, .med-grid, #doctorsToday, .section-box, #smartAlerts, .net-total-box {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .print-only { display: block !important; margin-bottom: 10px; }
+            .print-header-banner { background: #0b132b !important; color: white !important; padding: 12px 18px !important; border-radius: 10px !important; display: flex !important; justify-content: space-between !important; align-items: center !important; border: 2px solid #d4af37 !important; }
+            .print-header-banner img { height: 50px !important; background: white !important; padding: 4px !important; border-radius: 8px !important; }
+            .print-header-text h2 { color: #d4af37 !important; font-size: 1.3rem !important; margin-bottom: 3px !important; font-weight: 900 !important; }
+            .print-header-text h3 { color: white !important; font-size: 0.9rem !important; font-weight: 700 !important; }
+            .net-total-box { padding: 10px !important; margin-bottom: 8px !important; }
+            .net-total-box h2 { font-size: 0.65rem !important; }
+            .net-total-box .amount { font-size: 2rem !important; }
+            .grid-kpi { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; margin-bottom: 8px !important; }
+            .stat-card { padding: 7px !important; border: 1.5px solid #d4af37 !important; border-radius: 6px !important; text-align: center !important; background: #fdfbf7 !important; }
+            .stat-card::before, .stat-card::after { display: none !important; }
+            .stat-icon { width: 24px !important; height: 24px !important; margin-bottom: 4px !important; font-size: 0.7rem !important; }
+            .stat-value { font-size: 1.1rem !important; }
+            .stat-title { font-size: 0.6rem !important; margin-bottom: 4px !important; }
+            .grid-3 { display: flex !important; justify-content: space-between !important; gap: 6px !important; margin-bottom: 6px !important; }
+            .section-box { flex: 1 !important; padding: 6px !important; border: 1.5px solid #0b132b !important; border-radius: 6px !important; }
+            .section-header { font-size: 0.78rem !important; color: #d4af37 !important; margin-bottom: 4px !important; }
+            .scrollable-box { max-height: none !important; overflow: visible !important; }
+            table, th, td { border: 1px solid #ccc !important; padding: 2px !important; font-size: 0.62rem !important; }
+            th { background: #0b132b !important; color: #d4af37 !important; }
+            .med-grid { gap: 4px !important; margin-bottom: 6px !important; }
+            .med-stat { padding: 4px !important; font-size: 0.65rem !important; border: 1.5px solid #ccc !important; }
+            #ai-fab, #ai-box, #ls-lang-btn, #floatBackupBtn, #backupReminder, #ls-update-btn { display: none !important; }
+            #doctorsToday > div:last-child { grid-template-columns: repeat(8, 1fr) !important; gap: 3px !important; }
+            #doctorsToday > div:last-child > div { padding: 3px !important; border-radius: 5px !important; border-top-width: 2px !important; }
+            #doctorsToday > div:last-child > div * { font-size: 0.5rem !important; line-height: 1.15 !important; }
+            #doctorsToday > div:first-child * { font-size: 0.62rem !important; margin-bottom: 4px !important; }
+            #smartAlerts > div:last-child { grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; }
+            #smartAlerts > div:last-child > div { padding: 5px !important; }
+            #smartAlerts > div:last-child > div * { font-size: 0.5rem !important; }
+        }
+    </style>
+
+    <style>
+
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo">
+            <img src="logo.png" alt="Life Sport Logo" onerror="this.src='app-icon.png'">
+            <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <div id="serverStatus" style="color:#27ae60; font-weight:bold; font-size:0.9rem;"><i class="fas fa-check-circle"></i> متصل</div>
+            <div id="headerUserInfo" style="color:#d4af37; font-weight:800; background:#1a1f36; padding:8px 20px; border-radius:20px; border:1px solid #d4af37;">جاري التحميل...</div>
+        </div>
+    </header>
+
+    <nav class="sidebar">
+        <a href="dashboard.html" class="active"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+        <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+        <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+        <a href="patients.html"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html" id="adminPatientsLink" style="display:none;"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+        <a href="ledger.html"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+        <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+        <a href="hr.html"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+        <a href="analytics.html"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+        <a href="support.html"><i class="fas fa-shield-alt"></i> الدعم</a>
+    </nav>
+    
+    <main class="main-content">
+        
+        <div class="action-buttons">
+            <button class="btn-print-main" onclick="window.print()"><i class="fas fa-print"></i> طباعة التقرير اليومي</button>
+            <!-- شريط النسبة - يظهر تلقائي لو النسبة مفعّلة -->
+            <div id="ratioBanner">
+                <i class="fas fa-percentage"></i>
+                <span id="ratioBannerText">يظهر <strong id="ratioBannerPct">20%</strong> من إجمالي الكاش</span>
+            </div>
+        </div>
+
+        <div class="print-only">
+            <div class="print-header-banner">
+                <div class="print-header-text">
+                    <h2>تقرير لوحة القيادة والمؤشرات اليومية</h2>
+                    <h3 id="printDateDayLabel"></h3>
+                </div>
+                <img src="logo.png" alt="Life Sport Logo" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <div class="filters-container">
+            <div class="filter-box">
+                <h3>التاريخ:</h3>
+                <input type="date" id="dateSelector" class="filter-input" onchange="renderDashboard()">
+            </div>
+            <div class="filter-box">
+                <h3>الفرع:</h3>
+                <select id="branchSelector" class="filter-input" onchange="renderDashboard()">
+                    <option value="all">كل الفروع</option>
+                    <option value="الإدارة المركزية">الإدارة المركزية (الأدمن)</option>
+                    <option value="المهندسين">المهندسين</option>
+                    <option value="أكتوبر">أكتوبر</option>
+                    <option value="الهرم">الهرم</option>
+                    <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- التنبيهات الذكية -->
+        <div id="smartAlerts" style="display:none; margin-bottom:18px;"></div>
+
+        <!-- حضور الدكاترة اليوم -->
+        <div id="doctorsToday" style="display:none; margin-bottom:18px;"></div>
+
+        <div class="net-total-box">
+            <h2>صافي الإيرادات اليومية (كاش + تحمل − مصروفات الكاش)</h2>
+            <div class="amount" id="netTotalValue">0 <small style="font-size:1.5rem;">ج.م</small></div>
+            <p id="drawerCashValue" style="margin-top:15px; font-weight:bold; opacity:0.9; font-size:1.2rem; color:#d4af37;">صافي السيولة النقدية (في الدرج فقط): 0 ج.م</p>
+        </div>
+
+        <!-- أزرار الملخص -->
+        <div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+            <button onclick="sendDashWhatsApp()" style="flex:1; min-width:200px; background:linear-gradient(135deg,#25D366,#128C7E); color:white; border:none; padding:14px; border-radius:12px; font-size:0.98rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; font-family:'Tajawal'; box-shadow:0 4px 15px rgba(37,211,102,0.25);">
+                <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> إرسال ملخص اليوم واتساب
+            </button>
+            <button onclick="downloadDashPDF()" style="flex:1; min-width:200px; background:linear-gradient(135deg,#e74c3c,#c0392b); color:white; border:none; padding:14px; border-radius:12px; font-size:0.98rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; font-family:'Tajawal'; box-shadow:0 4px 15px rgba(231,76,60,0.25);">
+                <i class="fas fa-file-pdf" style="font-size:1.2rem;"></i> تحميل ملخص اليوم PDF
+            </button>
+        </div>
+
+        <div class="grid-kpi">
+            <div class="stat-card clickable" onclick="showKpiModal('cash')">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="stat-title">كاش اليوم</div>
+                <div class="stat-value" id="kpiCash">0</div>
+                <div class="stat-note" id="kpiCashNote" style="display:none;"></div>
+            </div>
+            <div class="stat-card clickable" onclick="showKpiModal('insta')"><div class="stat-icon" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);"><i class="fas fa-mobile-alt"></i></div><div class="stat-title">إنستاباي</div><div class="stat-value" id="kpiInstapay">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('copay')"><div class="stat-icon" style="background:linear-gradient(135deg,#2980b9,#1f6391);"><i class="fas fa-hospital"></i></div><div class="stat-title">تحمل (تأمين)</div><div class="stat-value" id="kpiCopay">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('expCash')"><div class="stat-icon" style="background:linear-gradient(135deg,#c0392b,#922b21);"><i class="fas fa-coins"></i></div><div class="stat-title">مصروفات الكاش</div><div class="stat-value" id="kpiExpCash" style="color:#e74c3c;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('expInsta')"><div class="stat-icon" style="background:linear-gradient(135deg,#6c3483,#5b2c6f);"><i class="fas fa-receipt"></i></div><div class="stat-title">مصروفات الإنستاباي</div><div class="stat-value" id="kpiExpInsta" style="color:#8e44ad;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('netAll')"><div class="stat-icon" style="background:linear-gradient(135deg,#d4af37,#b7950b);"><i class="fas fa-sack-dollar"></i></div><div class="stat-title">إجمالي كاش+تحمل+إنستاباي−مصروفات</div><div class="stat-value" id="kpiNetAll" style="color:#b7950b;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('companies')"><div class="stat-icon" style="background:linear-gradient(135deg,#16a085,#0e6655);"><i class="fas fa-file-invoice-dollar"></i></div><div class="stat-title">مطالبات شركات التأمين</div><div class="stat-value" id="kpiCompanies">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('attend')"><div class="stat-icon" style="background:linear-gradient(135deg,#27ae60,#1e8449);"><i class="fas fa-user-check"></i></div><div class="stat-title">إجمالي الحضور</div><div class="stat-value" id="kpiTotalCases" style="color:#27ae60;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('firstTime')"><div class="stat-icon" style="background:linear-gradient(135deg,#f39c12,#d68910);"><i class="fas fa-star"></i></div><div class="stat-title">حالات جديدة (First Time)</div><div class="stat-value" id="kpiFirstTime">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('absence')"><div class="stat-icon" style="background:linear-gradient(135deg,#e74c3c,#c0392b);"><i class="fas fa-user-times"></i></div><div class="stat-title">إجمالي الغياب</div><div class="stat-value" id="kpiAbsence" style="color:#e74c3c;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('rehab')"><div class="stat-icon" style="background:linear-gradient(135deg,#8e44ad,#6a1b9a);"><i class="fas fa-person-walking"></i></div><div class="stat-title">حالات التأهيل اليوم</div><div class="stat-value" id="kpiRehab" style="color:#8e44ad;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('nutrition')"><div class="stat-icon" style="background:linear-gradient(135deg,#16a085,#0e6655);"><i class="fas fa-apple-alt"></i></div><div class="stat-title">حالات التغذية اليوم</div><div class="stat-value" id="kpiNutrition" style="color:#16865b;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('recovery')"><div class="stat-icon" style="background:linear-gradient(135deg,#6a1b9a,#8e44ad);"><i class="fas fa-spa"></i></div><div class="stat-title">حالات الريكفري اليوم</div><div class="stat-value" id="kpiRecovery" style="color:#6a1b9a;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('exam')"><div class="stat-icon" style="background:linear-gradient(135deg,#0097a7,#006064);"><i class="fas fa-stethoscope"></i></div><div class="stat-title">كشوفات اليوم (عدد)</div><div class="stat-value" id="kpiExamCount" style="color:#0097a7;">0</div></div>
+            <div class="stat-card clickable" onclick="showKpiModal('examTotal')"><div class="stat-icon" style="background:linear-gradient(135deg,#00796b,#004d40);"><i class="fas fa-file-medical-alt"></i></div><div class="stat-title">إجمالي إيراد الكشوفات</div><div class="stat-value" id="kpiExamTotal" style="color:#00796b;">0</div></div>
+            <div class="stat-card manager-owner-only"><div class="stat-icon" style="background:linear-gradient(135deg,#34495e,#2c3e50);"><i class="fas fa-users"></i></div><div class="stat-title">رواتب الطاقم المستحقة</div><div class="stat-value" id="kpiSalaries">0</div></div>
+        </div>
+
+        <div class="grid-3">
+            <div class="section-box">
+                <h3 class="section-header"><i class="fas fa-coins" style="color:#e74c3c;"></i> مصروفات اليوم</h3>
+                <div class="scrollable-box">
+                    <table><thead><tr><th>البيان</th><th>المبلغ</th></tr></thead><tbody id="expenseTable"></tbody></table>
+                </div>
+            </div>
+            <div class="section-box">
+                <h3 class="section-header"><i class="fas fa-user-clock" style="color:#f39c12;"></i> أسباب الغياب</h3>
+                <div class="scrollable-box">
+                    <table><thead><tr><th>المريض</th><th>السبب</th></tr></thead><tbody id="absenceTable"></tbody></table>
+                </div>
+            </div>
+            <div class="section-box">
+                <h3 class="section-header"><i class="fas fa-stopwatch" style="color:#007bff;"></i> كثافة الحجوزات بالساعة</h3>
+                <div class="scrollable-box" id="hourlyBookingsContainer"></div>
+            </div>
+        </div>
+
+        <div class="section-box" style="margin-top:10px;">
+            <h3 class="section-header"><i class="fas fa-stethoscope" style="color:#d4af37;"></i> تحليل تفصيلي للفئات وأنواع الجلسات</h3>
+            <div class="med-grid">
+                <div class="med-stat">فئة A <span id="catA">0</span></div>
+                <div class="med-stat">فئة B <span id="catB">0</span></div>
+                <div class="med-stat">فئة C <span id="catC">0</span></div>
+            </div>
+            <div class="med-grid" style="grid-template-columns:repeat(3,1fr);">
+                <div class="med-stat">علاج طبيعي عادي <span id="tNormal">0</span></div>
+                <div class="med-stat">تأهيل بعد عملية <span id="tRehab">0</span></div>
+                <div class="med-stat">كشف طبيب <span id="tDoc">0</span></div>
+                <div class="med-stat">طبيعي (عضو واحد) <span id="tPt1">0</span></div>
+                <div class="med-stat">طبيعي (عضوين) <span id="tPt2">0</span></div>
+                <div class="med-stat">يدوي (عضو واحد) <span id="tMan1">0</span></div>
+                <div class="med-stat">يدوي (عضوين) <span id="tMan2">0</span></div>
+                <div class="med-stat">تصادمي (عضو واحد) <span id="tShock1">0</span></div>
+                <div class="med-stat">تصادمي (عضوين) <span id="tShock2">0</span></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+    // تأكيد الاتصال بعد 3 ثواني
+    setTimeout(() => {
+        const st = document.getElementById('serverStatus');
+        if (st && st.innerHTML.includes('جاري')) {
+            st.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60;"></i> متصل';
+        }
+    }, 3000);
+
+        let globalLedger = [], globalExpenses = [], globalBookings = [], globalReports = [], globalInsuDB = {}, globalCashDB = {}, globalEmployees = [];
+        let userBranch = "المهندسين", isCentralAdmin = false;
+
+        // ===== نسبة الكاش =====
+        let cashRatioEnabled = false;
+        let cashRatioValue   = 20; // النسبة الافتراضية 20%
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+            const name = localStorage.getItem('userName') || "مستخدم";
+            userBranch = localStorage.getItem('userBranch') || "المهندسين";
+            
+            if (role === 'owner' || userBranch === 'الإدارة المركزية') {
+                isCentralAdmin = true;
+                document.querySelectorAll('.manager-owner-only').forEach(el => el.style.display = 'flex');
+                const apl = document.getElementById('adminPatientsLink');
+                if (apl) apl.style.display = 'flex';
+            }
+            document.getElementById('headerUserInfo').innerText = `أهلاً: ${name} | ${userBranch}`;
+
+            const bSelect = document.getElementById('branchSelector');
+            if (!isCentralAdmin) { bSelect.value = userBranch; bSelect.disabled = true; }
+            else { bSelect.value = 'all'; }
+            
+            document.getElementById('dateSelector').value = new Date().toISOString().split('T')[0];
+            fetchData();
+        });
+
+        function fetchData() {
+            // ===== قراءة إعدادات النسبة =====
+            db.collection('settings').doc('system_settings').onSnapshot(doc => {
+                if (doc.exists) {
+                    cashRatioEnabled = doc.data().cashRatioEnabled === true;
+                    cashRatioValue   = doc.data().cashRatio || 20;
+                }
+                // تحديث شريط النسبة
+                const banner = document.getElementById('ratioBanner');
+                const pctEl  = document.getElementById('ratioBannerPct');
+                if (cashRatioEnabled) {
+                    banner.classList.add('show');
+                    pctEl.innerText = cashRatioValue + '%';
+                } else {
+                    banner.classList.remove('show');
+                }
+                renderDashboard();
+            });
+
+            db.collection("daily_ledger").orderBy("timestamp","desc").limit(1500).onSnapshot(s => {
+                globalLedger = [];
+                s.forEach(d => { const data = d.data(); data._id = d.id; globalLedger.push(data); });
+                renderDashboard();
+            }, err => {
+                // fallback لو مفيش timestamp
+                db.collection("daily_ledger").limit(1500).onSnapshot(s => {
+                    globalLedger = [];
+                    s.forEach(d => { const data = d.data(); data._id = d.id; globalLedger.push(data); });
+                    renderDashboard();
+                });
+            });
+            db.collection("daily_transactions").orderBy("timestamp","desc").limit(800).onSnapshot(s => {
+                globalExpenses = []; s.forEach(d => globalExpenses.push(d.data())); renderDashboard();
+            }, err => {
+                db.collection("daily_transactions").limit(800).onSnapshot(s => {
+                    globalExpenses = []; s.forEach(d => globalExpenses.push(d.data())); renderDashboard();
+                });
+            });
+            db.collection("reservations").orderBy("createdAt","desc").limit(1200).onSnapshot(s => {
+                globalBookings = []; s.forEach(d => globalBookings.push(d.data())); renderDashboard();
+            }, err => {
+                db.collection("reservations").limit(1200).onSnapshot(s => {
+                    globalBookings = []; s.forEach(d => globalBookings.push(d.data())); renderDashboard();
+                });
+            });
+            db.collection("follow_up_reports").limit(800).onSnapshot(s => {
+                globalReports = []; s.forEach(d => globalReports.push(d.data())); renderDashboard();
+            });
+            db.collection("patients_insu").limit(1200).onSnapshot(s => {
+                globalInsuDB = {}; s.forEach(d => { globalInsuDB[d.id] = d.data(); }); renderDashboard();
+            });
+            db.collection("patients_cash").limit(1200).onSnapshot(s => {
+                globalCashDB = {}; s.forEach(d => { globalCashDB[d.id] = d.data(); }); renderDashboard();
+            });
+            db.collection("employees").onSnapshot(s => {
+                globalEmployees = []; s.forEach(d => globalEmployees.push(d.data())); renderDashboard();
+            });
+        }
+
+        function isEntryOnDate(entry, dateInput) {
+            // التاريخ الذي كتبه المستخدم هو تاريخ الحركة؛ timestamp وقت التسجيل فقط.
+            const dbDate = entry.date || entry.Date;
+            if (typeof dbDate.toDate === 'function') {
+                const d = dbDate.toDate();
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` === dateInput;
+            }
+            if (typeof dbDate === 'string') {
+                const [y, m, d] = dateInput.split('-');
+                return [dateInput, `${parseInt(d)}/${parseInt(m)}/${y}`, `${d}/${m}/${y}`, `${y}/${m}/${d}`]
+                    .some(f => dbDate === f || dbDate.startsWith(f + ' '));
+            }
+            if (entry.timestamp && typeof entry.timestamp.toDate === 'function') {
+                const d = entry.timestamp.toDate();
+                const tY = d.getFullYear(), tM = String(d.getMonth()+1).padStart(2,'0'), tD = String(d.getDate()).padStart(2,'0');
+                return `${tY}-${tM}-${tD}` === dateInput;
+            }
+            return false;
+        }
+
+        function renderDashboard() {
+            const dateInput = document.getElementById('dateSelector').value;
+            if (!dateInput) return;
+            const branch = document.getElementById('branchSelector').value;
+            
+            const dateObj = new Date(dateInput + 'T00:00:00');
+            const dayName = dateObj.toLocaleDateString('ar-EG', { weekday: 'long' });
+            document.getElementById('printDateDayLabel').innerText = `الفرع: ${branch === 'all' ? 'الكل' : branch} | يوم ${dayName} ${dateInput}`;
+
+            let stats = {
+                cash: 0, copay: 0, insta: 0, exp: 0,
+                expCash: 0, expInsta: 0,
+                examCount: 0, examTotal: 0,
+                absCount: 0, insuComp: 0, salaries: 0,
+                A: 0, B: 0, C: 0,
+                tNormal: 0, tRehab: 0, tPt1: 0, tPt2: 0,
+                tMan1: 0, tMan2: 0, tShock1: 0, tShock2: 0, tDoc: 0
+            };
+
+            const attendedPatients = new Set();
+            let firstTimeCount = 0;
+
+            // قوائم الأسماء لكل كارت
+            const kpiNames = {
+                cash: [], copay: [], insta: [],
+                attend: [], firstTime: [], rehab: [],
+                expCash: [], expInsta: [], exam: [], nutrition: [], recovery: []
+            };
+
+            globalLedger.forEach(entry => {
+                const eBranch = entry.branch || 'المهندسين';
+                if (!isEntryOnDate(entry, dateInput)) return;
+                if (branch !== 'all' && eBranch !== branch) return;
+
+                const amount    = parseFloat(entry.amount) || 0;
+                const eType     = String(entry.type || '');
+                const isInstapay = entry.method === 'instapay';
+                const isInsu    = eType.includes('تحمل') || eType.includes('تأمين');
+                const isExam    = entry.isExam === true || eType === 'كشف';
+                const isPaymentOnly = entry.isPaymentOnly === true || entry.isPaymentOnly === 'true' || eType.includes('فرق جلسة') || eType.includes('فرق جلسه');
+                const isRefundEntry = entry.isRefund === true || entry.isRefund === 'true' || amount < 0;
+                if (entry.isCompanyAddition === true) {
+                    stats.insuComp += amount;
+                    kpiNames.companies = kpiNames.companies || [];
+                    kpiNames.companies.push({name:entry.patientName||'إضافة شركات',amount,extra:'إضافة يدوية'});
+                    return;
+                }
+                if (eType.includes('تغذية')) kpiNames.nutrition.push({name:(entry.patientName||'-'),amount,extra:entry.notes||'-'});
+                if (eType.includes('ريكفري')) kpiNames.recovery.push({name:(entry.patientName||'-'),amount,extra:entry.notes||'-'});
+
+                // الكشف يُحسب في الكاش ويُعدّ منفصلاً
+                if (isExam) {
+                    stats.examCount++;
+                    stats.examTotal += amount;
+                    if (isInstapay) stats.insta += amount;
+                    else stats.cash += amount;
+                    const pN = (entry.patientName || entry.name || '').trim();
+                    if (pN) {
+                        kpiNames.exam.push({ name: pN, amount });
+                        if (!attendedPatients.has(pN)) {
+                            attendedPatients.add(pN);
+                            kpiNames.attend.push({ name: pN });
+                            firstTimeCount++;
+                            kpiNames.firstTime.push({ name: pN });
+                        }
+                    }
+                    return; // لا يدخل في حسابات الجلسات العادية
+                }
+
+                // المبلغ يتحسب في نوعه الصح (تحمل/كاش)
+                if (isInstapay) stats.insta += amount;
+                else if (isInsu) stats.copay += amount;
+                else stats.cash += amount;
+
+                const pName = (entry.patientName || entry.name || '').trim();
+                if (!pName) return;
+
+                // أسماء لكل نوع (مع المبلغ)
+                if (isInsu) kpiNames.copay.push({ name: pName, amount });
+                else        kpiNames.cash.push({ name: pName, amount });
+                if (isInstapay) kpiNames.insta.push({ name: pName, amount });
+
+                // الدفعات وفروق الجلسات تدخل في المال فقط، وليست حضوراً أو حالة جديدة.
+                if (isPaymentOnly || isRefundEntry) return;
+
+                if (attendedPatients.has(pName)) return;
+                attendedPatients.add(pName);
+                kpiNames.attend.push({ name: pName });
+
+                const pData = isInsu ? (globalInsuDB[pName] || {}) : (globalCashDB[pName] || {});
+                if (isInsu) {
+                    const compPrice = parseFloat(pData.price || 0);
+                    stats.insuComp += compPrice;
+                    kpiNames.companies = kpiNames.companies || [];
+                    kpiNames.companies.push({ name: pName, amount: compPrice, extra: pData.comp || '' });
+                }
+                if (isInsu) {
+                    if (pData.cat === 'A') stats.A++;
+                    else if (pData.cat === 'B') stats.B++;
+                    else if (pData.cat === 'C') stats.C++;
+                }
+
+                const sType = String(pData.type || pData.sessionType || '');
+                if      (sType.includes('تأهيل بعد عملية'))               stats.tRehab++;
+                else if (sType.includes('طبيعي (عضوين)'))                 stats.tPt2++;
+                else if (sType.includes('طبيعي (عضو واحد)'))              stats.tPt1++;
+                else if (sType.includes('يدوي (عضوين)'))                  stats.tMan2++;
+                else if (sType.includes('يدوي (عضو واحد)'))               stats.tMan1++;
+                else if (sType.includes('تصادمي (عضوين)'))                stats.tShock2++;
+                else if (sType.includes('تصادمي (عضو واحد)'))             stats.tShock1++;
+                else if (sType.includes('كشف طبيب'))                      stats.tDoc++;
+                else                                                        stats.tNormal++;
+
+                if (parseInt(pData.attended || 0) === 1) {
+                    firstTimeCount++;
+                    kpiNames.firstTime.push({ name: pName });
+                }
+            });
+
+            // مصروفات
+            let expHtml = '';
+            let instaTransferDash = 0;
+            globalExpenses.forEach(ex => {
+                const exBranch = ex.branch || 'المهندسين';
+                if (!isEntryOnDate(ex, dateInput)) return;
+                if (branch !== 'all' && exBranch !== branch) return;
+                const exAmt = parseFloat(ex.amount) || 0;
+                if (ex.type === 'instapay') {
+                    if (ex.isTransfer) {
+                        // تحويل داخلي: الاتجاه محفوظ صراحة للحركات الجديدة.
+                        // الحركات القديمة بلا اتجاه تعتبر كاش → إنستاباي.
+                        if (ex.transferDirection === 'instapay_to_cash') {
+                            stats.cash += exAmt;
+                            stats.insta -= exAmt;
+                        } else {
+                            stats.insta += exAmt;
+                            instaTransferDash += exAmt;
+                        }
+                    } else {
+                        // مصروف حقيقي اتصرف من الإنستاباي
+                        expHtml += `<tr><td>${ex.reason||'مصروف إنستاباي'} <span style="font-size:0.7rem;color:#8e44ad;">(إنستاباي)</span></td><td style="color:#e74c3c; font-weight:bold;">${ex.amount}</td></tr>`;
+                        // يظل رصيد الإنستاباي المعروض إجمالي المقبوضات،
+                        // ويُخصم مصروفه مرة واحدة فقط داخل الإجمالي النهائي.
+                        stats.exp      += exAmt;
+                        stats.expInsta += exAmt;
+                        kpiNames.expInsta.push({ name: ex.reason || 'مصروف إنستاباي', amount: exAmt });
+                    }
+                } else if (!ex.isRefund) {
+                    expHtml += `<tr><td>${ex.reason}</td><td style="color:#e74c3c; font-weight:bold;">${ex.amount}</td></tr>`;
+                    stats.exp     += exAmt;
+                    stats.expCash += exAmt;
+                    kpiNames.expCash.push({ name: ex.reason || 'مصروف', amount: exAmt });
+                }
+            });
+            // اخصم التحويلات من الكاش
+            stats.cash = Math.max(0, stats.cash - instaTransferDash);
+            document.getElementById('expenseTable').innerHTML = expHtml || '<tr><td colspan="2" style="text-align:center; color:#999;">لا يوجد</td></tr>';
+
+            // غياب
+            let absHtml = '';
+            const kpiAbsNames = [];
+            globalReports.forEach(r => {
+                const rBranch = r.branch || 'المهندسين';
+                if (!isEntryOnDate(r, dateInput)) return;
+                if (branch !== 'all' && rBranch !== branch) return;
+                absHtml += `<tr><td>${r.patientName}<div style="font-size:0.72rem;color:#999;">📅 ${r.date||'-'}</div></td><td style="color:#e74c3c; font-weight:bold;">${r.reason}${r.notes?`<div style="font-size:0.72rem;color:#888;font-weight:normal;">${r.notes}</div>`:''}</td></tr>`;
+                kpiAbsNames.push({ name: r.patientName, extra: r.reason || '' });
+                stats.absCount++;
+            });
+            document.getElementById('absenceTable').innerHTML = absHtml || '<tr><td colspan="2" style="text-align:center; color:#999;">لم يُسجل غياب</td></tr>';
+
+            // كثافة الحجوزات
+            const hourMap = {};
+            globalBookings.forEach(b => {
+                const bBranch = b.branch || 'المهندسين';
+                if (!isEntryOnDate(b, dateInput)) return;
+                if (branch !== 'all' && bBranch !== branch) return;
+                const time = b.time || "غير محدد";
+                hourMap[time] = (hourMap[time] || 0) + 1;
+            });
+            document.getElementById('hourlyBookingsContainer').innerHTML = Object.keys(hourMap).sort().map(h =>
+                `<div class="booking-hour-row"><span>الساعة ${h}</span><span style="color:#007bff;">${hourMap[h]} حجز</span></div>`
+            ).join('') || '<div style="text-align:center; padding:15px; color:#999;">لا توجد حجوزات</div>';
+
+            // حالات التأهيل النهاردة
+            let rehabCount = 0;
+            globalBookings.forEach(b => {
+                const bBranch = b.branch || 'المهندسين';
+                if (!isEntryOnDate(b, dateInput)) return;
+                if (branch !== 'all' && bBranch !== branch) return;
+                if ((b.sessionType||'').includes('تأهيل')) {
+                    rehabCount++;
+                    kpiNames.rehab.push({ name: b.patientName || b.name || 'غير محدد', extra: b.time || '' });
+                }
+            });
+            const rehabEl = document.getElementById('kpiRehab');
+            if (rehabEl) rehabEl.innerText = rehabCount;
+
+            // رواتب
+            globalEmployees.forEach(e => {
+                if (branch === 'all' || (e.branch || 'المهندسين') === branch)
+                    stats.salaries += parseFloat(e.salary || 0);
+            });
+
+            // ===== تطبيق نسبة الكاش =====
+            const rawCash = stats.cash; // الكاش الحقيقي الكامل
+            const displayCash = cashRatioEnabled
+                ? Math.round(rawCash * cashRatioValue / 100)
+                : rawCash;
+
+            // الصافي الرئيسي = كاش + تحمل - مصروفات الكاش
+            const netCashCopay    = displayCash + stats.copay - stats.expCash;
+            const netAllRevenue   = displayCash + stats.copay + stats.insta - stats.exp;
+
+            // ===== تحديث الشاشة =====
+            document.getElementById('netTotalValue').innerHTML    = `${netCashCopay.toLocaleString()} <small style="font-size:1.5rem;">ج.م</small>`;
+            document.getElementById('drawerCashValue').innerText  = `صافي السيولة النقدية (في الدرج فقط): ${netCashCopay.toLocaleString()} ج.م`;
+
+            // كاش مع ملاحظة النسبة
+            document.getElementById('kpiCash').innerText = displayCash.toLocaleString();
+            document.getElementById('kpiCashNote').style.display = 'none';
+
+            document.getElementById('kpiCopay').innerText      = stats.copay.toLocaleString();
+            document.getElementById('kpiInstapay').innerText   = stats.insta.toLocaleString();
+            document.getElementById('kpiExpCash').innerText    = stats.expCash.toLocaleString();
+            document.getElementById('kpiExpInsta').innerText   = stats.expInsta.toLocaleString();
+            document.getElementById('kpiNetAll').innerText     = netAllRevenue.toLocaleString();
+            document.getElementById('kpiCompanies').innerText  = stats.insuComp.toLocaleString();
+            document.getElementById('kpiSalaries').innerText  = stats.salaries.toLocaleString();
+            document.getElementById('kpiTotalCases').innerText = attendedPatients.size;
+            document.getElementById('kpiFirstTime').innerText  = firstTimeCount;
+            document.getElementById('kpiAbsence').innerText    = stats.absCount;
+            document.getElementById('kpiExamCount').innerText  = stats.examCount;
+            document.getElementById('kpiExamTotal').innerText  = stats.examTotal.toLocaleString();
+            document.getElementById('kpiNutrition').innerText = kpiNames.nutrition.length;
+            document.getElementById('kpiRecovery').innerText = kpiNames.recovery.length;
+
+            // ===== ربط onclick على الكروت =====
+            window._kpiData = {
+                cash:      { title: '💵 مرضى الكاش', cols: ['الاسم','المبلغ'], rows: kpiNames.cash.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج'])) },
+                copay:     { title: '🏥 مرضى التحمل (تأمين)', cols: ['الاسم','المبلغ'], rows: kpiNames.copay.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج'])) },
+                insta:     { title: '📱 مرضى الإنستاباي', cols: ['الاسم','المبلغ'], rows: kpiNames.insta.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج'])) },
+                expCash:   { title: '🔴 تفاصيل مصروفات الكاش', cols: ['البيان','المبلغ'], rows: kpiNames.expCash.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج'])) },
+                expInsta:  { title: '🟣 تفاصيل مصروفات الإنستاباي', cols: ['البيان','المبلغ'], rows: kpiNames.expInsta.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج'])) },
+                attend:    { title: '✅ إجمالي الحضور', cols: ['الاسم'], rows: kpiNames.attend.map(p=>([p.name])) },
+                firstTime: { title: '⭐ الحالات الجديدة (أول مرة)', cols: ['الاسم'], rows: kpiNames.firstTime.map(p=>([p.name])) },
+                absence:   { title: '🚫 الغياب اليوم', cols: ['الاسم','السبب'], rows: kpiAbsNames.map(p=>([p.name, p.extra])) },
+                rehab:     { title: '🦴 حالات التأهيل', cols: ['الاسم','الوقت'], rows: kpiNames.rehab.map(p=>([p.name, p.extra||'-'])) },
+                nutrition: { title: '🥗 حالات التغذية', cols: ['الاسم','المبلغ','الملاحظة'], rows: kpiNames.nutrition.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج',p.extra||'-'])) },
+                recovery:  { title: '💆 حالات الريكفري', cols: ['الاسم','المبلغ','الملاحظة'], rows: kpiNames.recovery.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج',p.extra||'-'])) },
+                exam:      { title: '🩺 كشوفات اليوم (عدد)', cols: ['الاسم','المبلغ'], rows: kpiNames.exam.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج'])) },
+                examTotal: { title: '💊 إجمالي إيراد الكشوفات', cols: ['الاسم','المبلغ'], rows: kpiNames.exam.map(p=>([p.name,(p.amount||0).toLocaleString()+' ج'])) },
+                companies: { title: '🏢 مطالبات شركات التأمين', cols: ['المريض','جهة التأمين','المطالبة'], rows: (kpiNames.companies||[]).map(p=>([p.name, p.extra||'-', (p.amount||0).toLocaleString()+' ج'])) },
+                netAll:    { title: '🏆 تفصيل الإجمالي الكلي', cols: ['البند','المبلغ'], rows: [
+                    ['💵 كاش اليوم', displayCash.toLocaleString()+' ج'],
+                    ['🏥 تحمل (تأمين)', stats.copay.toLocaleString()+' ج'],
+                    ['📱 إنستاباي', stats.insta.toLocaleString()+' ج'],
+                    ['🔴 مصروفات الكاش', '−'+stats.expCash.toLocaleString()+' ج'],
+                    ['🟣 مصروفات الإنستاباي', '−'+stats.expInsta.toLocaleString()+' ج'],
+                    ['✅ الإجمالي الكلي', netAllRevenue.toLocaleString()+' ج'],
+                ]},
+            };
+
+            document.getElementById('catA').innerText = stats.A;
+            document.getElementById('catB').innerText = stats.B;
+            document.getElementById('catC').innerText = stats.C;
+            document.getElementById('tNormal').innerText = stats.tNormal;
+            document.getElementById('tRehab').innerText  = stats.tRehab;
+            document.getElementById('tPt1').innerText    = stats.tPt1;
+            document.getElementById('tPt2').innerText    = stats.tPt2;
+            document.getElementById('tMan1').innerText   = stats.tMan1;
+            document.getElementById('tMan2').innerText   = stats.tMan2;
+            document.getElementById('tShock1').innerText = stats.tShock1;
+            document.getElementById('tShock2').innerText = stats.tShock2;
+            document.getElementById('tDoc').innerText    = stats.tDoc;
+
+            renderSmartAlerts();
+            renderDoctorsToday();
+        }
+
+        // ===== حضور الدكاترة اليوم =====
+        function renderDoctorsToday() {
+            const dateInput = document.getElementById('dateSelector').value;
+            const branch = document.getElementById('branchSelector').value;
+            // اليوم بصيغة dd/mm/yyyy و yyyy-mm-dd للمقارنة
+            const todayISO = dateInput;
+            const todayDMY = dateInput.split('-').reverse().join('/');
+
+            // جمّع الحضور حسب الدكتور (status = حضر فقط)
+            const docMap = {};
+            globalBookings.forEach(b => {
+                // طابق التاريخ (ممكن يكون مخزن بأي صيغة)
+                const bDate = b.date || '';
+                const match = bDate === todayISO || bDate === todayDMY;
+                if (!match) return;
+                if (branch !== 'all' && b.branch !== branch) return;
+                // الحضور المسجّل من صفحة الحجوزات فقط (مع دعم السجلات القديمة).
+                if (!(b.status === 'حضر' || b.status === 'attended' || b.isAttended === true)) return;
+                const doc = (b.doctor || 'غير محدد').replace('د. ','').trim();
+                if (!docMap[doc]) docMap[doc] = [];
+                docMap[doc].push(b.patientName || b.name || 'مريض');
+            });
+
+            const docs = Object.keys(docMap);
+            const box = document.getElementById('doctorsToday');
+            if (!docs.length) { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+
+            const colors = ['#3498db','#9b59b6','#e67e22','#27ae60','#e74c3c','#16a085','#8e44ad'];
+            box.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <i class="fas fa-user-doctor" style="color:#d4af37;font-size:1.1rem;"></i>
+                    <span style="font-weight:900;color:#0b132b;font-size:1rem;">حضور الدكاترة اليوم</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;">
+                ${docs.map((doc,i) => {
+                    const c = colors[i % colors.length];
+                    const patients = docMap[doc];
+                    return `<button type="button" onclick="showDoctorToday(decodeURIComponent('${encodeURIComponent(doc)}'))" style="background:white;border-radius:14px;padding:16px;border:1px solid #eee;border-top:4px solid ${c};box-shadow:0 2px 10px rgba(0,0,0,0.05);cursor:pointer;text-align:right;font-family:'Tajawal',sans-serif;width:100%;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                            <div style="font-weight:900;color:#0b132b;font-size:1rem;">د. ${doc}</div>
+                            <div style="background:${c};color:white;border-radius:20px;padding:3px 12px;font-weight:900;font-size:0.9rem;">${patients.length}</div>
+                        </div>
+                        <div style="font-size:0.8rem;color:#777;font-weight:700;">اضغط لعرض أسماء الحالات الحاضرة</div>
+                    </button>`;
+                }).join('')}
+                </div>`;
+            window._doctorsToday = docMap;
+        }
+
+        function showDoctorToday(doctor) {
+            const patients = (window._doctorsToday || {})[doctor] || [];
+            window._kpiData = window._kpiData || {};
+            window._kpiData.doctorToday = {
+                title: `حالات د. ${doctor} الحاضرة اليوم`,
+                cols: ['الاسم'],
+                rows: patients.map(name => [name])
+            };
+            showKpiModal('doctorToday');
+        }
+
+        // ===== التنبيهات الذكية =====
+        let alertDetails = {}; // تخزين تفاصيل كل تنبيه
+
+        function renderSmartAlerts() {
+            const alerts = [];
+            alertDetails = {};
+
+            // 1. ملفات ناقصة ورق
+            let missingList = [];
+            Object.entries(globalInsuDB).forEach(([name,p]) => {
+                if (p.paperStatus && p.paperStatus.includes('ناقص')) missingList.push({ name, branch:p.branch||'-', comp:(p.comp||'تأمين'), extra:p.paperStatus });
+            });
+            if (missingList.length > 0) {
+                alertDetails['papers'] = { title:'ملفات تأمين ناقصة أوراق', list:missingList };
+                alerts.push({ id:'papers', icon:'fa-file-circle-exclamation', color:'#e67e22', text:`<b>${missingList.length}</b> ملف تأمين ناقص أوراق — محتاج مراجعة` });
+            }
+
+            // 2. مرضى قربوا يخلصوا
+            let almostList = [];
+            [...Object.entries(globalInsuDB), ...Object.entries(globalCashDB)].forEach(([name,p]) => {
+                const att = parseInt(p.attended||0), total = parseInt(p.totalSess||0);
+                if (total > 0 && !p.isClosed && (total - att) <= 2 && (total - att) > 0) {
+                    let typeLabel = p.comp ? p.comp : (p.mode==='course' ? 'كاش (كورس)' : 'كاش');
+                    almostList.push({ name, branch:p.branch||'-', comp:typeLabel, extra:`باقي ${total-att} من ${total}` });
+                }
+            });
+            if (almostList.length > 0) {
+                alertDetails['almost'] = { title:'مرضى باقي لهم جلستين أو أقل (فرصة تجديد)', list:almostList };
+                alerts.push({ id:'almost', icon:'fa-hourglass-half', color:'#3498db', text:`<b>${almostList.length}</b> مريض باقي له جلستين أو أقل — فرصة تجديد` });
+            }
+
+            // 3. مديونية
+            let debtList = [];
+            Object.entries(globalCashDB).forEach(([name,p]) => {
+                const price = parseFloat(p.price||p.sessPrice||0), total=parseInt(p.totalSess||0), paid=parseFloat(p.paid||0);
+                const debt = (p.mode==='course' ? (p.cost||0) : price*total) - paid;
+                if (debt > 0 && !p.isClosed) debtList.push({ name, branch:p.branch||'-', comp:(p.mode==='course'?'كاش (كورس)':'كاش'), extra:`عليه ${debt.toLocaleString()} ج` });
+            });
+            if (debtList.length > 0) {
+                alertDetails['debt'] = { title:'مرضى كاش عليهم مديونية غير محصلة', list:debtList };
+                alerts.push({ id:'debt', icon:'fa-money-bill-wave', color:'#e74c3c', text:`<b>${debtList.length}</b> مريض كاش عليه مديونية غير محصلة` });
+            }
+
+            // 4. رواتب
+            let totalSalaries = 0;
+            globalEmployees.forEach(e => totalSalaries += parseFloat(e.salary||0));
+            if (totalSalaries > 0) {
+                alerts.push({ id:'salary', icon:'fa-hand-holding-dollar', color:'#9b59b6', text:`رواتب الطاقم المستحقة هذا الشهر: <b>${totalSalaries.toLocaleString()} ج</b>` });
+            }
+
+            const box = document.getElementById('smartAlerts');
+            if (!alerts.length) { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+            box.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <i class="fas fa-bell" style="color:#d4af37;font-size:1.1rem;"></i>
+                    <span style="font-weight:900;color:#0b132b;font-size:1rem;">تنبيهات ذكية</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;">
+                ${alerts.map(a => `
+                    <div onclick="${alertDetails[a.id]?`showAlertDetails('${a.id}')`:''}" style="background:white;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;border:1px solid #eee;border-right:4px solid ${a.color};box-shadow:0 2px 8px rgba(0,0,0,0.04);${alertDetails[a.id]?'cursor:pointer;':''}">
+                        <div style="width:38px;height:38px;border-radius:10px;background:${a.color}18;color:${a.color};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;"><i class="fas ${a.icon}"></i></div>
+                        <div style="font-size:0.87rem;font-weight:700;color:#333;line-height:1.5;flex:1;">${a.text}</div>
+                        ${alertDetails[a.id]?'<i class="fas fa-chevron-left" style="color:#ccc;"></i>':''}
+                    </div>
+                `).join('')}
+                </div>`;
+        }
+
+        function showAlertDetails(id) {
+            const d = alertDetails[id];
+            if (!d) return;
+            let html = `<div onclick="event.stopPropagation()" style="background:white;border-radius:18px;padding:24px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4af37;padding-bottom:12px;margin-bottom:16px;">
+                    <h3 style="margin:0;color:#0b132b;font-size:1.1rem;">${d.title}</h3>
+                    <button onclick="document.getElementById('alertModal').remove()" style="background:#f0f0f0;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;">✕</button>
+                </div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead><tr style="background:#f7f8fa;">
+                        <th style="padding:10px;text-align:right;font-size:0.85rem;color:#666;">المريض</th>
+                        <th style="padding:10px;text-align:right;font-size:0.85rem;color:#666;">الشركة/النوع</th>
+                        <th style="padding:10px;text-align:right;font-size:0.85rem;color:#666;">الفرع</th>
+                        <th style="padding:10px;text-align:right;font-size:0.85rem;color:#666;">التفاصيل</th>
+                    </tr></thead>
+                    <tbody>
+                    ${d.list.map(p => `<tr style="border-bottom:1px solid #f0f2f5;">
+                        <td style="padding:10px;font-weight:800;font-size:0.88rem;">${p.name}</td>
+                        <td style="padding:10px;font-size:0.83rem;"><span style="background:#fff3e0;color:#e65100;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;">${p.comp||'-'}</span></td>
+                        <td style="padding:10px;font-size:0.85rem;"><span style="background:#e3f2fd;color:#1565c0;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;">${p.branch}</span></td>
+                        <td style="padding:10px;font-size:0.85rem;color:#e67e22;font-weight:700;">${p.extra}</td>
+                    </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+            const modal = document.createElement('div');
+            modal.id = 'alertModal';
+            modal.onclick = () => modal.remove();
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(11,19,43,0.8);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+            modal.innerHTML = html;
+            document.body.appendChild(modal);
+        }
+
+
+        // ===== مودال تفاصيل الكروت =====
+        function showKpiModal(key) {
+            const d = (window._kpiData || {})[key];
+            if (!d) return;
+            const colsHtml = d.cols.map(c => `<th>${c}</th>`).join('');
+            const rowsHtml = d.rows.length
+                ? d.rows.map(r => `<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')
+                : `<tr><td colspan="${d.cols.length}" class="kpi-modal-empty">لا توجد بيانات</td></tr>`;
+            const overlay = document.createElement('div');
+            overlay.className = 'kpi-modal-overlay';
+            overlay.onclick = () => overlay.remove();
+            overlay.innerHTML = `
+                <div class="kpi-modal-box" onclick="event.stopPropagation()">
+                    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4af37;padding-bottom:12px;margin-bottom:18px;">
+                        <h3 style="margin:0;color:#0b132b;font-size:1.1rem;">${d.title} <span style="color:#aaa;font-size:0.85rem;font-weight:600;">(${d.rows.length})</span></h3>
+                        <button onclick="this.closest('.kpi-modal-overlay').remove()" style="background:#f0f0f0;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;">✕</button>
+                    </div>
+                    <table><thead><tr>${colsHtml}</tr></thead><tbody>${rowsHtml}</tbody></table>
+                </div>`;
+            document.body.appendChild(overlay);
+        }
+
+        // ===== حساب ملخص اليوم للديش بورد (تفصيلي) =====
+        function calcDashSummary() {
+            const dateInput = document.getElementById('dateSelector').value;
+            const branch = document.getElementById('branchSelector').value;
+            const dateObj = new Date(dateInput + 'T00:00:00');
+            const dayName = dateObj.toLocaleDateString('ar-EG', { weekday: 'long' });
+            const dateFmt = dateInput.split('-').reverse().join('/');
+
+            let cash=0, copay=0, insta=0, exp=0, expCash=0, expInsta=0, insuComp=0;
+            let A=0,B=0,C=0, manual=0, surgery=0, normal=0, firstTime=0, absCount=0;
+            const cashNames=new Set(), insuNames=new Set(), caseNames=new Set(), processed=new Set(), firstTimeNames=new Set();
+
+            globalLedger.forEach(entry => {
+                const eBranch = entry.branch || 'المهندسين';
+                if (!isEntryOnDate(entry, dateInput)) return;
+                if (branch !== 'all' && eBranch !== branch) return;
+                const amount = parseFloat(entry.amount)||0;
+                const eType = String(entry.type||'');
+                const pName = (entry.patientName||'').trim();
+                const isInsu = eType.includes('تحمل')||eType.includes('تأمين');
+                const isExam = entry.isExam === true || eType.includes('كشف');
+                const isPaymentOnly = entry.isPaymentOnly === true || entry.isPaymentOnly === 'true' || eType.includes('فرق جلسة') || eType.includes('فرق جلسه');
+                const isRefund = entry.isRefund === true || entry.isRefund === 'true' || amount < 0;
+                if (entry.isCompanyAddition === true) { insuComp += amount; return; }
+                // إجمالي الحالات = حضور المريض مرة واحدة، حتى لو كانت جلسة بدون مبلغ أو كشف.
+                // الدفعات المنفصلة والاسترجاعات ليست حضوراً.
+                if (pName && !isPaymentOnly && !isRefund) caseNames.add(pName);
+                if (pName && isExam) firstTimeNames.add(pName);
+                if (entry.method==='instapay') insta+=amount;
+                else if (isInsu) copay+=amount;
+                else cash+=amount;
+                if (isInsu && pName) insuNames.add(pName);
+                else if (pName) cashNames.add(pName);
+
+                if (pName && !isPaymentOnly && !isRefund && !processed.has(pName)) {
+                    processed.add(pName);
+                    const p = (globalInsuDB[pName] || globalCashDB[pName] || {});
+                    // مطالبة الشركة لليوم = سعر الجلسة (لجلسة النهاردة فقط، مش كل التاريخ)
+                    if (isInsu && p.price) insuComp += parseFloat(p.price||0);
+                    if (p.cat === 'A') A++; else if (p.cat === 'B') B++; else if (p.cat === 'C') C++;
+                    const st = String(p.type || p.sessionType || '');
+                    if (st.includes('يدوي')) manual++;
+                    else if (st.includes('تأهيل') || st.includes('عملية')) surgery++;
+                    else normal++;
+                    if (parseInt(p.attended||0) === 1) firstTimeNames.add(pName);
+                }
+            });
+            let instaTransfer = 0;
+            globalExpenses.forEach(t => {
+                const tBranch = t.branch||'المهندسين';
+                if (!isEntryOnDate(t, dateInput)) return;
+                if (branch !== 'all' && tBranch !== branch) return;
+                if (t.type==='instapay') {
+                    insta += parseFloat(t.amount||0);
+                    if (t.isTransfer) {
+                        instaTransfer += parseFloat(t.amount||0);
+                    } else {
+                        exp     += parseFloat(t.amount||0);
+                        expInsta+= parseFloat(t.amount||0);
+                    }
+                } else if (t.isTransfer && t.transferDirection==='instapay_to_cash') {
+                    cash += parseFloat(t.amount||0);
+                    insta -= parseFloat(t.amount||0);
+                } else if (!t.isRefund) {
+                    exp     += parseFloat(t.amount||0);
+                    expCash += parseFloat(t.amount||0);
+                }
+            });
+            // اخصم التحويلات من الكاش (اتحوّلت لإنستاباي)
+            cash = Math.max(0, cash - instaTransfer);
+            globalReports.forEach(r => {
+                if (!isEntryOnDate(r, dateInput)) return;
+                if (branch !== 'all' && (r.branch||'') !== branch) return;
+                absCount++;
+            });
+
+            const displayCash    = cashRatioEnabled ? Math.round(cash*cashRatioValue/100) : cash;
+            const net            = displayCash + copay - exp;
+            const netCashCopay   = displayCash + copay - expCash;
+            const netAllRevenue  = displayCash + copay + insta - exp;
+            const totalCases = caseNames.size;
+            firstTime = firstTimeNames.size;
+
+            return { branch: branch==='all'?'جميع الفروع':branch, dayName, dateFmt,
+                     displayCash, copay, insta, exp, expCash, expInsta,
+                     net, netCashCopay, netAllRevenue, insuComp,
+                     cashCount: cashNames.size, insuCount: insuNames.size, totalCases,
+                     A, B, C, manual, surgery, normal, firstTime, absCount };
+        }
+
+        // ===== واتساب =====
+        function sendDashWhatsApp() {
+            const s = calcDashSummary();
+            const dateInput = document.getElementById('dateSelector').value;
+            const branch    = document.getElementById('branchSelector').value;
+
+            const D  = '━━━━━━━━━━━━━━━━━━━━';
+            const d  = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
+
+            // ====== رسالة الترحيب ======
+            let msg = `\n`;
+            msg += `╭${D}╮\n`;
+            msg += `│  🏥 *LIFE SPORT*  │\n`;
+            msg += `│  *التقرير اليومي الشامل*  │\n`;
+            msg += `╰${D}╯\n\n`;
+            msg += `🌟 *أهلاً د. قاسم وشركاه،*\n`;
+            msg += `_نتمنى لكم يومًا موفقًا ومليئًا بالنجاح والعطاء._ 🤍\n\n`;
+            msg += `📍 *الفرع:* ${s.branch}\n`;
+            msg += `📅 *التاريخ:* ${s.dayName} — ${s.dateFmt}\n`;
+            msg += `\n`;
+
+            // ====== الحالات ======
+            msg += `👥 *الحالات*\n`;
+            msg += `${d}\n`;
+            msg += `📊 *إجمالي الحالات:* ${s.totalCases}\n`;
+            msg += `⭐ *حالات أول مرة:* ${s.firstTime}\n`;
+            const examCnt   = parseInt(document.getElementById('kpiExamCount').innerText)||0;
+            const examTot   = parseInt((document.getElementById('kpiExamTotal').innerText||'0').replace(/,/g,''))||0;
+            if (examCnt > 0) msg += `🩺 *كشوفات:* ${examCnt} كشف — ${examTot.toLocaleString()} ج.م\n`;
+            const serviceRows = globalLedger.filter(x=>isEntryOnDate(x,dateInput)&&(branch==='all'||(x.branch||'')===branch)&&(String(x.type||'').includes('تغذية')||String(x.type||'').includes('ريكفري')));
+            if (serviceRows.length) {
+                msg += `🥗 *التغذية والريكفري:* ${serviceRows.length} حالة\n`;
+                serviceRows.forEach(x=>{ msg += `   ├ *${x.patientName||'-'}* — ${x.type||''}${x.notes?' ('+x.notes+')':''}\n`; });
+            }
+            msg += `\n`;
+
+            // ====== الإيرادات ======
+            msg += `💰 *الإيرادات*\n`;
+            msg += `${d}\n`;
+            msg += `💵 *الكاش:* ${s.displayCash.toLocaleString()} ج.م\n`;
+            msg += `📱 *الإنستاباي:* ${s.insta > 0 ? s.insta.toLocaleString() + ' ج.م' : 'لا يوجد'}\n`;
+            msg += `🏥 *التحمل (تأمين):* ${s.copay.toLocaleString()} ج.م\n`;
+            msg += `📋 *مطالبات شركات التأمين:* ${s.insuComp.toLocaleString()} ج.م\n`;
+            msg += `\n`;
+
+            // ====== المصروفات ======
+            msg += `💸 *المصروفات*\n`;
+            msg += `${d}\n`;
+            msg += `🔴 *مصروفات الكاش:* ${s.expCash > 0 ? s.expCash.toLocaleString() + ' ج.م' : 'لا يوجد'}\n`;
+            // تفاصيل مصروفات الكاش
+            try {
+                const allExp = globalExpenses.filter(t => isEntryOnDate(t, dateInput) && (branch==='all' || (t.branch||'')===branch) && t.type!=='instapay' && !t.isRefund);
+                if (allExp.length) allExp.forEach(t => { msg += `   ├ ${t.reason||'مصروف'}: *${parseFloat(t.amount||0).toLocaleString()} ج.م*\n`; });
+            } catch(e){}
+            msg += `\n`;
+            if (s.expInsta > 0) {
+                msg += `🟣 *مصروفات الإنستاباي:* ${s.expInsta.toLocaleString()} ج.م\n`;
+                try {
+                    const instaExp = globalExpenses.filter(t => isEntryOnDate(t, dateInput) && (branch==='all' || (t.branch||'')===branch) && t.type==='instapay' && !t.isTransfer);
+                    if (instaExp.length) instaExp.forEach(t => { msg += `   ├ ${t.reason||'مصروف إنستاباي'}: *${parseFloat(t.amount||0).toLocaleString()} ج.م*\n`; });
+                } catch(e){}
+                msg += `\n`;
+            }
+
+            // ====== الغياب ======
+            if (s.absCount > 0) {
+                msg += `🚫 *الغياب اليوم:* ${s.absCount} حالة\n`;
+                msg += `${d}\n`;
+                try {
+                    const todayAbs = globalReports.filter(r => isEntryOnDate(r, dateInput) && (branch==='all' || (r.branch||'')===branch));
+                    todayAbs.forEach(r => { msg += `   ├ *${r.patientName}* — ${r.reason||''}${r.notes?' ('+r.notes+')':''}\n`; });
+                } catch(e){}
+                msg += `\n`;
+            } else {
+                msg += `✅ *الغياب:* لا يوجد غياب اليوم 🎉\n\n`;
+            }
+
+            // ====== الفئات وأنواع الجلسات ======
+            msg += `📊 *الفئات:*\n`;
+            msg += `${d}\n`;
+            msg += `   🅰️ فئة A: *${s.A}*  |  🅱️ فئة B: *${s.B}*  |  🇨 فئة C: *${s.C}*\n\n`;
+            msg += `🩺 *أنواع الجلسات:*\n`;
+            msg += `${d}\n`;
+            msg += `   ✋ يدوي: *${s.manual}*  |  🦴 تأهيل بعد عملية: *${s.surgery}*  |  ⚡ علاج عادي: *${s.normal}*\n\n`;
+
+            // ====== الإجماليات النهائية ======
+            msg += `${D}\n`;
+            msg += `🧾 *الإجماليات النهائية*\n`;
+            msg += `${D}\n`;
+            msg += `💼 كاش + تحمل − مصروفات الكاش:\n`;
+            msg += `   ✅ *${s.netCashCopay.toLocaleString()} ج.م*\n\n`;
+            msg += `🏆 الإجمالي الكلي (كاش+تحمل+إنستاباي−مصروفات):\n`;
+            msg += `   ✅ *${s.netAllRevenue.toLocaleString()} ج.م*\n`;
+            msg += `${D}\n`;
+
+            // ====== ختام ======
+            msg += `📊 _نتمنى أن يساهم هذا الملخص في متابعة الأداء واتخاذ أفضل القرارات._\n`;
+            msg += `_مع أطيب تمنياتنا بيوم ناجح._\n`;
+            msg += `🌿 _نظام لايف سبورت للعلاج الطبيعي_\n`;
+            msg += `_تم إعداد التقرير تلقائياً_ 🤍`;
+
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // ===== PDF =====
+        function downloadDashPDF() {
+            const s = calcDashSummary();
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html dir="rtl"><head><meta charset="utf-8"><title>ملخص اليوم</title>
+                <style>
+                    body { font-family: 'Tajawal', Arial, sans-serif; padding: 36px; color: #0b132b; }
+                    .head { text-align:center; border-bottom:3px solid #d4af37; padding-bottom:18px; margin-bottom:22px; }
+                    .head h1 { color:#0b132b; margin:0; font-size:26px; }
+                    .head p { color:#666; margin:6px 0 0; font-size:15px; }
+                    .net { background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; text-align:center; padding:24px; border-radius:14px; margin:20px 0; }
+                    .net .lbl { color:#d4af37; font-size:13px; letter-spacing:1px; }
+                    .net .val { font-size:38px; font-weight:900; margin-top:8px; }
+                    .sec { font-weight:900; color:#d4af37; font-size:15px; margin:18px 0 8px; border-bottom:1px solid #eee; padding-bottom:5px; }
+                    .row { display:flex; justify-content:space-between; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:15px; }
+                    .row b { color:#0b132b; }
+                    .row .amt { font-weight:900; color:#27ae60; }
+                    .foot { text-align:center; margin-top:30px; color:#999; font-size:12px; }
+                    @media print { button { display:none; } }
+
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            .stat-card, .kpi-card { min-width: 140px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+        }
+
+    </style>
+
+
+
+</head><body>
+                <div class="head"><h1>🏥 LIFE SPORT SYSTEM</h1><p>ملخص اليوم الكامل</p></div>
+                <div class="row"><b>📍 الفرع</b><span>${s.branch}</span></div>
+                <div class="row"><b>📅 اليوم</b><span>${s.dayName} ${s.dateFmt}</span></div>
+
+                <div class="sec">👥 الحالات</div>
+                <div class="row"><b>إجمالي الحالات</b><span class="amt">${s.totalCases}</span></div>
+                <div class="row"><b>حالات جديدة (أول مرة)</b><span class="amt">${s.firstTime}</span></div>
+                <div class="row"><b>حالات يدوي</b><span class="amt">${s.manual}</span></div>
+                <div class="row"><b>حالات عمليات / تأهيل</b><span class="amt">${s.surgery}</span></div>
+                <div class="row"><b>الفئات</b><span class="amt">A: ${s.A} | B: ${s.B} | C: ${s.C}</span></div>
+
+                <div class="sec">💰 الماليات</div>
+                <div class="row"><b>الكاش</b><span class="amt">${s.displayCash.toLocaleString()} ج (${s.cashCount} مريض)</span></div>
+                <div class="row"><b>التحمل</b><span class="amt">${s.copay.toLocaleString()} ج (${s.insuCount} مريض)</span></div>
+                ${s.insta>0?`<div class="row"><b>إنستاباي</b><span class="amt">${s.insta.toLocaleString()} ج</span></div>`:''}
+                <div class="row"><b>مطالبات الشركات</b><span class="amt">${s.insuComp.toLocaleString()} ج</span></div>
+                <div class="row"><b>المصروفات</b><span style="color:#e74c3c;font-weight:900;">${s.exp.toLocaleString()} ج</span></div>
+                ${s.absCount>0?`<div class="row"><b>الغياب</b><span style="color:#e74c3c;font-weight:900;">${s.absCount}</span></div>`:''}
+
+                <div class="net">
+                    <div class="lbl">صافي اليوم (كاش + تحمل - مصروفات)</div>
+                    <div class="val">${s.net.toLocaleString()} ج.م</div>
+                </div>
+                <div class="foot">تم الإنشاء من نظام Life Sport — ${new Date().toLocaleString('ar-EG')}</div>
+                <div style="text-align:center;margin-top:24px;">
+                    <button onclick="window.print()" style="background:#0b132b;color:white;border:none;padding:13px 38px;border-radius:10px;font-size:15px;cursor:pointer;font-family:'Tajawal';">🖨️ طباعة / حفظ PDF</button>
+                </div>
+                </body></html>`);
+            win.document.close();
+        }
+    // ===== طباعة الداش بورد في صفحة واحدة نظيفة =====
+    function printDashboardClean() {
+        const g = (id) => { const el = document.getElementById(id); return el ? el.innerText.trim() : '0'; };
+        const branch = document.getElementById('branchSelector');
+        const branchTxt = branch ? (branch.value === 'all' ? 'كل الفروع' : branch.value) : '-';
+        const dateInput = document.getElementById('dateSelector') ? document.getElementById('dateSelector').value : '';
+        const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+        let dayName = '', dateFmt = dateInput;
+        if (dateInput) { const dObj = new Date(dateInput+'T00:00:00'); dayName = days[dObj.getDay()]; dateFmt = dateInput.split('-').reverse().join('/'); }
+
+        const net = g('netTotalValue');
+
+        const cards = [
+            ['💰 الكاش', g('kpiCash'), '#27ae60'],
+            ['📱 إنستاباي', g('kpiInstapay'), '#8e24aa'],
+            ['🏥 تحمل (تأمين)', g('kpiCopay'), '#2980b9'],
+            ['📋 مطالبات الشركات', g('kpiCompanies'), '#16a085'],
+            ['✅ إجمالي الحضور', g('kpiTotalCases'), '#27ae60'],
+            ['⭐ حالات جديدة', g('kpiFirstTime'), '#f39c12'],
+            ['❌ إجمالي الغياب', g('kpiAbsence'), '#e74c3c'],
+            ['🏃 حالات التأهيل', g('kpiRehab'), '#8e44ad'],
+            ['👥 رواتب الطاقم', g('kpiSalaries'), '#34495e'],
+        ];
+
+        const bodyHtml = `
+            <div class="ls-print-head">
+                <div>
+                    <div class="ls-pt">تقرير لوحة القيادة اليومية</div>
+                    <div class="ls-ps">📍 الفرع: ${branchTxt} &nbsp;|&nbsp; 📅 ${dayName} ${dateFmt}</div>
+                </div>
+                <img src="logo.png" onerror="this.style.display='none'">
+            </div>
+            <div class="ls-net">
+                <div class="ls-net-l">صافي إيرادات اليوم (كاش + تحمل - مصروفات)</div>
+                <div class="ls-net-v">${net}</div>
+            </div>
+            <div class="ls-grid">
+                ${cards.map(c => `<div class="ls-c"><div class="ls-c-l">${c[0]}</div><div class="ls-c-v" style="color:${c[2]};">${c[1]}</div></div>`).join('')}
+            </div>
+            <div class="ls-foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>`;
+
+        const printCSS = `
+            .ls-print-head { background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; padding:18px 24px; border-radius:16px; border:3px solid #d4af37; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+            .ls-pt { font-size:1.6rem; font-weight:900; color:#d4af37; }
+            .ls-ps { font-size:1rem; margin-top:6px; color:#fff; }
+            .ls-print-head img { height:64px; background:white; padding:5px; border-radius:10px; }
+            .ls-net { background:linear-gradient(135deg,#27ae60,#1e8449); color:white; text-align:center; padding:20px; border-radius:16px; margin-bottom:16px; }
+            .ls-net-l { font-size:1rem; opacity:0.9; margin-bottom:6px; }
+            .ls-net-v { font-size:2.8rem; font-weight:900; }
+            .ls-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+            .ls-c { border:2px solid #eee; border-radius:14px; padding:15px; text-align:center; }
+            .ls-c-l { font-size:0.92rem; color:#555; font-weight:700; margin-bottom:8px; }
+            .ls-c-v { font-size:1.8rem; font-weight:900; }
+            .ls-foot { text-align:center; margin-top:18px; color:#999; font-size:0.85rem; }`;
+
+        // جرّب نافذة جديدة (أفضل على الكمبيوتر)
+        let win = null;
+        try { win = window.open('', '_blank'); } catch(e) { win = null; }
+
+        if (win) {
+            win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>تقرير لوحة القيادة</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+                * { margin:0; padding:0; box-sizing:border-box; font-family:'Tajawal',sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+                body { padding:20px; color:#0b132b; }
+                ${printCSS}
+                @media print { @page { size:A4 portrait; margin:8mm; } body { padding:0; } .ls-noprint { display:none; } }
+            </style></head><body>
+                ${bodyHtml}
+                <div class="ls-noprint" style="text-align:center;margin-top:22px;">
+                    <button onclick="window.print()" style="background:#0b132b;color:#d4af37;border:none;padding:14px 40px;border-radius:12px;font-size:1rem;font-weight:900;cursor:pointer;font-family:'Tajawal';">🖨️ طباعة / حفظ PDF</button>
+                </div>
+            </body></html>`);
+            win.document.close();
+            setTimeout(() => { try { win.print(); } catch(e){} }, 500);
+        } else {
+            // موبايل: اطبع جوّه الصفحة نفسها (fallback)
+            let ov = document.getElementById('lsPrintOverlay');
+            if (ov) ov.remove();
+            ov = document.createElement('div');
+            ov.id = 'lsPrintOverlay';
+            const st = document.createElement('style');
+            st.id = 'lsPrintStyle';
+            st.textContent = `${printCSS}
+                @media print {
+                    @page { size:A4 portrait; margin:8mm; }
+                    body > *:not(#lsPrintOverlay) { display:none !important; }
+                    #lsPrintOverlay { position:static !important; display:block !important; padding:0 !important; background:white !important; }
+                    #lsPrintOverlay .ls-noprint { display:none !important; }
+                }`;
+            document.head.appendChild(st);
+            ov.style.cssText = 'position:fixed;inset:0;background:white;z-index:99999;overflow-y:auto;padding:16px;';
+            ov.innerHTML = bodyHtml + `<div class="ls-noprint" style="display:flex;gap:10px;margin-top:20px;">
+                <button onclick="window.print()" style="flex:1;background:#0b132b;color:#d4af37;border:none;padding:14px;border-radius:12px;font-weight:900;font-family:Tajawal;font-size:1rem;">🖨️ طباعة</button>
+                <button onclick="document.getElementById('lsPrintOverlay').remove();document.getElementById('lsPrintStyle').remove();" style="background:#eee;border:none;padding:14px 20px;border-radius:12px;font-weight:900;font-family:Tajawal;">إغلاق</button>
+            </div>`;
+            document.body.appendChild(ov);
+        }
+    }
+    window.printDashboardClean = printDashboardClean;
+    </script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+
+
+
+
+</body>
+</html>

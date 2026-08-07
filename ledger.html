@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - الحركة المالية اليومية</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="premium.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f2f5; display: flex; overflow-x: hidden; color: #1a1f36; }
+
+        /* ===== TOAST ===== */
+        #toastContainer { position: fixed; bottom: 30px; left: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #0b132b; color: white; padding: 14px 22px; border-radius: 12px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 35px rgba(0,0,0,0.25); transform: translateX(-200%); transition: 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-right: 4px solid #d4af37; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-right-color: #27ae60; }
+        .toast.error   { border-right-color: #e74c3c; }
+
+        /* ===== MODAL ===== */
+        #customModalOverlay { position: fixed; inset: 0; background: rgba(11,19,43,0.92); display: flex; align-items: center; justify-content: center; z-index: 5000; opacity: 0; pointer-events: none; transition: 0.35s; backdrop-filter: blur(8px); }
+        #customModalOverlay.active { opacity: 1; pointer-events: auto; }
+        .custom-modal { background: white; padding: 40px 35px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4); transform: scale(0.85) translateY(20px); transition: 0.35s cubic-bezier(0.34,1.56,0.64,1); border-top: 4px solid #d4af37; }
+        #customModalOverlay.active .custom-modal { transform: scale(1) translateY(0); }
+        .modal-icon { width: 70px; height: 70px; background: linear-gradient(135deg, #0b132b, #1a2a5e); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .modal-icon i { color: #d4af37; font-size: 1.8rem; }
+        .custom-modal h3 { color: #0b132b; margin-bottom: 8px; font-size: 1.4rem; font-weight: 800; }
+        .custom-modal p  { color: #888; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6; }
+        .custom-modal input { width: 100%; padding: 14px; border: 2px solid #e8e8e8; border-radius: 12px; text-align: center; font-size: 2rem; letter-spacing: 10px; outline: none; margin-bottom: 20px; transition: 0.3s; color: #0b132b; font-family: 'Tajawal'; }
+        .custom-modal input:focus { border-color: #d4af37; box-shadow: 0 0 0 4px rgba(212,175,55,0.12); }
+        .btn-confirm { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Tajawal'; font-size: 1.05rem; padding: 14px; width: 100%; }
+        .btn-confirm:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; }
+
+        /* ===== HEADER ===== */
+        .header { background: linear-gradient(135deg, #0b132b 0%, #1a2a5e 100%); height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 35px; border-bottom: 2px solid rgba(212,175,55,0.4); z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .header-logo { display: flex; align-items: center; gap: 14px; }
+        .header-logo img { height: 42px; }
+        .header-title { color: white; font-size: 1.25rem; font-weight: 900; letter-spacing: 2px; }
+        .header-title span { color: #d4af37; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .server-status { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 700; padding: 8px 16px; border-radius: 30px; border: 1px solid; transition: 0.3s; }
+        .server-status.connected  { color: #27ae60; background: rgba(39,174,96,0.1); border-color: rgba(39,174,96,0.3); }
+        .server-status.connecting { color: #f39c12; background: rgba(243,156,18,0.1); border-color: rgba(243,156,18,0.3); }
+        .branch-badge { color: #d4af37; font-weight: 800; background: rgba(212,175,55,0.1); padding: 8px 18px; border-radius: 30px; border: 1px solid rgba(212,175,55,0.3); font-size: 0.9rem; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar { background: #0e1628; width: 255px; height: 100vh; position: fixed; top: 72px; right: 0; padding: 20px 0; z-index: 900; border-left: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-section { padding: 10px 20px 5px; font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.25); letter-spacing: 2px; text-transform: uppercase; }
+        .sidebar a { display: flex; align-items: center; gap: 12px; color: rgba(163,174,209,0.8); text-decoration: none; padding: 13px 22px; transition: 0.25s; font-size: 0.98rem; border-right: 3px solid transparent; margin-bottom: 2px; }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.04); border-right-color: rgba(212,175,55,0.5); }
+        .sidebar a.active { color: #d4af37; background: rgba(212,175,55,0.08); border-right-color: #d4af37; font-weight: 800; }
+        .sidebar a i { width: 20px; text-align: center; }
+
+        /* ===== MAIN ===== */
+        .main-content { margin-right: 255px; margin-top: 72px; padding: 28px 32px; width: calc(100% - 255px); overflow-x: hidden; display: none; background: linear-gradient(160deg, #eef0f5, #e8ecf2); min-height: calc(100vh - 72px); }
+        .main-content.unlocked { display: block; }
+
+        /* ===== TOP BAR ===== */
+        .top-bar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; margin-bottom: 22px; flex-wrap: wrap; }
+        .branch-info-card { background: white; padding: 16px 22px; border-radius: 16px; display: flex; align-items: center; gap: 14px; border: 1px solid #e8eaf0; box-shadow: 0 3px 15px rgba(0,0,0,0.05); }
+        .branch-info-card .icon { width: 46px; height: 46px; background: linear-gradient(135deg, #0b132b, #1a2a5e); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(11,19,43,0.2); }
+        .branch-info-card .icon i { color: #d4af37; font-size: 1.1rem; }
+        .branch-info-card .label { font-size: 0.75rem; color: #aaa; font-weight: 700; margin-bottom: 3px; }
+        .branch-info-card .value { font-size: 1.1rem; font-weight: 900; color: #0b132b; }
+        .summary-cards { display: flex; gap: 10px; }
+        .summary-mini { background: white; padding: 13px 16px; border-radius: 13px; text-align: center; border: 1px solid #e8eaf0; box-shadow: 0 3px 12px rgba(0,0,0,0.04); min-width: 110px; transition: 0.2s; }
+        .summary-mini:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+        .summary-mini .s-label { font-size: 0.72rem; color: #aaa; font-weight: 800; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .summary-mini .s-val { font-size: 1.25rem; font-weight: 900; }
+        .s-val.green { color: #2e7d32; } .s-val.red { color: #c62828; } .s-val.blue { color: #1565c0; }
+        .date-card { background: white; padding: 16px 22px; border-radius: 16px; display: flex; align-items: center; gap: 14px; border: 1px solid #e8eaf0; box-shadow: 0 3px 15px rgba(0,0,0,0.05); justify-content: flex-end; }
+        .date-card .day-pill { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; padding: 8px 16px; border-radius: 30px; font-weight: 900; font-size: 0.9rem; white-space: nowrap; box-shadow: 0 3px 10px rgba(212,175,55,0.3); }
+        .date-card .date-input-wrap { display: flex; flex-direction: column; align-items: flex-end; }
+        .date-card .date-input-wrap label { font-size: 0.72rem; color: #aaa; font-weight: 700; margin-bottom: 4px; }
+        .date-card input[type="date"] { border: none; background: transparent; font-weight: 800; font-size: 1rem; color: #0b132b; cursor: pointer; outline: none; font-family: 'Tajawal'; }
+
+        /* ===== ACTIONS ===== */
+        .actions-row { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; align-items: center; }
+        .btn-print-main { background: linear-gradient(135deg, #27ae60, #1e8449); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(39,174,96,0.25); transition: 0.3s; font-family: 'Tajawal'; }
+        .btn-print-main:hover { transform: translateY(-2px); }
+        .btn-privacy { background: white; color: #e67e22; border: 2px solid #e67e22; padding: 12px 24px; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; font-family: 'Tajawal'; }
+        .btn-privacy.locked { background: #0b132b; color: #d4af37; border-color: #0b132b; }
+
+        /* ===== FILTERS ===== */
+        .filters-bar { background: white; padding: 18px 24px; border-radius: 14px; display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 22px; border: 1px solid #e8eaf0; }
+        .filter-group { display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 200px; }
+        .filter-group label { font-size: 0.82rem; font-weight: 800; color: #666; display: flex; align-items: center; gap: 7px; }
+        .filter-group label i { color: #d4af37; }
+        .filter-group select, .filter-group input { padding: 11px 16px; font-size: 0.98rem; font-weight: 700; border: 1.5px solid #e8eaf0; border-radius: 10px; outline: none; color: #0b132b; background: #f8f9fc; transition: 0.25s; font-family: 'Tajawal'; }
+        .filter-group select:focus, .filter-group input:focus { border-color: #d4af37; background: white; }
+        .filter-group select:disabled { background: #f0f0f0; cursor: not-allowed; color: #999; }
+
+        /* ===== TABS ===== */
+        .tabs-wrapper { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 14px; font-size: 0.98rem; font-weight: 800; border: 2px solid #e8eaf0; border-radius: 14px; cursor: pointer; background: white; color: #888; transition: 0.25s; display: flex; align-items: center; justify-content: center; gap: 9px; font-family: 'Tajawal'; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .tab-btn:hover { background: #f8f9fc; border-color: #d4af37; color: #0b132b; transform: translateY(-1px); }
+        .tab-btn .tab-count { background: #f0f2f5; color: #888; padding: 3px 10px; border-radius: 20px; font-size: 0.82rem; transition: 0.25s; font-weight: 900; }
+        .tab-btn.active { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; border-color: #0b132b; box-shadow: 0 6px 20px rgba(11,19,43,0.25); transform: translateY(-1px); }
+        .tab-btn.active .tab-count { background: rgba(212,175,55,0.2); color: #d4af37; }
+
+        /* ===== TABLE ===== */
+        .table-container { background: white; border-radius: 16px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); border: 1px solid #e8eaf0; margin-bottom: 25px; }
+        .table-scroll { overflow: visible; border-radius: 16px; }
+        .table-scroll::-webkit-scrollbar { width: 8px; height: 10px; }
+        .table-scroll::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 10px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 0; table-layout: fixed; }
+        th { background: #f8f9fc; padding: 12px 8px; font-size: 0.78rem; font-weight: 800; color: #555; position: sticky; top: 0; border-bottom: 2px solid #e8eaf0; white-space: normal; overflow-wrap:anywhere; z-index: 2; }
+        td { padding: 11px 8px; border-bottom: 1px solid #f4f6f8; vertical-align: middle; font-size: 0.86rem; white-space:normal; overflow-wrap:anywhere; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fefcf6; }
+
+        .patient-name { font-weight: 900; color: #0b132b; font-size: 1.08rem; }
+        .phone-text { font-size: 0.8rem; color: #999; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+        .badge { padding: 5px 12px; border-radius: 30px; font-size: 0.78rem; font-weight: 800; display: inline-block; text-align: center; white-space: nowrap; }
+        .badge-comp    { background: #e3f2fd; color: #1565c0; }
+        .badge-session { background: #fff8e1; color: #e65100; }
+        .badge-course  { background: #fff3e0; color: #e67e22; }
+        .badge-session-single { background: #f3e5f5; color: #7b1fa2; }
+        .badge-checkup { background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; padding: 5px 14px; border-radius: 30px; font-size: 0.82rem; font-weight: 900; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 3px 10px rgba(255,107,53,0.3); }
+
+        .money-text    { font-weight: 800; font-size: 0.97rem; }
+        .money-in      { color: #2e7d32; }
+        .money-out     { color: #c62828; }
+        .money-neutral { color: #555; }
+        .money-debt  { background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 8px; font-size: 0.88rem; font-weight: 800; display: inline-block; }
+        .money-clear { background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 8px; font-size: 0.88rem; font-weight: 800; display: inline-block; }
+        .row-num { font-weight: 900; color: #ccc; font-size: 0.9rem; }
+
+        .btn-action  { border: none; padding: 7px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.25s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; font-family: 'Tajawal'; width: 100%; margin-bottom: 5px; }
+        .btn-return  { background: #fff1f0; color: #e74c3c; border: 1px solid #ffd6d3; }
+        .btn-return:hover { background: #e74c3c; color: white; }
+        .btn-delete  { background: #c62828; color: white; }
+        .btn-delete:hover { background: #8b0000; }
+
+        /* ===== SUMMARY BAR ===== */
+        .summary-bar { background: linear-gradient(135deg, #f8f9fc, #f0f2f5); padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #e8eaf0; }
+        .summary-label  { font-size: 1rem; font-weight: 800; color: #666; display: flex; align-items: center; gap: 10px; }
+        .summary-amount { font-size: 2rem; font-weight: 900; color: #0b132b; }
+        .summary-amount.red { color: #c62828; }
+        .summary-amount span { font-size: 1.1rem; font-weight: 700; color: #999; }
+
+        .empty-state { text-align: center; padding: 50px 30px; color: #bbb; }
+        .empty-state i { font-size: 3rem; margin-bottom: 15px; display: block; color: #e0e0e0; }
+        .hidden { display: none !important; }
+
+        /* خصوصية الكاش */
+        body.hide-cash-ledger #tableCash .money-text,
+        body.hide-cash-ledger #tableCash .summary-amount { filter: blur(5px); user-select: none; }
+        body.hide-cash-ledger #tableCash .money-debt,
+        body.hide-cash-ledger #tableCash .money-clear { filter: blur(5px); }
+
+        /* ============================================================
+           =================== PRINT STYLES ==========================
+           ============================================================ */
+        @media print {
+            /* A4 landscape: 297mm × 210mm — margins 6mm كل جانب */
+            @page { size: A4 landscape; margin: 6mm 6mm; }
+
+            /* إخفاء الواجهة */
+            .header, .sidebar, .filters-bar, .tabs-wrapper, .actions-row,
+            .top-bar, #customModalOverlay, #toastContainer,
+            .hide-print, th:last-child, td:last-child,
+            #ai-fab, #ai-box, #ls-lang-btn, #editPatientModal { display: none !important; }
+
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-size: 7px;
+            }
+            /* أجبر كل العلامات الملونة تظهر في الطباعة */
+            .badge, .badge-checkup, .badge-session, .badge-comp, .badge-course,
+            [class*="badge"], .row-num, .money-in, .money-debt, .money-clear {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            .main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                overflow: visible !important;
+                display: block !important;
+            }
+
+            /* كل قسم في صفحة منفصلة */
+            .table-container {
+                page-break-after: always;
+                page-break-inside: auto;
+                overflow: visible !important;
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+            }
+            .table-container:last-child { page-break-after: avoid; }
+
+            .table-scroll {
+                overflow: visible !important;
+                max-height: none !important;
+            }
+
+            /* تكرار الهيدر في كل صفحة */
+            thead { display: table-header-group !important; }
+            tfoot { display: table-footer-group !important; }
+
+            /* ===== هيدر كل صفحة — ضغطناه للحد الأدنى ===== */
+            .print-page-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                padding: 3px 8px;       /* أصغر من قبل */
+                margin-bottom: 2px;
+                border-radius: 5px;
+                page-break-inside: avoid;
+            }
+            .print-page-header.insu-header { background: #0b132b !important; }
+            .print-page-header.cash-header { background: #1a5c2a !important; }
+            .print-page-header.exp-header  { background: #7b1a1a !important; padding: 8px 14px !important; margin-bottom: 5px !important; }
+            .ph-right { display: flex; align-items: center; gap: 8px; }
+            .ph-title    { color: #d4af37 !important; font-size: 9pt !important; font-weight: 900; }
+            .ph-subtitle { color: rgba(255,255,255,0.85) !important; font-size: 6.5pt !important; font-weight: 700; margin-top: 0; }
+            .ph-meta { text-align: left; color: white !important; font-size: 6.5pt !important; font-weight: 700; line-height: 1.5; }
+            .ph-meta strong { color: #d4af37 !important; font-size: 7pt !important; }
+
+            /* شريط الملخص — ضغطناه */
+            .print-summary-strip {
+                display: flex !important;
+                gap: 5px;
+                margin-bottom: 2px;
+                page-break-inside: avoid;
+            }
+            .ps-item {
+                flex: 1;
+                padding: 2px 6px !important;   /* أصغر بكثير */
+                border-radius: 3px;
+                font-size: 6.5pt !important;
+                font-weight: 800;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: 1px solid;
+            }
+            .ps-item strong { font-size: 7pt !important; }
+            .ps-item.insu-color { background: #ddeeff !important; border-color: #0055cc !important; color: #003399 !important; }
+            .ps-item.cash-color { background: #ccf0d8 !important; border-color: #1a7a3a !important; color: #0d4d1f !important; }
+            .ps-item.debt-color { background: #ffd6d6 !important; border-color: #aa1111 !important; color: #770000 !important; }
+            .ps-item.exp-color  { background: #ffe8cc !important; border-color: #cc6600 !important; color: #773300 !important; }
+            .ps-item.net-color  { background: #eed6ff !important; border-color: #8800cc !important; color: #440066 !important; }
+
+            /* ==============================================
+               الجدول — الهدف: 45-50 صف في صفحة A4 landscape
+               الحساب: ارتفاع الصف = height: 3.5mm ثابت
+               ============================================== */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 6.5pt !important;     /* pt أكثر دقة من px في الطباعة */
+                table-layout: fixed !important;
+            }
+            th {
+                padding: 2px 4px !important;     /* ضغط الهيدر */
+                font-size: 6.5pt !important;
+                border: 0.5pt solid #888 !important;
+                white-space: nowrap;
+                position: static !important;
+                font-weight: 900 !important;
+                height: 4mm !important;           /* ارتفاع ثابت */
+                line-height: 1 !important;
+            }
+            td {
+                padding: 0 3px !important;        /* padding=0 رأسياً، مهم جداً */
+                font-size: 6.5pt !important;
+                border: 0.5pt solid #e0e0e0 !important;
+                line-height: 1 !important;        /* line-height=1 أهم حاجة */
+                vertical-align: middle !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                height: 3.6mm !important;         /* الارتفاع الثابت للصف */
+                max-height: 3.6mm !important;
+            }
+            tr:hover td { background: transparent !important; }
+
+            /* الاسم والتليفون في نفس الخلية — أفقياً مش رأسياً */
+            .patient-name {
+                display: inline !important;
+                font-size: 6.5pt !important;
+                font-weight: 900 !important;
+                color: #000 !important;
+            }
+            .phone-text {
+                display: inline !important;        /* مهم: inline مش block */
+                font-size: 6pt !important;
+                color: #666 !important;
+                margin-right: 3px !important;
+                margin-top: 0 !important;
+            }
+            .phone-text i { display: none !important; } /* إخفاء أيقونة التليفون */
+
+            /* منع انقسام الصف */
+            tbody tr { page-break-inside: avoid !important; }
+
+            /* قطع الصفحة بعد كل 47 صف (حساباً للهيدر والسامري بار) */
+            tbody tr:nth-child(50n) { page-break-after: always; }
+
+            /* ألوان رؤوس الجداول */
+            #tableInsu th { background: #0b132b !important; color: #d4af37 !important; }
+            #tableCash  th { background: #1a5c2a !important; color: #a8e6bc !important; }
+            #tableExp   th { background: #7b1a1a !important; color: #ffcdd2 !important; }
+
+            /* ألوان صفوف متناوبة */
+            #tableInsu tbody tr:nth-child(even) td { background: #f0f4ff !important; }
+            #tableCash  tbody tr:nth-child(even) td { background: #f0fff4 !important; }
+            #tableExp   tbody tr:nth-child(even) td { background: #fff5f5 !important; }
+
+            /* عروض الأعمدة - التأمين */
+            #tableInsu th:nth-child(1),  #tableInsu td:nth-child(1)  { width: 3%; }
+            #tableInsu th:nth-child(2),  #tableInsu td:nth-child(2)  { width: 15%; }
+            #tableInsu th:nth-child(3),  #tableInsu td:nth-child(3)  { width: 10%; }
+            #tableInsu th:nth-child(4),  #tableInsu td:nth-child(4)  { width: 12%; }
+            #tableInsu th:nth-child(5),  #tableInsu td:nth-child(5)  { width: 10%; }
+            #tableInsu th:nth-child(6),  #tableInsu td:nth-child(6)  { width: 7%; }
+            #tableInsu th:nth-child(7),  #tableInsu td:nth-child(7)  { width: 9%; }
+            #tableInsu th:nth-child(8),  #tableInsu td:nth-child(8)  { width: 8%; }
+            #tableInsu th:nth-child(9),  #tableInsu td:nth-child(9)  { width: 12%; }
+            #tableInsu th:nth-child(10), #tableInsu td:nth-child(10) { width: 14%; }
+
+            /* عروض الأعمدة - الكاش */
+            #tableCash th:nth-child(1),  #tableCash td:nth-child(1)  { width: 3%; }
+            #tableCash th:nth-child(2),  #tableCash td:nth-child(2)  { width: 15%; }
+            #tableCash th:nth-child(3),  #tableCash td:nth-child(3)  { width: 10%; }
+            #tableCash th:nth-child(4),  #tableCash td:nth-child(4)  { width: 8%; }
+            #tableCash th:nth-child(5),  #tableCash td:nth-child(5)  { width: 10%; }
+            #tableCash th:nth-child(6),  #tableCash td:nth-child(6)  { width: 8%; }
+            #tableCash th:nth-child(7),  #tableCash td:nth-child(7)  { width: 9%; }
+            #tableCash th:nth-child(8),  #tableCash td:nth-child(8)  { width: 9%; }
+            #tableCash th:nth-child(9),  #tableCash td:nth-child(9)  { width: 11%; }
+            #tableCash th:nth-child(10), #tableCash td:nth-child(10) { width: 17%; }
+
+            /* عروض الأعمدة - المصروفات */
+            #tableExp th:nth-child(1), #tableExp td:nth-child(1) { width: 5%; }
+            #tableExp th:nth-child(2), #tableExp td:nth-child(2) { width: 45%; }
+            #tableExp th:nth-child(3), #tableExp td:nth-child(3) { width: 20%; }
+            #tableExp th:nth-child(4), #tableExp td:nth-child(4) { width: 15%; }
+            #tableExp th:nth-child(5), #tableExp td:nth-child(5) { width: 15%; }
+
+            /* عناصر الجدول */
+            .badge         { font-size: 5.5pt !important; padding: 0 3px !important; border: 0.5pt solid #ccc !important; border-radius: 4px !important; display: inline-block !important; white-space: nowrap; line-height: 1.3 !important; }
+            .badge-comp    { background: #ddeeff !important; color: #003399 !important; border-color: #99bbdd !important; }
+            .badge-session { background: #fff3cc !important; color: #995500 !important; border-color: #ddcc77 !important; }
+            .badge-course  { background: #ffe8cc !important; color: #884400 !important; }
+            .badge-session-single { background: #f0e0ff !important; color: #550088 !important; }
+            .badge-checkup { background: #ff6b35 !important; color: white !important; font-size: 5.5pt !important; padding: 0 3px !important; border-radius: 4px !important; font-weight: 900 !important; box-shadow: none !important; display: inline-block !important; line-height: 1.3 !important; }
+            /* علامة الكشف الصفراء جنب الاسم — تظهر في الطباعة */
+            .patient-name span[style*="ffc107"] {
+                background: #ffd54f !important;
+                color: #000 !important;
+                font-size: 5.5pt !important;
+                padding: 0 4px !important;
+                border-radius: 4px !important;
+                font-weight: 900 !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .money-text    { font-size: 6.5pt !important; font-weight: 900; }
+            .money-in      { color: #1a6b2a !important; }
+            .money-out     { color: #aa1111 !important; }
+            .money-neutral { color: #333 !important; }
+            .money-debt  { background: #ffd6d6 !important; color: #aa1111 !important; padding: 0 3px !important; font-size: 6pt !important; border-radius: 3px !important; display: inline-block !important; line-height: 1.3 !important; }
+            .money-clear { background: #ccf0d8 !important; color: #1a6b2a !important; padding: 0 3px !important; font-size: 6pt !important; border-radius: 3px !important; display: inline-block !important; line-height: 1.3 !important; }
+            .row-num { color: #aaa !important; font-size: 6pt !important; }
+
+            /* Summary bar — مضغوط */
+            .summary-bar {
+                background: #f0f2f5 !important;
+                padding: 3px 10px !important;     /* أصغر بكثير */
+                border-top: 1.5pt solid #333 !important;
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                page-break-inside: avoid;
+                border-radius: 0 !important;
+            }
+            .summary-label  { font-size: 7pt !important; color: #000 !important; font-weight: 800; }
+            .summary-amount { font-size: 9pt !important; color: #000 !important; font-weight: 900 !important; }
+            .summary-amount.red { color: #aa1111 !important; }
+            .summary-amount span { font-size: 7pt !important; }
+
+            .empty-state { padding: 10px !important; font-size: 7pt !important; }
+            .empty-state i { font-size: 1rem !important; }
+
+            /* خصوصية الكاش في الطباعة */
+            body.hide-cash-ledger #tableCash .money-text,
+            body.hide-cash-ledger #tableCash .summary-amount,
+            body.hide-cash-ledger #tableCash .money-debt,
+            body.hide-cash-ledger #tableCash .money-clear { filter: none !important; }
+            body.hide-cash-ledger #tableCash .money-text::after { content: " ---"; color: #aaa; }
+            body.hide-cash-ledger #tableCash .summary-amount::after { content: " ---"; color: #aaa; }
+
+            /* ====================================================
+               يومية الكاش — أسماء أكبر، ~35 صف في الصفحة
+               ==================================================== */
+            #tableCash table {
+                font-size: 8pt !important;
+            }
+            #tableCash th {
+                font-size: 8pt !important;
+                padding: 3px 5px !important;
+                height: 5mm !important;
+                background: #1a5c2a !important;
+                color: #a8e6bc !important;
+            }
+            #tableCash td {
+                font-size: 8pt !important;
+                padding: 1px 5px !important;
+                height: 5mm !important;
+                max-height: 5mm !important;
+                line-height: 1.1 !important;
+            }
+            #tableCash .patient-name {
+                font-size: 9pt !important;
+                font-weight: 900 !important;
+            }
+            #tableCash .phone-text {
+                font-size: 7.5pt !important;
+                color: #555 !important;
+            }
+            #tableCash .money-text { font-size: 8pt !important; }
+            #tableCash .badge { font-size: 7pt !important; padding: 1px 5px !important; }
+            #tableCash .money-debt, #tableCash .money-clear {
+                font-size: 7.5pt !important;
+                padding: 1px 5px !important;
+            }
+            /* قطع بعد 50 صف للكاش */
+            #tableCash tbody tr:nth-child(50n) { page-break-after: always; }
+
+            /* عروض أعمدة الكاش — اسم أعرض */
+            #tableCash th:nth-child(1),  #tableCash td:nth-child(1)  { width: 3%; }
+            #tableCash th:nth-child(2),  #tableCash td:nth-child(2)  { width: 22%; }  /* الاسم أعرض */
+            #tableCash th:nth-child(3),  #tableCash td:nth-child(3)  { width: 10%; }
+            #tableCash th:nth-child(4),  #tableCash td:nth-child(4)  { width: 8%; }
+            #tableCash th:nth-child(5),  #tableCash td:nth-child(5)  { width: 10%; }
+            #tableCash th:nth-child(6),  #tableCash td:nth-child(6)  { width: 7%; }
+            #tableCash th:nth-child(7),  #tableCash td:nth-child(7)  { width: 8%; }
+            #tableCash th:nth-child(8),  #tableCash td:nth-child(8)  { width: 8%; }
+            #tableCash th:nth-child(9),  #tableCash td:nth-child(9)  { width: 9%; }
+            #tableCash th:nth-child(10), #tableCash td:nth-child(10) { width: 15%; }
+
+            /* ====================================================
+               يومية المصروفات — كبيرة وواضحة، ~15 بند في الصفحة
+               ==================================================== */
+            #tableExp table {
+                font-size: 12pt !important;
+            }
+            #tableExp th {
+                font-size: 11pt !important;
+                padding: 6px 10px !important;
+                height: 9mm !important;
+                background: #7b1a1a !important;
+                color: #ffcdd2 !important;
+                font-weight: 900 !important;
+            }
+            #tableExp td {
+                font-size: 12pt !important;
+                padding: 4px 10px !important;
+                height: 11mm !important;
+                max-height: 11mm !important;
+                line-height: 1.3 !important;
+                font-weight: 700 !important;
+            }
+            #tableExp .patient-name {
+                font-size: 13pt !important;
+                font-weight: 900 !important;
+                color: #000 !important;
+            }
+            #tableExp .money-text { font-size: 12pt !important; font-weight: 900 !important; }
+            #tableExp .money-out { color: #880000 !important; font-size: 13pt !important; }
+            #tableExp .badge { font-size: 10pt !important; padding: 2px 8px !important; border-radius: 6px !important; }
+            #tableExp .row-num { font-size: 10pt !important; color: #999 !important; font-weight: 900 !important; }
+
+            /* قطع بعد 15 بند للمصروفات */
+            #tableExp tbody tr:nth-child(47n) { page-break-after: auto; }
+            #tableExp tbody tr:nth-child(15n) { page-break-after: always; }
+
+            /* عروض أعمدة المصروفات — أعرض وأوضح */
+            #tableExp th:nth-child(1), #tableExp td:nth-child(1) { width: 4%; text-align: center !important; }
+            #tableExp th:nth-child(2), #tableExp td:nth-child(2) { width: 50%; }
+            #tableExp th:nth-child(3), #tableExp td:nth-child(3) { width: 18%; }
+            #tableExp th:nth-child(4), #tableExp td:nth-child(4) { width: 13%; }
+            #tableExp th:nth-child(5), #tableExp td:nth-child(5) { width: 15%; }
+
+            /* تمييز صفوف المصروفات */
+            #tableExp tbody tr:nth-child(even) td { background: #fff0f0 !important; }
+            #tableExp tbody tr:nth-child(odd) td  { background: #ffffff !important; }
+
+            /* هيدر المصروفات أكبر */
+            #tableExp .print-page-header .ph-title { font-size: 14pt !important; }
+            #tableExp .print-page-header .ph-meta  { font-size: 10pt !important; }
+
+            /* summary bar للمصروفات أكبر */
+            #tableExp .summary-bar { padding: 8px 15px !important; }
+            #tableExp .summary-label  { font-size: 11pt !important; }
+            #tableExp .summary-amount { font-size: 16pt !important; color: #880000 !important; }
+        }
+    </style>
+
+    <style>
+
+
+    </style>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<div id="customModalOverlay" class="active auth-overlay-unified">
+    <div class="custom-modal auth-box-unified">
+        <button type="button" class="auth-close" onclick="window.location.href='dashboard.html'" aria-label="إغلاق والعودة للوحة القيادة"><i class="fas fa-times"></i></button>
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <h2>بوابة الإدارة والأمان</h2>
+        <p style="color:#777; margin-bottom:20px; font-weight:bold;">يرجى إدخال رمز التحقق الخاص بالحركة المالية اليومية</p>
+        <input type="password" id="ledgerPinInput" placeholder="****" onkeydown="if(event.key==='Enter') verifyLedgerPin()">
+        <button onclick="verifyLedgerPin()"><i class="fas fa-unlock-alt"></i> فتح لوحة التحكم</button>
+    </div>
+</div>
+
+<header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+    </div>
+    <div class="header-right">
+        <div id="serverStatus" class="server-status connecting"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
+        <div id="branchInfo" class="branch-badge">جاري التحميل...</div>
+    </div>
+</header>
+
+<nav class="sidebar">
+    <div class="sidebar-section">القائمة الرئيسية</div>
+    <a href="dashboard.html" class="manager-owner-only"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+    <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+    <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+    <a href="patients.html" class="manager-owner-only"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html" class="manager-owner-only"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+    <a href="ledger.html" class="active manager-owner-only"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+    <div class="sidebar-section">الإدارة</div>
+    <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+    <a href="hr.html" class="manager-owner-only"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+    <a href="analytics.html" class="manager-owner-only"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+    <a href="support.html" class="owner-only"><i class="fas fa-shield-alt"></i> الدعم وسجل المراقبة</a>
+</nav>
+
+<main class="main-content" id="mainContentArea">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="branch-info-card">
+            <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+                <div class="label">الفرع الحالي</div>
+                <div class="value" id="displayCurrentBranch">جاري التحميل...</div>
+            </div>
+        </div>
+        <div class="summary-cards">
+            <div class="summary-mini"><div class="s-label">تأمين</div><div class="s-val blue" id="miniInsu">0</div></div>
+            <div class="summary-mini"><div class="s-label">كاش</div><div class="s-val green" id="miniCash">0</div></div>
+            <div class="summary-mini"><div class="s-label">مصروفات</div><div class="s-val red" id="miniExp">0</div></div>
+        </div>
+        <div class="date-card">
+            <div class="date-input-wrap">
+                <label>اختر تاريخ اليومية</label>
+                <input type="date" id="dateSelector" onchange="loadSelectedLedgerDate()">
+            </div>
+            <div class="day-pill" id="displayDayName">اليوم</div>
+        </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions-row">
+        <button class="btn-print-main" onclick="window.print()">
+            <i class="fas fa-print"></i> طباعة كشف اليومية (كل قسم في صفحة — 50 اسم/صفحة)
+        </button>
+        <button class="btn-print-main" style="background:linear-gradient(135deg,#25D366,#128C7E);" onclick="sendWhatsAppSummary()">
+            <i class="fab fa-whatsapp"></i> إرسال ملخص اليوم واتساب
+        </button>
+        <button class="btn-print-main" style="background:linear-gradient(135deg,#e74c3c,#c0392b);" onclick="downloadLedgerPDF()">
+            <i class="fas fa-file-pdf"></i> تحميل ملخص اليوم PDF
+        </button>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label><i class="fas fa-map-marker-alt"></i> تصفية حسب الفرع</label>
+            <select id="branchSelector" onchange="renderLedger()">
+                <option value="all">الكل (جميع الفروع)</option>
+                <option value="المهندسين">المهندسين</option>
+                <option value="أكتوبر">أكتوبر</option>
+                <option value="الهرم">الهرم</option>
+                <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+            </select>
+        </div>
+        <div class="filter-group" style="flex:2;">
+            <label><i class="fas fa-search"></i> بحث سريع</label>
+            <input type="text" id="ledgerSearch" placeholder="ابحث باسم المريض، الشركة، أو الفئة..." oninput="filterLedgerSearch()">
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-wrapper">
+        <button class="tab-btn active" id="btnTabInsu" onclick="switchLedgerTab('insu')">
+            <i class="fas fa-building"></i> يومية التأمين <span class="tab-count" id="cntInsu">0</span>
+        </button>
+        <button class="tab-btn" id="btnTabCash" onclick="switchLedgerTab('cash')">
+            <i class="fas fa-wallet"></i> يومية الكاش <span class="tab-count" id="cntCash">0</span>
+        </button>
+        <button class="tab-btn" id="btnTabExp" onclick="switchLedgerTab('exp')">
+            <i class="fas fa-file-invoice-dollar"></i> المصروفات <span class="tab-count" id="cntExp">0</span>
+        </button>
+    </div>
+
+    <!-- TABLE INSU -->
+    <div id="tableInsu" class="table-container">
+        <div class="print-page-header insu-header" style="display:none;">
+            <div class="ph-right">
+                <div>
+                    <div class="ph-title">🏥 LIFE SPORT SYSTEM &nbsp;|&nbsp; يومية شركات التأمين</div>
+                    <div class="ph-subtitle" id="pi_subtitle">-</div>
+                </div>
+            </div>
+            <div class="ph-meta">
+                <div>الفرع: <strong id="pi_branch">-</strong></div>
+                <div>اليوم: <strong id="pi_day">-</strong> &nbsp;|&nbsp; التاريخ: <strong id="pi_date">-</strong></div>
+            </div>
+        </div>
+        <div class="print-summary-strip" style="display:none;">
+            <div class="ps-item insu-color">إجمالي التحمل المحصل <strong id="pi_total">0 ج</strong></div>
+            <div class="ps-item debt-color">إجمالي باقي التحمل <strong id="pi_debt">0 ج</strong></div>
+            <div class="ps-item insu-color">عدد المرضى <strong id="pi_count">0</strong></div>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="3%">م</th>
+                        <th>الاسم ورقم التليفون</th>
+                        <th>الطبيب المحول</th>
+                        <th>الشركة والفئة</th>
+                        <th>موقف الجلسات</th>
+                        <th>سعر الجلسة</th>
+                        <th>مدفوع التحمل</th>
+                        <th>باقي التحمل</th>
+                        <th>طريقة الدفع / الورق</th>
+                        <th>ملاحظات</th>
+                        <th class="hide-print" style="width:130px;">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyInsu"></tbody>
+            </table>
+        </div>
+        <div class="summary-bar">
+            <div class="summary-label"><i class="fas fa-coins" style="color:#1565c0;"></i> إجمالي نسب التحمل المحصلة</div>
+            <div class="summary-amount" id="totalInsuValue">0 <span>ج.م</span></div>
+        </div>
+    </div>
+
+    <!-- TABLE CASH -->
+    <div id="tableCash" class="table-container hidden">
+        <div class="print-page-header cash-header" style="display:none;">
+            <div class="ph-right">
+                <div>
+                    <div class="ph-title">💰 LIFE SPORT SYSTEM &nbsp;|&nbsp; يومية الكاش</div>
+                    <div class="ph-subtitle" id="pc_subtitle">-</div>
+                </div>
+            </div>
+            <div class="ph-meta">
+                <div>الفرع: <strong id="pc_branch">-</strong></div>
+                <div>اليوم: <strong id="pc_day">-</strong> &nbsp;|&nbsp; التاريخ: <strong id="pc_date">-</strong></div>
+            </div>
+        </div>
+        <div class="print-summary-strip" style="display:none;">
+            <div class="ps-item cash-color">إجمالي الكاش المحصل <strong id="pc_total">0 ج</strong></div>
+            <div class="ps-item debt-color">إجمالي المديونيات <strong id="pc_debt">0 ج</strong></div>
+            <div class="ps-item cash-color">عدد المرضى <strong id="pc_count">0</strong></div>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="3%">م</th>
+                        <th>الاسم ورقم التليفون</th>
+                        <th>الطبيب المحول</th>
+                        <th>النظام</th>
+                        <th>موقف الجلسات</th>
+                        <th>السعر الأساسي</th>
+                        <th>المدفوع اليوم</th>
+                        <th>الباقي (مديونية)</th>
+                        <th>طريقة الدفع</th>
+                        <th>ملاحظات</th>
+                        <th class="hide-print" style="width:130px;">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyCash"></tbody>
+            </table>
+        </div>
+        <div class="summary-bar">
+            <div class="summary-label"><i class="fas fa-coins" style="color:#2e7d32;"></i> إجمالي الكاش المحصل</div>
+            <div class="summary-amount" id="totalCashValue">0 <span>ج.م</span></div>
+        </div>
+    </div>
+
+    <!-- TABLE EXP -->
+    <div id="tableExp" class="table-container hidden">
+        <div class="print-page-header exp-header" style="display:none;">
+            <div class="ph-right">
+                <div>
+                    <div class="ph-title">📤 LIFE SPORT SYSTEM &nbsp;|&nbsp; مصروفات اليوم</div>
+                    <div class="ph-subtitle" id="pe_subtitle">-</div>
+                </div>
+            </div>
+            <div class="ph-meta">
+                <div>الفرع: <strong id="pe_branch">-</strong></div>
+                <div>اليوم: <strong id="pe_day">-</strong> &nbsp;|&nbsp; التاريخ: <strong id="pe_date">-</strong></div>
+            </div>
+        </div>
+        <div class="print-summary-strip" style="display:none;">
+            <div class="ps-item exp-color">إجمالي المصروفات النقدية <strong id="pe_total">0 ج</strong></div>
+            <div class="ps-item net-color">صافي الكاش بعد المصروفات <strong id="pe_net">0 ج</strong></div>
+            <div class="ps-item exp-color">عدد بنود المصروفات <strong id="pe_count">0</strong></div>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="5%">م</th>
+                        <th>بيان المنصرف</th>
+                        <th>نوع الحركة</th>
+                        <th>الفرع</th>
+                        <th>المبلغ</th>
+                        <th class="hide-print">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyExp"></tbody>
+            </table>
+        </div>
+        <div class="summary-bar">
+            <div class="summary-label"><i class="fas fa-minus-circle" style="color:#c62828;"></i> إجمالي المصروفات النقدية</div>
+            <div class="summary-amount red" id="totalExpValue">0 <span>ج.م</span></div>
+        </div>
+    </div>
+
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY",
+        authDomain: "life-sport-system-hossamzahran.firebaseapp.com",
+        projectId: "life-sport-system-hossamzahran",
+        storageBucket: "life-sport-system-hossamzahran.firebasestorage.app",
+        messagingSenderId: "797045013311",
+        appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+
+    // ===== نظام تسجيل الحركات =====
+    let globalActivityLog = [];
+    function logActivity(action, patientName, details) {
+        try {
+            const userName = localStorage.getItem('userName') || 'مستخدم';
+            const userBranch = localStorage.getItem('userBranch') || '-';
+            db.collection('activity_log').add({
+                action: action,           // نوع الحركة (تعديل، دفعة، حذف، إلخ)
+                patientName: patientName || '-',
+                details: details || '',
+                user: userName,
+                branch: userBranch,
+                date: new Date().toLocaleDateString('en-GB'),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch(e) { console.warn('log:', e); }
+    }
+    window.logActivity = logActivity;
+        // تأكيد الاتصال بعد 3 ثواني
+        setTimeout(() => {
+            const st = document.getElementById('serverStatus');
+            if (st && st.innerHTML.includes('جاري')) {
+                st.innerHTML = '<i class="fas fa-check-circle"></i> متصل';
+            }
+        }, 3000);
+
+    const daysArabic = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    let globalInsuDB = {}, globalCashDB = {}, globalLedger = [], globalTrans = [];
+
+    // ===== نسبة الكاش =====
+    let cashRatioEnabled = false;
+    let cashRatioValue   = 20;
+
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        const icon  = type === 'success' ? 'fa-check-circle' : 'fa-times-circle';
+        const color = type === 'success' ? '#27ae60' : '#e74c3c';
+        t.innerHTML = `<i class="fas ${icon}" style="color:${color};"></i> ${msg}`;
+        c.appendChild(t);
+        setTimeout(() => t.classList.add('show'), 80);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3200);
+    }
+
+    let LEDGER_PASS = '1234'; // الافتراضي، يتحدّث من الإعدادات
+    let DELETE_PASS = '999';
+    // اقرأ الباسوردات فوراً (get) + متابعة أي تغيير (snapshot)
+    db.collection("settings").doc("system_settings").get().then(doc => {
+        if (doc.exists) {
+            const d = doc.data();
+            if (d.passLedger) LEDGER_PASS = d.passLedger;
+            if (d.passDelete) DELETE_PASS = d.passDelete;
+        }
+    }).catch(()=>{});
+    db.collection("settings").doc("system_settings").onSnapshot(doc => {
+        if (doc.exists) {
+            const d = doc.data();
+            if (d.passLedger) LEDGER_PASS = d.passLedger;
+            if (d.passDelete) DELETE_PASS = d.passDelete;
+        }
+    });
+
+    function verifyLedgerPin() {
+        const pin = document.getElementById('ledgerPinInput').value;
+        if (pin === LEDGER_PASS) {
+            sessionStorage.setItem('ledgerUnlocked', 'true');
+            document.getElementById('customModalOverlay').classList.remove('active');
+            document.getElementById('mainContentArea').classList.add('unlocked');
+            showToast("تم فتح الحركة المالية اليومية بنجاح!");
+        } else {
+            showToast("الرقم السري غير صحيح!", "error");
+            document.getElementById('ledgerPinInput').value = '';
+        }
+    }
+
+    function togglePrivacyMode() {
+        const btn = document.getElementById('privacyToggle');
+        if (document.body.classList.contains('hide-cash-ledger')) {
+            const pin = prompt("أدخل الرقم السري لإظهار ماليات الكاش:");
+            if (pin === LEDGER_PASS) {
+                document.body.classList.remove('hide-cash-ledger');
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i> إخفاء ماليات الكاش';
+                btn.classList.remove('locked');
+                showToast("تم إظهار ماليات الكاش.");
+            } else if (pin !== null) { showToast("الرقم السري غير صحيح!", "error"); }
+        } else {
+            document.body.classList.add('hide-cash-ledger');
+            btn.innerHTML = '<i class="fas fa-eye"></i> إظهار ماليات الكاش';
+            btn.classList.add('locked');
+            showToast("تم تفعيل وضع الخصوصية.");
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const role          = localStorage.getItem('userRole')   || 'owner';
+        const name          = localStorage.getItem('userName')   || "مستخدم";
+        const currentBranch = localStorage.getItem('userBranch') || "المهندسين";
+
+        if (role === 'reception') { window.location.href = "reservations.html"; return; }
+
+        document.getElementById('branchInfo').innerText = `أهلاً ${name} | ${currentBranch}`;
+        document.getElementById('displayCurrentBranch').innerText = currentBranch;
+
+        const fBranch = document.getElementById('branchSelector');
+        if (role === 'manager') {
+            document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+            fBranch.value = currentBranch;
+            fBranch.disabled = true;
+        } else {
+            fBranch.value = 'all';
+        }
+
+        if (sessionStorage.getItem('ledgerUnlocked') === 'true') {
+            document.getElementById('customModalOverlay').classList.remove('active');
+            document.getElementById('mainContentArea').classList.add('unlocked');
+        }
+
+        const today = new Date();
+        document.getElementById('dateSelector').value = today.toISOString().split('T')[0];
+
+        db.collection('settings').doc('system_settings').onSnapshot(doc => {
+            if (doc.exists) {
+                if (doc.data().showCashPrices === false) {
+                    document.body.classList.add('hide-cash-ledger');
+                    const pt = document.getElementById('privacyToggle');
+                    if (pt) pt.classList.add('locked');
+                }
+                // قراءة نسبة الكاش
+                cashRatioEnabled = doc.data().cashRatioEnabled === true;
+                cashRatioValue   = doc.data().cashRatio || 20;
+            }
+            renderLedger();
+        });
+
+        fetchDataRealtime();
+    });
+
+    let _ledgerTimer = null;
+    function debouncedRenderLedger() {
+        clearTimeout(_ledgerTimer);
+        _ledgerTimer = setTimeout(() => { try { renderLedger(); } catch(e){ console.warn(e); } }, 200);
+    }
+
+    function fetchDataRealtime() {
+        db.collection("patients_insu").onSnapshot(s => {
+            globalInsuDB = {};
+            s.forEach(d => { globalInsuDB[d.id] = d.data(); });
+            debouncedRenderLedger();
+        });
+        db.collection("patients_cash").onSnapshot(s => {
+            globalCashDB = {};
+            s.forEach(d => { globalCashDB[d.id] = d.data(); });
+            debouncedRenderLedger();
+        });
+        db.collection("daily_ledger").orderBy("timestamp", "desc").limit(800).onSnapshot(s => {
+            globalLedger = [];
+            s.forEach(d => { const x = d.data(); x.id = d.id; globalLedger.push(x); });
+            debouncedRenderLedger();
+            updateStatusUI();
+        });
+        db.collection("daily_transactions").orderBy("timestamp", "desc").limit(500).onSnapshot(s => {
+            globalTrans = [];
+            s.forEach(d => { const x = d.data(); x.id = d.id; globalTrans.push(x); });
+            debouncedRenderLedger();
+            updateStatusUI();
+        });
+        // تحميل سجل الحركات (آخر 200)
+        db.collection("activity_log").orderBy("timestamp", "desc").limit(200).onSnapshot(s => {
+            globalActivityLog = [];
+            s.forEach(d => { const x = d.data(); x.id = d.id; globalActivityLog.push(x); });
+            renderActivityLog();
+        });
+    }
+
+    // الأيام القديمة قد لا تكون ضمن آخر 800 حركة المحمّلة. نجلب اليوم المختار مباشرة.
+    async function loadSelectedLedgerDate() {
+        const dateInput = document.getElementById('dateSelector').value;
+        if (!dateInput) return;
+        renderLedger(); // تحديث العنوان فوراً
+        const [y, m, d] = dateInput.split('-');
+        const dateFormats = [...new Set([dateInput, `${d}/${m}/${y}`, `${parseInt(d)}/${parseInt(m)}/${y}`])];
+        try {
+            const readDay = async collection => {
+                const snap = await db.collection(collection).where('date', 'in', dateFormats).get();
+                return snap.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            };
+            const [ledgerRows, transRows] = await Promise.all([
+                readDay('daily_ledger'), readDay('daily_transactions')
+            ]);
+            // استبدال القائمة باليوم المطلوب يمنع اختفاء أسماء الأيام السابقة.
+            globalLedger = ledgerRows;
+            globalTrans = transRows;
+            renderLedger();
+            updateStatusUI();
+        } catch (error) {
+            console.error('load selected ledger date:', error);
+            alert('تعذر تحميل بيانات هذا التاريخ، حاول مرة أخرى.');
+        }
+    }
+
+    function updateStatusUI() {
+        const el = document.getElementById('serverStatus');
+        if (!el) return;
+        el.className = 'server-status connected';
+        el.innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem;"></i> متصل ومحدث';
+    }
+
+    function switchLedgerTab(tab) {
+        ['Insu','Cash','Exp'].forEach(t => {
+            const tbl = document.getElementById(`table${t}`);
+            const btn = document.getElementById(`btnTab${t}`);
+            if (tbl) tbl.classList.toggle('hidden', tab !== t.toLowerCase());
+            if (btn) btn.classList.toggle('active', tab === t.toLowerCase());
+        });
+        document.getElementById('ledgerSearch').value = '';
+        filterLedgerSearch();
+    }
+
+    function filterLedgerSearch() {
+        const txt = document.getElementById('ledgerSearch').value.toLowerCase();
+        const activeTab = document.querySelector('.tab-btn.active').id;
+        let bodyId = 'bodyInsu';
+        if (activeTab === 'btnTabCash') bodyId = 'bodyCash';
+        else if (activeTab === 'btnTabExp') bodyId = 'bodyExp';
+        const body = document.getElementById(bodyId);
+        if (!body) return;
+        body.querySelectorAll('tr').forEach(tr => {
+            if (tr.querySelector('.empty-state')) return;
+            tr.style.display = tr.innerText.toLowerCase().includes(txt) ? '' : 'none';
+        });
+    }
+
+    function isDateMatch(entry, dateInput) {
+        // تاريخ الحركة المكتوب هو المعتمد (خصوصاً عند إدخال مصروف لشهر/يوم سابق).
+        // timestamp مجرد وقت التسجيل ولا يجوز أن ينقل المصروف إلى يوم تسجيله.
+        const dbDate = entry.date || entry.Date;
+        if (typeof dbDate.toDate === 'function') {
+            const d = dbDate.toDate();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` === dateInput;
+        }
+        if (dbDate) {
+            const [y,m,d] = dateInput.split('-');
+            return [dateInput, `${parseInt(d)}/${parseInt(m)}/${y}`, `${d}/${m}/${y}`, `${y}/${m}/${d}`]
+                   .some(f => String(dbDate) === f || String(dbDate).startsWith(f+' '));
+        }
+        if (entry.timestamp && typeof entry.timestamp.toDate === 'function') {
+            const d = entry.timestamp.toDate();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` === dateInput;
+        }
+        return false;
+    }
+
+    // ===== إرسال ملخص اليوم على واتساب =====
+    function sendWhatsAppSummary() {
+        const dateInput = document.getElementById('dateSelector').value;
+        const selectedBranch = document.getElementById('branchSelector').value;
+        if (!dateInput) { alert('اختر التاريخ الأول'); return; }
+
+        const dObj = new Date(dateInput + 'T00:00:00');
+        const dayName = daysArabic[dObj.getDay()];
+        const dateFormatted = dateInput.split('-').reverse().join('/');
+        const branchLabel = selectedBranch === 'all' ? 'جميع الفروع' : selectedBranch;
+
+        // احسب الإجماليات لليوم المحدد
+        let totalInsu = 0, totalCash = 0, totalExp = 0, totalInstapay = 0;
+        let cntInsu = 0, cntCash = 0;
+        const insuNames = new Set(), cashNames = new Set();
+
+        globalLedger.forEach(entry => {
+            const eBranch = entry.branch || 'المهندسين';
+            if (!isDateMatch(entry, dateInput)) return;
+            if (selectedBranch !== 'all' && eBranch !== selectedBranch) return;
+            const eType = entry.type || '';
+            const pName = (entry.patientName || '').trim();
+            if (eType.includes('تحمل') || eType.includes('تأمين')) {
+                totalInsu += parseFloat(entry.amount || 0);
+                if (pName) insuNames.add(pName);
+            } else if (eType.includes('كاش')) {
+                totalCash += parseFloat(entry.amount || 0);
+                if (pName) cashNames.add(pName);
+            }
+        });
+
+        let transferToInsta = 0;
+        globalTrans.forEach(t => {
+            const tBranch = t.branch || 'المهندسين';
+            if (!isDateMatch(t, dateInput)) return;
+            if (selectedBranch !== 'all' && tBranch !== selectedBranch) return;
+            if (t.type === 'instapay') {
+                totalInstapay += parseFloat(t.amount || 0);
+                if (t.isTransfer) transferToInsta += parseFloat(t.amount || 0);
+            }
+            else totalExp += parseFloat(t.amount || 0);
+        });
+
+        totalCash = Math.max(0, totalCash - transferToInsta);
+
+        const displayCash = cashRatioEnabled ? Math.round(totalCash * cashRatioValue / 100) : totalCash;
+        const net = displayCash + totalInsu + totalInstapay - totalExp;
+
+        // اصنع الرسالة
+        let msg = `*🏥 LIFE SPORT — ملخص اليومية*\n`;
+        msg += `━━━━━━━━━━━━━━\n`;
+        msg += `📍 *الفرع:* ${branchLabel}\n`;
+        msg += `📅 *اليوم:* ${dayName} ${dateFormatted}\n`;
+        msg += `━━━━━━━━━━━━━━\n\n`;
+        msg += `💰 *الكاش:* ${displayCash.toLocaleString()} ج\n`;
+        msg += `   (عدد المرضى: ${cashNames.size})\n\n`;
+        msg += `🏥 *التحمل (تأمين):* ${totalInsu.toLocaleString()} ج\n`;
+        msg += `   (عدد المرضى: ${insuNames.size})\n\n`;
+        if (totalInstapay > 0) msg += `📲 *إنستاباي:* ${totalInstapay.toLocaleString()} ج\n\n`;
+        msg += `💸 *المصروفات:* ${totalExp.toLocaleString()} ج\n\n`;
+        msg += `━━━━━━━━━━━━━━\n`;
+        msg += `✅ *صافي اليوم:* ${net.toLocaleString()} ج\n`;
+        msg += `━━━━━━━━━━━━━━\n`;
+        msg += `_تم الإرسال من نظام Life Sport_`;
+
+        // افتح واتساب
+        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+    }
+
+    // ===== تحميل ملخص اليوم PDF =====
+    function downloadLedgerPDF() {
+        const dateInput = document.getElementById('dateSelector').value;
+        const selectedBranch = document.getElementById('branchSelector').value;
+        if (!dateInput) { alert('اختر التاريخ الأول'); return; }
+
+        const dObj = new Date(dateInput + 'T00:00:00');
+        const dayName = daysArabic[dObj.getDay()];
+        const dateFormatted = dateInput.split('-').reverse().join('/');
+        const branchLabel = selectedBranch === 'all' ? 'جميع الفروع' : selectedBranch;
+
+        let totalInsu = 0, totalCash = 0, totalExp = 0, totalInstapay = 0;
+        const insuNames = new Set(), cashNames = new Set();
+
+        globalLedger.forEach(entry => {
+            const eBranch = entry.branch || 'المهندسين';
+            if (!isDateMatch(entry, dateInput)) return;
+            if (selectedBranch !== 'all' && eBranch !== selectedBranch) return;
+            const eType = entry.type || '';
+            const pName = (entry.patientName || '').trim();
+            if (eType.includes('تحمل') || eType.includes('تأمين')) {
+                totalInsu += parseFloat(entry.amount || 0);
+                if (pName) insuNames.add(pName);
+            } else if (eType.includes('كاش')) {
+                totalCash += parseFloat(entry.amount || 0);
+                if (pName) cashNames.add(pName);
+            }
+        });
+        let transferToInsta2 = 0;
+        globalTrans.forEach(t => {
+            const tBranch = t.branch || 'المهندسين';
+            if (!isDateMatch(t, dateInput)) return;
+            if (selectedBranch !== 'all' && tBranch !== selectedBranch) return;
+            if (t.type === 'instapay') {
+                totalInstapay += parseFloat(t.amount || 0);
+                if (t.isTransfer) transferToInsta2 += parseFloat(t.amount || 0);
+            }
+            else totalExp += parseFloat(t.amount || 0);
+        });
+
+        totalCash = Math.max(0, totalCash - transferToInsta2);
+
+        const displayCash = cashRatioEnabled ? Math.round(totalCash * cashRatioValue / 100) : totalCash;
+        const net = displayCash + totalInsu + totalInstapay - totalExp;
+
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html dir="rtl"><head><meta charset="utf-8"><title>ملخص اليوم</title>
+            <style>
+                body { font-family: 'Tajawal', Arial, sans-serif; padding: 40px; color: #0b132b; }
+                .head { text-align:center; border-bottom:3px solid #d4af37; padding-bottom:20px; margin-bottom:30px; }
+                .head h1 { color:#0b132b; margin:0; font-size:28px; }
+                .head p { color:#666; margin:8px 0 0; font-size:16px; }
+                .net { background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; text-align:center; padding:30px; border-radius:16px; margin:25px 0; }
+                .net .lbl { color:#d4af37; font-size:14px; letter-spacing:1px; }
+                .net .val { font-size:42px; font-weight:900; margin-top:10px; }
+                .row { display:flex; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #eee; font-size:18px; }
+                .row b { color:#0b132b; }
+                .row .amt { font-weight:900; color:#27ae60; }
+                .foot { text-align:center; margin-top:40px; color:#999; font-size:13px; }
+                @media print { button { display:none; } }
+            
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 1100px) {
+            /* top-bar يتكسر لعمودين أو صف */
+            .top-bar { display: flex !important; flex-direction: column !important; gap: 10px !important; }
+            .summary-cards { flex-wrap: wrap !important; }
+            .summary-mini { min-width: 90px !important; flex: 1 1 90px !important; }
+        }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            /* اليومية على الموبايل: كل صف كارت طولي واضح بدلاً من جدول عريض. */
+            .table-scroll { overflow:visible !important; }
+            .table-scroll table, .table-scroll tbody, .table-scroll tr, .table-scroll td { display:block !important; width:100% !important; }
+            .table-scroll table { min-width:0 !important; table-layout:auto !important; }
+            .table-scroll thead { display:none !important; }
+            .table-scroll tr { background:#fff; border:1px solid #e6eaf0; border-radius:12px; margin:10px; padding:6px 11px; box-shadow:0 2px 8px rgba(11,19,43,.05); }
+            .table-scroll td { min-height:32px; padding:7px 0 !important; border-bottom:1px dashed #e7ebf0 !important; font-size:.84rem !important; white-space:normal !important; overflow-wrap:anywhere !important; text-align:left; }
+            .table-scroll td:last-child { border-bottom:0 !important; }
+            .table-scroll td::before { content:''; float:right; width:42%; text-align:right; color:#697586; font-weight:900; font-size:.75rem; }
+            #tableInsu td:nth-child(1)::before, #tableCash td:nth-child(1)::before, #tableExp td:nth-child(1)::before { content:'م'; }
+            #tableInsu td:nth-child(2)::before, #tableCash td:nth-child(2)::before { content:'الاسم والتليفون'; }
+            #tableInsu td:nth-child(3)::before, #tableCash td:nth-child(3)::before { content:'الطبيب المحول'; }
+            #tableInsu td:nth-child(4)::before { content:'الشركة والفئة'; }
+            #tableCash td:nth-child(4)::before { content:'النظام'; }
+            #tableInsu td:nth-child(5)::before, #tableCash td:nth-child(5)::before { content:'موقف الجلسات'; }
+            #tableInsu td:nth-child(6)::before { content:'سعر الجلسة'; }
+            #tableCash td:nth-child(6)::before { content:'السعر الأساسي'; }
+            #tableInsu td:nth-child(7)::before { content:'مدفوع التحمل'; }
+            #tableCash td:nth-child(7)::before { content:'المدفوع اليوم'; }
+            #tableInsu td:nth-child(8)::before { content:'باقي التحمل'; }
+            #tableCash td:nth-child(8)::before { content:'الباقي'; }
+            #tableInsu td:nth-child(9)::before { content:'الدفع / الورق'; }
+            #tableCash td:nth-child(9)::before { content:'طريقة الدفع'; }
+            #tableInsu td:nth-child(10)::before, #tableCash td:nth-child(10)::before { content:'ملاحظات'; }
+            #tableInsu td:nth-child(11)::before, #tableCash td:nth-child(11)::before, #tableExp td:nth-child(6)::before { content:'إجراء'; }
+            #tableExp td:nth-child(2)::before { content:'بيان المنصرف'; }
+            #tableExp td:nth-child(3)::before { content:'نوع الحركة'; }
+            #tableExp td:nth-child(4)::before { content:'الفرع'; }
+            #tableExp td:nth-child(5)::before { content:'المبلغ'; }
+            .summary-bar { padding:16px !important; flex-direction:column; align-items:flex-start; gap:7px; }
+            .summary-amount { font-size:1.65rem; }
+            /* الفلاتر تلتف */
+            .filters-bar { flex-direction: column !important; gap: 10px !important; }
+            .filter-group { min-width: 100% !important; }
+            /* الأكشن row تلتف */
+            .actions-row { flex-wrap: wrap !important; }
+            .actions-row button { flex: 1 1 140px !important; }
+            /* التابز */
+            .tabs-wrapper { gap: 6px !important; }
+            .tab-btn { font-size: 0.82rem !important; padding: 10px 6px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+            .table-scroll tr { margin:8px !important; padding:5px 10px !important; }
+            .table-scroll td { font-size:.8rem !important; }
+        }
+
+    </style>
+
+
+
+</head><body>
+            <div class="head">
+                <h1>🏥 LIFE SPORT SYSTEM</h1>
+                <p>ملخص اليومية المالية</p>
+            </div>
+            <div class="row"><b>📍 الفرع</b><span>${branchLabel}</span></div>
+            <div class="row"><b>📅 اليوم</b><span>${dayName} ${dateFormatted}</span></div>
+            <div class="row"><b>💰 الكاش</b><span class="amt">${displayCash.toLocaleString()} ج (${cashNames.size} مريض)</span></div>
+            <div class="row"><b>🏥 التحمل (تأمين)</b><span class="amt">${totalInsu.toLocaleString()} ج (${insuNames.size} مريض)</span></div>
+            ${totalInstapay>0?`<div class="row"><b>📲 إنستاباي</b><span class="amt">${totalInstapay.toLocaleString()} ج</span></div>`:''}
+            <div class="row"><b>💸 المصروفات</b><span style="color:#e74c3c;font-weight:900;">${totalExp.toLocaleString()} ج</span></div>
+            <div class="net">
+                <div class="lbl">صافي اليوم (كاش + تحمل - مصروفات)</div>
+                <div class="val">${net.toLocaleString()} ج.م</div>
+            </div>
+            <div class="foot">تم الإنشاء من نظام Life Sport — ${new Date().toLocaleString('ar-EG')}</div>
+            <div style="text-align:center;margin-top:30px;">
+                <button onclick="window.print()" style="background:#0b132b;color:white;border:none;padding:14px 40px;border-radius:10px;font-size:16px;cursor:pointer;font-family:'Tajawal';">🖨️ طباعة / حفظ PDF</button>
+            </div>
+            </body></html>`);
+        win.document.close();
+    }
+
+    function renderLedger() {
+        const dateInput      = document.getElementById('dateSelector').value;
+        const selectedBranch = document.getElementById('branchSelector').value;
+        if (!dateInput) return;
+
+        const dObj          = new Date(dateInput + 'T00:00:00');
+        const dayName       = daysArabic[dObj.getDay()];
+        const dateFormatted = dateInput.split('-').reverse().join('/');
+        const branchLabel   = selectedBranch === 'all' ? 'جميع الفروع' : selectedBranch;
+        const subtitle      = `${dateFormatted} — ${branchLabel}`;
+
+        document.getElementById('displayDayName').innerText = dayName;
+
+        // تحديث هيدرات الطباعة
+        ['pi','pc','pe'].forEach(p => {
+            document.getElementById(`${p}_subtitle`).innerText = subtitle;
+            document.getElementById(`${p}_branch`).innerText   = branchLabel;
+            document.getElementById(`${p}_day`).innerText      = dayName;
+            document.getElementById(`${p}_date`).innerText     = dateFormatted;
+        });
+
+        // دمج إدخالات نفس المريض (آخر entry) + عد التكرار
+        const insuMap = new Map();
+        const cashMap = new Map();
+        const insuCountMap = new Map(); // عدد مرات التسجيل لكل مريض
+        const cashCountMap = new Map();
+        const insuPaidMap = new Map(); // إجمالي المدفوع النهاردة لكل مريض (جلسة + دفعات)
+        const cashPaidMap = new Map();
+
+        globalLedger.forEach(entry => {
+            const eBranch = entry.branch || 'المهندسين';
+            const eType   = entry.type   || '';
+            if (!isDateMatch(entry, dateInput)) return;
+            if (selectedBranch !== 'all' && eBranch !== selectedBranch) return;
+
+            const pName = (entry.patientName || '').trim();
+            if (!pName) return;
+
+            const isInsu = eType === 'تحمل' || eType.includes('تأمين') || eType.includes('تحمل');
+            const isCash = eType === 'كاش'  || eType.includes('كاش');
+            // اجمع كل المبالغ الموجبة (جلسة + دفعات) لكل مريض النهاردة
+            const amtVal = parseFloat(entry.amount || 0);
+            if (amtVal > 0) {
+                if (isInsu) insuPaidMap.set(pName, (insuPaidMap.get(pName) || 0) + amtVal);
+                else if (isCash) cashPaidMap.set(pName, (cashPaidMap.get(pName) || 0) + amtVal);
+            }
+            // هل ده دفعة أو استرداد أو كشف؟ (مش جلسة فعلية) — فحص قوي
+            const notesLower = (entry.notes || '');
+            const isDifferenceEntry = eType.includes('فرق جلسة') || eType.includes('فرق جلسه');
+            const isPayOnlyEntry = entry.isPaymentOnly === true || entry.isPaymentOnly === 'true' || isDifferenceEntry || notesLower.includes('دفعة') || notesLower.includes('مقدم') || notesLower.includes('سداد');
+            const isRefundEntry = entry.isRefund === true || entry.isRefund === 'true' || (entry.amount || 0) < 0 || notesLower.includes('استرداد') || notesLower.includes('مرتجع');
+            // الكشف: مايتعدش كتكرار (لا علامة مكرر عليه)
+            const pData = isInsu ? (globalInsuDB[pName]||{}) : (globalCashDB[pName]||{});
+            const isCheckupEntry = ((pData.totalSess||0) === 0) || (pData.sessionType||pData.type||'').includes('كشف') || eType.includes('كشف') || notesLower.includes('كشف');
+            const isRealSession = !isPayOnlyEntry && !isRefundEntry && !isCheckupEntry;
+
+            if (isInsu) {
+                // عد الجلسات الفعلية بس للتكرار (مش الدفعات)
+                if (isRealSession) insuCountMap.set(pName, (insuCountMap.get(pName) || 0) + 1);
+                if (!insuMap.has(pName)) {
+                    insuMap.set(pName, entry);
+                } else {
+                    const existing = insuMap.get(pName);
+                    // لو الموجود دفعة والجديد جلسة فعلية → فضّل الجلسة الفعلية
+                    const existIsPayOnly = existing.isPaymentOnly === true || (existing.notes||'').includes('دفعة');
+                    if (existIsPayOnly && isRealSession) {
+                        insuMap.set(pName, entry);
+                    } else if (!(isPayOnlyEntry && !existIsPayOnly)) {
+                        // مش (الجديد دفعة والموجود جلسة) → خد الأحدث بالوقت
+                        const existTs  = existing.timestamp ? existing.timestamp.toMillis() : 0;
+                        const newTs    = entry.timestamp    ? entry.timestamp.toMillis()    : 0;
+                        if (newTs > existTs) insuMap.set(pName, entry);
+                    }
+                }
+            } else if (isCash) {
+                if (isRealSession) cashCountMap.set(pName, (cashCountMap.get(pName) || 0) + 1);
+                if (!cashMap.has(pName)) {
+                    cashMap.set(pName, entry);
+                } else {
+                    const existing = cashMap.get(pName);
+                    const existIsPayOnly = existing.isPaymentOnly === true || (existing.notes||'').includes('دفعة');
+                    if (existIsPayOnly && isRealSession) {
+                        cashMap.set(pName, entry);
+                    } else if (!(isPayOnlyEntry && !existIsPayOnly)) {
+                        const existTs  = existing.timestamp ? existing.timestamp.toMillis() : 0;
+                        const newTs    = entry.timestamp    ? entry.timestamp.toMillis()    : 0;
+                        if (newTs > existTs) cashMap.set(pName, entry);
+                    }
+                }
+            }
+        });
+
+        // ===== رندر التأمين =====
+        let htmlInsu = '', totalInsu = 0, totalInsuDebt = 0, cntInsu = 0;
+        const insuDebtSet = new Set();
+
+        insuMap.forEach((entry, pName) => {
+            cntInsu++;
+            const p    = globalInsuDB[pName] || {};
+            const debt = Math.max(0, (p.copayTotal || 0) - (p.copayPaid || 0));
+            if (!insuDebtSet.has(pName)) { totalInsuDebt += debt; insuDebtSet.add(pName); }
+            const dupCount = insuCountMap.get(pName) || 1;
+            const dupBadge = dupCount > 1 ? `<span style="background:#e74c3c;color:white;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:900;margin-right:5px;">🔁 مكرر ×${dupCount}</span>` : '';
+
+            const paperBadge = (p.paperStatus && p.paperStatus.includes("مكتمل"))
+                ? '<span class="badge" style="background:#e8f5e9;color:#2e7d32;">✓ كامل</span>'
+                : '<span class="badge" style="background:#ffebee;color:#c62828;">✗ ناقص</span>';
+
+            const payMethod = entry.method === 'instapay'
+                ? '<span class="badge" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);color:white;font-weight:900;box-shadow:0 2px 6px rgba(106,27,154,0.4);"><i class="fas fa-mobile-alt"></i> إنستاباي</span>'
+                : '<span class="badge" style="background:#f5f5f5;color:#555;">💵 كاش</span>';
+
+            // كشف فقط = الحالة 0 جلسة (totalSess=0) أو نوعها كشف
+            const isCheckupOnly = ((p.totalSess || 0) === 0) || (p.sessionType || p.type || '').includes('كشف') || (entry.type || '').includes('كشف');
+            const isCheckup = isCheckupOnly;
+            const serviceType = String(entry.type || '').includes('تغذية') ? 'تغذية' : String(entry.type || '').includes('ريكفري') ? 'ريكفري' : '';
+            const serviceBadge = serviceType ? `<span class="badge" style="background:${serviceType==='تغذية'?'linear-gradient(135deg,#16a085,#0e6655)':'linear-gradient(135deg,#6a1b9a,#8e24aa)'};color:white;font-weight:900;padding:5px 12px;box-shadow:0 2px 7px rgba(0,0,0,.18);">${serviceType==='تغذية'?'🥗':'💆'} ${serviceType}</span>` : '';
+            const isRefund = entry.isRefund === true || (entry.amount || 0) < 0 || (entry.notes || '').includes('استرداد');
+            const isPayOnly = entry.isPaymentOnly === true || String(entry.type||'').includes('فرق جلسة') || String(entry.type||'').includes('فرق جلسه') || (entry.notes || '').includes('دفعة');
+            // اجمع كل دفعات التحمل للمريض في اليوم، وليس آخر حركة ظاهرة فقط.
+            const paidToday = insuPaidMap.get(pName) || parseFloat(entry.amount || 0);
+            const sessionDisplay = isRefund
+                ? '<span class="badge" style="background:#ffebee;color:#c62828;font-weight:900;"><i class="fas fa-rotate-left"></i> استرداد فلوس</span>'
+                : isPayOnly
+                ? '<span class="badge" style="background:#fff3e0;color:#e65100;font-weight:900;"><i class="fas fa-money-bill-wave"></i> دفعة فقط</span>'
+                : serviceBadge
+                ? serviceBadge
+                : isCheckup
+                ? '<span class="badge-checkup" style="background:linear-gradient(135deg,#7b1fa2,#9c27b0);color:white;font-weight:900;padding:4px 12px;border-radius:12px;box-shadow:0 2px 6px rgba(123,31,162,0.4);"><i class="fas fa-stethoscope"></i> كشف فقط</span>'
+                : `<span class="badge badge-session">حضر ${p.attended || 0} من ${p.totalSess || 0}</span>`;
+
+            // علامة كشف صفراء جنب الاسم (للحالة 0 جلسات)
+            const checkupTag = serviceType ? `<span style="background:${serviceType==='تغذية'?'#16a085':'#6a1b9a'};color:white;padding:2px 9px;border-radius:10px;font-size:0.72rem;font-weight:900;margin-right:6px;">${serviceType==='تغذية'?'🥗 تغذية':'💆 ريكفري'}</span>` : isCheckup ? '<span style="background:#ffc107;color:#0b132b;padding:2px 9px;border-radius:10px;font-size:0.72rem;font-weight:900;margin-right:6px;box-shadow:0 1px 4px rgba(255,193,7,0.4);">🩺 كشف</span>' : '';
+
+            htmlInsu += `<tr${dupCount > 1 ? ' style="background:#fff8e1 !important;"' : ''}>
+                <td><span class="row-num">${cntInsu}</span></td>
+                <td><div class="patient-name">${pName} ${checkupTag}${dupBadge}</div><div class="phone-text">${p.phone || '-'}</div></td>
+                <td><span style="font-weight:700;color:#555;font-size:0.8rem;">${p.refDoctor || 'لم يحدد'}</span></td>
+                <td><span class="badge badge-comp">${p.comp || '-'}</span> <span style="font-size:0.75rem;color:#777;font-weight:700;">/ ${p.cat || '-'}</span></td>
+                <td>${sessionDisplay}</td>
+                <td><span class="money-text money-neutral">${p.price || 0} ج</span></td>
+                <td><span class="money-text money-in">+${paidToday} ج</span></td>
+                <td>${debt > 0 ? `<span class="money-debt">${debt} ج</span>` : '<span class="money-clear">✓</span>'}</td>
+                <td>${payMethod} ${paperBadge}</td>
+                <td><span style="font-size:0.8rem;color:#777;display:block;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.notes || '-'}</span></td>
+                <td class="hide-print">
+                    <button class="btn-action" style="background:linear-gradient(135deg,#3498db,#2980b9);color:white;" onclick="openEditPatient('${pName}','${entry.type}')"><i class="fas fa-user-edit"></i> تعديل الملف</button>
+                    <button class="btn-action btn-return" onclick="cancelSessionAction('${entry.id}','${entry.type}','${pName}',${entry.amount},${isPayOnly},${isRefund})"><i class="fas fa-undo-alt"></i> إرجاع</button>
+                    <button class="btn-action btn-delete" onclick="deletePatientCompletely('${pName}','${entry.type}')"><i class="fas fa-user-times"></i> مسح</button>
+                </td>
+            </tr>`;
+            totalInsu += paidToday;
+        });
+
+        // ===== رندر الكاش =====
+        let htmlCash = '', totalCash = 0, totalCashDebt = 0, cntCash = 0;
+
+        cashMap.forEach((entry, pName) => {
+            cntCash++;
+            const p        = globalCashDB[pName] || {};
+            const isCourse = p.mode === 'course';
+            const debt     = isCourse ? Math.max(0, (p.cost || 0) - (p.paid || 0)) : 0;
+            totalCashDebt += debt;
+            const basePrice = isCourse ? (p.cost || 0) : (p.sessPrice || 0);
+            const isCheckup = (p.sessionType || p.type || '').includes('كشف') || (entry.type || '').includes('كشف');
+            const serviceType = String(entry.type || '').includes('تغذية') ? 'تغذية' : String(entry.type || '').includes('ريكفري') ? 'ريكفري' : '';
+            const serviceBadge = serviceType ? `<span class="badge" style="background:${serviceType==='تغذية'?'linear-gradient(135deg,#16a085,#0e6655)':'linear-gradient(135deg,#6a1b9a,#8e24aa)'};color:white;font-weight:900;padding:5px 12px;box-shadow:0 2px 7px rgba(0,0,0,.18);">${serviceType==='تغذية'?'🥗':'💆'} ${serviceType}</span>` : '';
+            const isRefund = entry.isRefund === true || (entry.amount || 0) < 0 || (entry.notes || '').includes('استرداد');
+            const isPayOnly = entry.isPaymentOnly === true || String(entry.type||'').includes('فرق جلسة') || String(entry.type||'').includes('فرق جلسه') || (entry.notes || '').includes('دفعة');
+            const dupCount = cashCountMap.get(pName) || 1;
+            const dupBadge = dupCount > 1 ? `<span style="background:#e74c3c;color:white;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:900;margin-right:5px;">🔁 مكرر ×${dupCount}</span>` : '';
+
+            const sessionDisplay = isRefund
+                ? '<span class="badge" style="background:#ffebee;color:#c62828;font-weight:900;"><i class="fas fa-rotate-left"></i> استرداد فلوس</span>'
+                : isPayOnly
+                ? '<span class="badge" style="background:#fff3e0;color:#e65100;font-weight:900;"><i class="fas fa-money-bill-wave"></i> دفعة فقط</span>'
+                : serviceBadge
+                ? serviceBadge
+                : isCheckup
+                ? '<span class="badge-checkup"><i class="fas fa-stethoscope"></i> كشف طبيب</span>'
+                : (isCourse
+                    ? `<span class="badge badge-session">حضر ${p.attended || 0} من ${p.totalSess || 0}</span>`
+                    : `<span class="badge badge-session-single">جلسة رقم ${p.attended || 0}</span>`);
+
+            const payMethod = entry.method === 'instapay'
+                ? '<span class="badge" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);color:white;font-weight:900;box-shadow:0 2px 6px rgba(106,27,154,0.4);"><i class="fas fa-mobile-alt"></i> إنستاباي</span>'
+                : '<span class="badge" style="background:#f5f5f5;color:#555;">💵 كاش</span>';
+
+            const checkupTagC = serviceType ? `<span style="background:${serviceType==='تغذية'?'#16a085':'#6a1b9a'};color:white;padding:2px 9px;border-radius:10px;font-size:0.72rem;font-weight:900;margin-right:6px;">${serviceType==='تغذية'?'🥗 تغذية':'💆 ريكفري'}</span>` : isCheckup ? '<span style="background:#ffc107;color:#0b132b;padding:2px 9px;border-radius:10px;font-size:0.72rem;font-weight:900;margin-right:6px;box-shadow:0 1px 4px rgba(255,193,7,0.4);">🩺 كشف</span>' : '';
+
+            htmlCash += `<tr${dupCount > 1 ? ' style="background:#fff8e1 !important;"' : ''}>
+                <td><span class="row-num">${cntCash}</span></td>
+                <td><div class="patient-name">${pName} ${checkupTagC}${dupBadge}</div><div class="phone-text">${p.phone || '-'}</div></td>
+                <td><span style="font-weight:700;color:#555;font-size:0.8rem;">${p.refDoctor || 'لم يحدد'}</span></td>
+                <td><span class="badge badge-course">${isCourse ? 'كورس' : 'جلسات'}</span></td>
+                <td>${sessionDisplay}</td>
+                <td><span class="money-text money-neutral">${basePrice} ج</span></td>
+                <td><span class="money-text money-in">+${(cashPaidMap.get(pName) || entry.amount)} ج</span></td>
+                <td>${debt > 0 ? `<span class="money-debt">${debt} ج</span>` : '<span class="money-clear">✓</span>'}</td>
+                <td>${payMethod}</td>
+                <td><span style="font-size:0.75rem;color:#777;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px;display:inline-block;">${entry.notes || '-'}</span></td>
+                <td class="hide-print">
+                    <button class="btn-action" style="background:linear-gradient(135deg,#3498db,#2980b9);color:white;" onclick="openEditPatient('${pName}','${entry.type}')"><i class="fas fa-user-edit"></i> تعديل الملف</button>
+                    <button class="btn-action btn-return" onclick="cancelSessionAction('${entry.id}','${entry.type}','${pName}',${entry.amount},${isPayOnly},${isRefund})"><i class="fas fa-undo-alt"></i> إرجاع</button>
+                    <button class="btn-action btn-delete" onclick="deletePatientCompletely('${pName}','${entry.type}')"><i class="fas fa-user-times"></i> مسح</button>
+                </td>
+            </tr>`;
+            totalCash += parseFloat(entry.amount || 0);
+        });
+
+        // ===== رندر المصروفات =====
+        let htmlExp = '', totalExp = 0, cntExp = 0;
+
+        globalTrans.forEach(t => {
+            const tBranch = t.branch || 'المهندسين';
+            if (!isDateMatch(t, dateInput)) return;
+            if (selectedBranch !== 'all' && tBranch !== selectedBranch) return;
+            cntExp++;
+            const typeBadge = t.isRefund
+                ? '<span class="badge" style="background:#fff3e0;color:#e65100;font-weight:900;"><i class="fas fa-rotate-left"></i> استرداد مريض</span>'
+                : (t.type === 'instapay'
+                    ? '<span class="badge" style="background:#e8f5e9;color:#2e7d32;">إنستاباي</span>'
+                    : '<span class="badge" style="background:#ffebee;color:#c62828;">نقدي</span>');
+
+            htmlExp += `<tr>
+                <td><span class="row-num">${cntExp}</span></td>
+                <td><div class="patient-name">${t.reason}</div></td>
+                <td>${typeBadge}</td>
+                <td><span class="badge" style="background:#f4f6f9;color:#555;">${tBranch}</span></td>
+                <td><span class="money-text money-out">-${t.amount} ج</span></td>
+                <td class="hide-print">
+                    <button class="btn-action btn-return" onclick="cancelExpenseAction('${t.id}','${t.reason}')"><i class="fas fa-trash-alt"></i> مسح</button>
+                </td>
+            </tr>`;
+            if (t.type !== 'instapay') totalExp += parseFloat(t.amount || 0);
+        });
+
+        // ===== تطبيق نسبة الكاش =====
+        const displayCash = cashRatioEnabled
+            ? Math.round(totalCash * cashRatioValue / 100)
+            : totalCash;
+        // الرقم يظهر بس من غير توضيح النسبة
+        const cashLabel = `${displayCash.toLocaleString()} <span>ج.م</span>`;
+
+        // ===== تحديث الـ DOM =====
+        const emptyTd11 = `<tr><td colspan="11"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد حركة في هذا اليوم</p></div></td></tr>`;
+        const emptyTd6  = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد مصروفات في هذا اليوم</p></div></td></tr>`;
+
+        document.getElementById('bodyInsu').innerHTML = htmlInsu || emptyTd11;
+        document.getElementById('bodyCash').innerHTML = htmlCash || emptyTd11;
+        document.getElementById('bodyExp').innerHTML  = htmlExp  || emptyTd6;
+
+        document.getElementById('totalInsuValue').innerHTML = `${totalInsu.toLocaleString()} <span>ج.م</span>`;
+        document.getElementById('totalCashValue').innerHTML = cashLabel;
+        document.getElementById('totalExpValue').innerHTML  = `${totalExp.toLocaleString()}  <span>ج.م</span>`;
+
+        document.getElementById('miniInsu').innerText = totalInsu.toLocaleString();
+        document.getElementById('miniCash').innerText = displayCash.toLocaleString();
+        document.getElementById('miniExp').innerText  = totalExp.toLocaleString();
+
+        document.getElementById('cntInsu').innerText = cntInsu;
+        document.getElementById('cntCash').innerText = cntCash;
+        document.getElementById('cntExp').innerText  = cntExp;
+
+        // Print strips
+        document.getElementById('pi_total').innerText = totalInsu.toLocaleString() + ' ج';
+        document.getElementById('pi_debt').innerText  = totalInsuDebt.toLocaleString() + ' ج';
+        document.getElementById('pi_count').innerText = cntInsu + ' مريض';
+        document.getElementById('pc_total').innerText = displayCash.toLocaleString() + ' ج';
+        document.getElementById('pc_debt').innerText  = totalCashDebt.toLocaleString() + ' ج';
+        document.getElementById('pc_count').innerText = cntCash + ' مريض';
+        document.getElementById('pe_total').innerText = totalExp.toLocaleString() + ' ج';
+        document.getElementById('pe_net').innerText   = (totalCash - totalExp).toLocaleString() + ' ج';
+        document.getElementById('pe_count').innerText = cntExp + ' بند';
+    }
+
+    async function cancelSessionAction(docId, type, patientName, amount, isPayOnly, isRefund) {
+        const isDifference = String(type || '').includes('فرق جلسة') || String(type || '').includes('فرق جلسه');
+        const isPayment = isPayOnly === true || isPayOnly === 'true' || isDifference;
+        const isRef = isRefund === true || isRefund === 'true';
+        const confirmMsg = isPayment
+            ? `هل تريd إلغاء هذه الدفعة (${amount} ج.م)؟ هيترجع المبلغ من حساب المريض.`
+            : isRef
+            ? `هل تريد إلغاء هذا الاسترداد (${amount} ج.م)؟`
+            : `هل أنت متأكد من إرجاع المالية واسترجاع ${amount} ج.م؟`;
+        if (!confirm(confirmMsg)) return;
+        try {
+            const isInsu = (type === 'تحمل' || type.includes('تأمين') || type.includes('تحمل'));
+            const amt = parseFloat(amount) || 0;
+            const collection = isInsu ? "patients_insu" : "patients_cash";
+            const db_ref = isInsu ? globalInsuDB[patientName] : globalCashDB[patientName];
+            let linkedPaymentTotal = 0;
+            let linkedPaymentDocs = [];
+            let linkedPaymentRows = [];
+            const originalDoc = await db.collection('daily_ledger').doc(docId).get();
+            const originalRow = originalDoc.exists ? originalDoc.data() : {};
+            const operationDate = originalRow.date || '';
+            const sameOperationDate = value => {
+                if (!value || !operationDate) return true;
+                return value === operationDate || String(value).split('-').reverse().join('/') === operationDate;
+            };
+
+            // صف اليومية يعرض الجلسة والدفعات معًا؛ عند إرجاع الجلسة ألغي دفعات نفس اليوم أيضًا.
+            if (!isPayment && !isRef) {
+                if (operationDate) {
+                    const samePatient = await db.collection('daily_ledger').where('patientName','==',patientName).get();
+                    samePatient.forEach(doc => {
+                        if (doc.id === docId) return;
+                        const row = doc.data();
+                        const isLinkedPayment = row.date === operationDate && (row.isPaymentOnly === true || row.isPaymentOnly === 'true' || String(row.type||'').includes('فرق جلسة') || String(row.type||'').includes('فرق جلسه') || String(row.notes || '').includes('دفعة'));
+                        if (isLinkedPayment) {
+                            linkedPaymentTotal += parseFloat(row.amount || 0);
+                            linkedPaymentDocs.push(doc.ref);
+                            linkedPaymentRows.push(row);
+                        }
+                    });
+                }
+            }
+
+            if (db_ref) {
+                const p = db_ref;
+                let update = {};
+                if (isPayment) {
+                    // دفعة أو فرق جلسة: ارجع المبلغ فقط ولا تلمس الحضور.
+                    if (isInsu) update.copayPaid = Math.max(0,(p.copayPaid||0)-amt-linkedPaymentTotal);
+                    else update.paid = Math.max(0,(p.paid||0)-amt-linkedPaymentTotal);
+                    if (Array.isArray(p.paymentsHistory)) {
+                        const hist = [...p.paymentsHistory];
+                        let removeIndex = -1;
+                        // الحركات الجديدة مرتبطة بمعرّف دقيق، فلا يمكن حذف دفعة أخرى بالخطأ.
+                        if (originalRow.operationId) removeIndex = hist.map((h,i)=>({h,i})).filter(x=>x.h.operationId===originalRow.operationId).map(x=>x.i).pop() ?? -1;
+                        // دعم الحركات القديمة: طابق التاريخ أولاً، ثم السبب/المبلغ لو كان التاريخ مختلفاً.
+                        if (removeIndex < 0) {
+                            for (let i=hist.length-1; i>=0; i--) {
+                                const rightKind = isDifference ? String(hist[i].type||'').includes('فرق جلس') : !String(hist[i].type||'').includes('فرق جلس');
+                                if (Math.abs(parseFloat(hist[i].amount||0))===amt && hist[i].amount>0 && rightKind && sameOperationDate(hist[i].date)) { removeIndex=i; break; }
+                            }
+                        }
+                        if (removeIndex < 0 && isDifference) {
+                            for (let i=hist.length-1; i>=0; i--) {
+                                if (Math.abs(parseFloat(hist[i].amount||0))===amt && hist[i].amount>0 && String(hist[i].type||'').includes('فرق جلس') && (!originalRow.notes || hist[i].note===originalRow.notes)) { removeIndex=i; break; }
+                            }
+                        }
+                        if (removeIndex >= 0) hist.splice(removeIndex,1);
+                        update.paymentsHistory = hist;
+                    }
+                    // ملاحظة فرق الجلسة لا تبقى في كارت المتابعة بعد إلغائها.
+                    if (isDifference && Array.isArray(p.sessionNotesHistory) && originalRow.notes) {
+                        update.sessionNotesHistory = p.sessionNotesHistory.filter(n => !((sameOperationDate(n.date) || n.note === originalRow.notes) && n.note === originalRow.notes));
+                    }
+                } else if (isRef) {
+                    // استرداد: رجّع المبلغ للحساب + شيله من السجل
+                    if (isInsu) update.copayPaid = (p.copayPaid||0)+amt;
+                    else update.paid = (p.paid||0)+amt;
+                    if (Array.isArray(p.paymentsHistory)) {
+                        const hist = [...p.paymentsHistory];
+                        for (let i = hist.length-1; i >= 0; i--) {
+                            if (Math.abs(hist[i].amount) === amt && (hist[i].amount < 0 || hist[i].type === 'استرداد')) { hist.splice(i,1); break; }
+                        }
+                        update.paymentsHistory = hist;
+                    }
+                } else {
+                    // جلسة حضور: ألغِ كذلك أي فرق جلسة/دفعة مرتبطة بها في نفس اليوم.
+                    update.attended = Math.max(0,(p.attended||0)-1);
+                    if (isInsu) update.copayPaid = Math.max(0,(p.copayPaid||0)-amt-linkedPaymentTotal);
+                    else update.paid = Math.max(0,(p.paid||0)-amt-linkedPaymentTotal);
+                    if (Array.isArray(p.paymentsHistory)) {
+                        const hist = [...p.paymentsHistory];
+                        const rowsToRemove = [originalRow, ...linkedPaymentRows];
+                        rowsToRemove.forEach(row => {
+                            const rowAmount = Math.abs(parseFloat(row.amount||0));
+                            const rowIsDifference = String(row.type||'').includes('فرق جلسة') || String(row.type||'').includes('فرق جلسه');
+                            for (let i=hist.length-1; i>=0; i--) {
+                                const hIsDifference = String(hist[i].type||'').includes('فرق جلس');
+                                if (Math.abs(parseFloat(hist[i].amount||0))===rowAmount && hist[i].amount>0 && hIsDifference===rowIsDifference && sameOperationDate(hist[i].date)) { hist.splice(i,1); break; }
+                            }
+                        });
+                        update.paymentsHistory = hist;
+                    }
+                    if (Array.isArray(p.sessionNotesHistory)) {
+                        const notesToRemove = [originalRow, ...linkedPaymentRows].map(r=>r.notes).filter(Boolean);
+                        if (notesToRemove.length) update.sessionNotesHistory = p.sessionNotesHistory.filter(n => !(sameOperationDate(n.date) && notesToRemove.includes(n.note)));
+                    }
+                }
+                await db.collection(collection).doc(patientName).update(update);
+            }
+            await db.collection("daily_ledger").doc(docId).delete();
+            if (linkedPaymentDocs.length) {
+                const batch = db.batch();
+                linkedPaymentDocs.forEach(ref => batch.delete(ref));
+                await batch.commit();
+            }
+            // شيل علامة الحضور من الحجز النهاردة بس لو جلسة (مش دفعة)
+            if (!isPayment && !isRef) {
+                try {
+                    const todayISO = new Date().toISOString().split('T')[0];
+                    const todayDMY = todayISO.split('-').reverse().join('/');
+                    const resSnap = await db.collection('reservations').where('patientName','==',patientName).get();
+                    const batch = db.batch();
+                    resSnap.forEach(d => {
+                        const r = d.data();
+                        if ((r.date === todayISO || r.date === todayDMY) && r.status === 'حضر') {
+                            batch.update(d.ref, { status: 'منتظر' });
+                        }
+                    });
+                    await batch.commit();
+                } catch(e) { console.warn('unmark reservation:', e); }
+            }
+            showToast(isPayment ? "تم إلغاء الدفعة بنجاح." : "تم الإرجاع بنجاح.");
+            logActivity(isPayment ? 'إلغاء دفعة' : (isRef ? 'إلغاء استرداد' : 'إرجاع جلسة'), patientName, `${amount} ج.م`);
+        } catch(e) { showToast("حدث خطأ أثناء الإرجاع.", "error"); console.error(e); }
+    }
+
+    async function deletePatientCompletely(patientName, eType) {
+        const pass = prompt(`أنت على وشك مسح ملف (${patientName}) بالكامل. أدخل الرقم السري:`);
+        if (pass !== DELETE_PASS) { if (pass !== null) showToast("الرقم السري غير صحيح!", "error"); return; }
+        try {
+            const isInsu = (eType === 'تحمل' || eType.includes('تأمين') || eType.includes('تحمل'));
+            await db.collection(isInsu ? "patients_insu" : "patients_cash").doc(patientName).delete();
+            showToast("تم مسح ملف المريض نهائياً!");
+        } catch(e) { showToast("حدث خطأ أثناء المسح.", "error"); }
+    }
+
+    async function cancelExpenseAction(docId, reason) {
+        if (!confirm(`هل أنت متأكد من مسح مصروف: (${reason})؟`)) return;
+        try {
+            await db.collection("daily_transactions").doc(docId).delete();
+            showToast("تم مسح المصروف بنجاح.");
+        } catch(e) { showToast("حدث خطأ أثناء المسح.", "error"); }
+    }
+
+    // ===== تعديل ملف المريض =====
+    let editPatientName = null, editPatientType = null;
+    function openEditPatient(pName, eType) {
+        const isInsu = (eType.includes('تحمل') || eType.includes('تأمين'));
+        const db_ = isInsu ? globalInsuDB : globalCashDB;
+        const p = db_[pName];
+        if (!p) { showToast("المريض غير موجود", "error"); return; }
+        editPatientName = pName;
+        editPatientType = isInsu ? 'insu' : 'cash';
+
+        // املأ الحقول
+        document.getElementById('ep_name').value = pName;
+        document.getElementById('ep_phone').value = p.phone || '';
+        document.getElementById('ep_comp').value = p.comp || '';
+        document.getElementById('ep_refDoctor').value = p.refDoctor || '';
+        document.getElementById('ep_injury').value = p.injury || '';
+        if (document.getElementById('ep_approvalDate')) document.getElementById('ep_approvalDate').value = p.approvalDate || '';
+        if (document.getElementById('ep_cat')) document.getElementById('ep_cat').value = p.cat || 'A';
+        if (document.getElementById('ep_notes')) document.getElementById('ep_notes').value = p.notes || '';
+        document.getElementById('ep_price').value = p.price || p.sessPrice || '';
+        document.getElementById('ep_totalSess').value = p.totalSess || '';
+        document.getElementById('ep_attended').value = p.attended || '';
+        document.getElementById('ep_type').value = editPatientType;
+        document.getElementById('ep_copayTotal').value = p.copayTotal || '';
+        document.getElementById('ep_copayPaid').value = p.copayPaid || '';
+        document.getElementById('ep_paid').value = p.paid || '';
+        document.getElementById('ep_branch').value = p.branch || 'المهندسين';
+        // الكورس
+        document.getElementById('ep_mode').value = p.mode || 'sessions';
+        document.getElementById('ep_cost').value = p.cost || '';
+        // حالة الأوراق
+        const ps = p.paperStatus || 'مكتمل';
+        if (ps.includes('ناقص')) {
+            document.getElementById('ep_paperStatus').value = 'ناقص';
+            // استخرج الناقص (لو متخزن بصيغة "ناقص: كذا")
+            const m = ps.split(':')[1];
+            document.getElementById('ep_paperMissing').value = m ? m.trim() : '';
+        } else {
+            document.getElementById('ep_paperStatus').value = 'مكتمل';
+            document.getElementById('ep_paperMissing').value = '';
+        }
+        epTogglePaper();
+        epToggleType();
+        epToggleCourse();
+        // الملفات
+        epExistingDocs = Array.isArray(p.docs) ? [...p.docs] : [];
+        epNewDocs = [];
+        document.getElementById('ep_files').value = '';
+        renderEpFiles();
+        // الدفعة
+        document.getElementById('ep_payAmount').value = '';
+        document.getElementById('ep_payDate').value = new Date().toISOString().split('T')[0];
+        if (document.getElementById('ep_refundAmount')) {
+            document.getElementById('ep_refundAmount').value = '';
+            document.getElementById('ep_refundDate').value = new Date().toISOString().split('T')[0];
+        }
+        // عنوان الدفعة حسب النوع
+        const payLbl = document.getElementById('ep_payLabel');
+        if (isInsu) payLbl.innerText = 'المبلغ المدفوع من التحمل';
+        else if (p.mode === 'course') payLbl.innerText = 'سعر الكورس المدفوع';
+        else payLbl.innerText = 'قيمة الدفعة';
+
+        document.getElementById('editPatientModal').style.display = 'flex';
+    }
+
+    function epToggleCourse() {
+        const isCourse = document.getElementById('ep_mode').value === 'course';
+        document.getElementById('ep_courseWrap').style.display = isCourse ? 'block' : 'none';
+    }
+
+    function epTogglePaper() {
+        const missing = document.getElementById('ep_paperStatus').value === 'ناقص';
+        document.getElementById('ep_paperMissingWrap').style.display = missing ? 'block' : 'none';
+    }
+
+    // ملفات المريض
+    let epExistingDocs = []; // الملفات المحفوظة
+    let epNewDocs = []; // الملفات الجديدة
+
+    function epPreviewFiles() {
+        const files = document.getElementById('ep_files').files;
+        for (let f of files) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                epNewDocs.push({ name: f.name, data: e.target.result, type: f.type });
+                renderEpFiles();
+            };
+            reader.readAsDataURL(f);
+        }
+    }
+
+    function renderEpFiles() {
+        const box = document.getElementById('ep_filesPreview');
+        const all = [...epExistingDocs, ...epNewDocs];
+        if (!all.length) { box.innerHTML = '<span style="color:#bbb;font-size:0.82rem;">لا توجد ملفات</span>'; return; }
+        box.innerHTML = all.map((d, i) => {
+            const isImg = (d.type || '').startsWith('image') || (d.data || '').startsWith('data:image');
+            const isNew = i >= epExistingDocs.length;
+            const realIdx = isNew ? i - epExistingDocs.length : i;
+            return `<div style="position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;border:1px solid #e0e4ea;background:#fff;">
+                ${isImg ? `<img src="${d.data}" style="width:100%;height:100%;object-fit:cover;cursor:pointer;" onclick="window.open('${d.data}','_blank')">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#e74c3c;"><i class="fas fa-file-pdf" style="font-size:1.5rem;"></i></div>`}
+                <button onclick="epRemoveFile(${isNew?'true':'false'},${realIdx})" style="position:absolute;top:2px;left:2px;background:rgba(231,76,60,0.9);color:white;border:none;width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:0.7rem;line-height:1;">✕</button>
+            </div>`;
+        }).join('');
+    }
+
+    function epRemoveFile(isNew, idx) {
+        if (isNew) epNewDocs.splice(idx, 1);
+        else epExistingDocs.splice(idx, 1);
+        renderEpFiles();
+    }
+
+    function epToggleType() {
+        const isInsu = document.getElementById('ep_type').value === 'insu';
+        // حقول الكاش (نظام الدفع + المدفوع كاش) تظهر للكاش بس
+        document.querySelectorAll('.ep-cash-only').forEach(el => el.style.display = isInsu ? 'none' : 'block');
+        // حقول الشركات (التحمل) تظهر للشركات بس
+        document.querySelectorAll('.ep-comp-only').forEach(el => el.style.display = isInsu ? 'block' : 'none');
+        // لو بقى شركات، خانة الكورس تختفي
+        if (isInsu) document.getElementById('ep_courseWrap').style.display = 'none';
+        else epToggleCourse();
+        // عدّل عنوان الدفعة
+        const payLbl = document.getElementById('ep_payLabel');
+        if (payLbl) {
+            if (isInsu) payLbl.innerText = 'المبلغ المدفوع من التحمل';
+            else if (document.getElementById('ep_mode').value === 'course') payLbl.innerText = 'سعر الكورس المدفوع';
+            else payLbl.innerText = 'قيمة الدفعة';
+        }
+    }
+
+    function closeEditPatient() {
+        document.getElementById('editPatientModal').style.display = 'none';
+        editPatientName = null;
+    }
+
+    let _savingEdit = false;
+    async function saveEditPatient() {
+        if (_savingEdit) return; // منع الضغط المزدوج
+        if (!editPatientName) { showToast("افتح ملف مريض أولاً", "error"); return; }
+        const newType = document.getElementById('ep_type').value; // insu أو cash
+        const newName = document.getElementById('ep_name').value.trim();
+        if (!newName) { showToast("اكتب اسم المريض!", "error"); return; }
+        _savingEdit = true;
+        // مؤشر تحميل على الزرار
+        const saveBtn = document.getElementById('btnSaveEditPatient');
+        let _btnOld = '';
+        if (saveBtn) { _btnOld = saveBtn.innerHTML; saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...'; saveBtn.disabled = true; }
+        // أمان: فك القفل بعد 12 ثانية مهما حصل
+        const _unlockTimer = setTimeout(() => { _savingEdit = false; if (saveBtn) { saveBtn.innerHTML = _btnOld || '<i class="fas fa-save"></i> حفظ التعديلات'; saveBtn.disabled = false; } }, 12000);
+
+        // تحديد الكولكشن القديم والجديد + هل الاسم اتغير
+        const oldCollection = editPatientType === 'insu' ? 'patients_insu' : 'patients_cash';
+        const newCollection = newType === 'insu' ? 'patients_insu' : 'patients_cash';
+        const nameChanged = newName !== editPatientName;
+
+        const data = {
+            phone: document.getElementById('ep_phone').value,
+            comp: document.getElementById('ep_comp').value,
+            refDoctor: document.getElementById('ep_refDoctor').value,
+            injury: document.getElementById('ep_injury').value,
+            cat: document.getElementById('ep_cat') ? document.getElementById('ep_cat').value : 'A',
+            approvalDate: document.getElementById('ep_approvalDate') ? document.getElementById('ep_approvalDate').value : '',
+            notes: document.getElementById('ep_notes') ? document.getElementById('ep_notes').value : '',
+            price: parseFloat(document.getElementById('ep_price').value) || 0,
+            sessPrice: parseFloat(document.getElementById('ep_price').value) || 0,
+            totalSess: parseInt(document.getElementById('ep_totalSess').value) || 0,
+            attended: parseInt(document.getElementById('ep_attended').value) || 0,
+            copayTotal: parseFloat(document.getElementById('ep_copayTotal').value) || 0,
+            copayPaid: parseFloat(document.getElementById('ep_copayPaid').value) || 0,
+            paid: parseFloat(document.getElementById('ep_paid').value) || 0,
+            branch: document.getElementById('ep_branch').value,
+            mode: document.getElementById('ep_mode').value,
+            cost: parseFloat(document.getElementById('ep_cost').value) || 0,
+            paperStatus: document.getElementById('ep_paperStatus').value === 'ناقص'
+                ? ('ناقص: ' + (document.getElementById('ep_paperMissing').value || 'غير محدد'))
+                : 'مكتمل',
+            docs: [...epExistingDocs, ...epNewDocs]
+        };
+
+        // معالجة الدفعة الجديدة بتاريخ
+        const payAmount = parseFloat(document.getElementById('ep_payAmount').value) || 0;
+        const payDate = document.getElementById('ep_payDate').value;
+        let paymentLedger = null;
+        if (payAmount > 0) {
+            const todayISO = new Date().toISOString().split('T')[0];
+            // ضيف للمدفوع في الملف
+            if (newType === 'insu') data.copayPaid = (data.copayPaid || 0) + payAmount;
+            else data.paid = (data.paid || 0) + payAmount;
+            // أضف الدفعة لسجل الدفعات
+            const oldP = (editPatientType === 'insu' ? globalInsuDB : globalCashDB)[editPatientName] || {};
+            const history = Array.isArray(oldP.paymentsHistory) ? [...oldP.paymentsHistory] : [];
+            history.push({
+                amount: payAmount,
+                date: payDate,
+                type: newType === 'insu' ? 'تحمل' : (data.mode === 'course' ? 'كورس' : 'كاش'),
+                note: 'دفعة من تعديل الملف'
+            });
+            data.paymentsHistory = history;
+            // لو النهاردة، حضّر تسجيل في اليومية
+            if (payDate === todayISO) {
+                const payMethod = document.getElementById('ep_payMethod') ? document.getElementById('ep_payMethod').value : 'cash';
+                paymentLedger = {
+                    patientName: newName,
+                    amount: payAmount,
+                    type: newType === 'insu' ? 'تحمل تأمين' : 'كاش',
+                    method: payMethod,
+                    date: payDate.split('-').reverse().join('/'),
+                    branch: data.branch,
+                    notes: 'دفعة مسجلة من تعديل الملف',
+                    isPaymentOnly: true,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+            }
+        }
+
+        // معالجة الاسترداد
+        const refundAmount = document.getElementById('ep_refundAmount') ? (parseFloat(document.getElementById('ep_refundAmount').value) || 0) : 0;
+        const refundDate = document.getElementById('ep_refundDate') ? document.getElementById('ep_refundDate').value : '';
+        let refundLedger = null;
+        if (refundAmount > 0) {
+            const todayISO = new Date().toISOString().split('T')[0];
+            // اخصم من المدفوع
+            if (newType === 'insu') data.copayPaid = Math.max(0, (data.copayPaid || 0) - refundAmount);
+            else data.paid = Math.max(0, (data.paid || 0) - refundAmount);
+            // ضيفه لسجل الدفعات كاسترداد
+            const oldP2 = (editPatientType === 'insu' ? globalInsuDB : globalCashDB)[editPatientName] || {};
+            const hist2 = Array.isArray(data.paymentsHistory) ? data.paymentsHistory : (Array.isArray(oldP2.paymentsHistory) ? [...oldP2.paymentsHistory] : []);
+            hist2.push({ amount: -refundAmount, date: refundDate, type: 'استرداد', note: 'استرداد فلوس' });
+            data.paymentsHistory = hist2;
+            // لو النهاردة، سجّل في المصروفات (مش اليومية بالسالب) عشان ما يتعدش مرتين
+            if (refundDate === todayISO) {
+                const compName2 = newType === 'insu' ? (data.comp || 'تأمين') : 'كاش';
+                refundLedger = {
+                    reason: `استرداد فلوس — ${newName} (${compName2})`,
+                    amount: refundAmount,
+                    type: 'expense',
+                    isRefund: true,
+                    patientName: newName,
+                    branch: data.branch,
+                    date: refundDate.split('-').reverse().join('/'),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+            }
+        }
+
+        try {
+            if (paymentLedger) await db.collection('daily_ledger').add(paymentLedger);
+            if (refundLedger) await db.collection('daily_transactions').add(refundLedger);
+            if (oldCollection === newCollection && !nameChanged) {
+                // تحديث عادي (نفس النوع ونفس الاسم)
+                await db.collection(newCollection).doc(editPatientName).update(data);
+            } else {
+                // النوع اتغيّر أو الاسم اتغيّر → ننقل الـ document
+                const oldDoc = (editPatientType === 'insu' ? globalInsuDB : globalCashDB)[editPatientName] || {};
+                const merged = { ...oldDoc, ...data };
+                await db.collection(newCollection).doc(newName).set(merged);
+                // امسح القديم (لو الاسم أو الكولكشن اتغير)
+                if (nameChanged || oldCollection !== newCollection) {
+                    await db.collection(oldCollection).doc(editPatientName).delete();
+                }
+                // عدّل اسم المريض في اليومية كمان لو الاسم اتغير
+                if (nameChanged) {
+                    const ledgerSnap = await db.collection('daily_ledger').where('patientName','==',editPatientName).get();
+                    const batch = db.batch();
+                    ledgerSnap.forEach(d => batch.update(d.ref, { patientName: newName }));
+                    await batch.commit();
+                }
+            }
+            showToast(`✅ تم تحديث ملف ${newName}`);
+            // سجّل الحركة
+            let logDetails = [];
+            if (payAmount > 0) logDetails.push(`دفعة ${payAmount} ج`);
+            logActivity(payAmount > 0 ? 'تعديل + دفعة' : 'تعديل ملف', newName, logDetails.join(' | ') || 'تعديل بيانات الملف');
+            closeEditPatient();
+        } catch(e) {
+            showToast("خطأ أثناء الحفظ!", "error");
+            console.error(e);
+        } finally {
+            clearTimeout(_unlockTimer);
+            _savingEdit = false;
+            if (saveBtn) { saveBtn.innerHTML = _btnOld; saveBtn.disabled = false; }
+        }
+    }
+</script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+    <!-- نافذة تعديل ملف المريض -->
+    <div id="editPatientModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:18px; padding:28px; max-width:540px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; border-bottom:2px solid #d4af37; padding-bottom:14px;">
+                <h2 style="margin:0; color:#0b132b; font-size:1.3rem;"><i class="fas fa-user-edit" style="color:#d4af37;"></i> تعديل ملف المريض</h2>
+                <button onclick="closeEditPatient()" style="background:#f0f0f0; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1.1rem;">✕</button>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                <div style="grid-column:1/-1;">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">اسم المريض</label>
+                    <input id="ep_name" type="text" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">النوع</label>
+                    <select id="ep_type" onchange="epToggleType()" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                        <option value="cash">كاش</option>
+                        <option value="insu">تأمين / شركة</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">رقم التليفون</label>
+                    <input id="ep_phone" type="tel" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">الشركة / التأمين</label>
+                    <input id="ep_comp" type="text" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">الطبيب المحول</label>
+                    <input id="ep_refDoctor" type="text" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">التشخيص / الإصابة</label>
+                    <input id="ep_injury" type="text" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div class="ep-comp-only">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">📅 تاريخ الموافقة</label>
+                    <input id="ep_approvalDate" type="date" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div class="ep-comp-only">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">الفئة</label>
+                    <select id="ep_cat" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                        <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">سعر الجلسة</label>
+                    <input id="ep_price" type="number" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div class="ep-cash-only">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">نظام الدفع</label>
+                    <select id="ep_mode" onchange="epToggleCourse()" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                        <option value="sessions">بالجلسة</option>
+                        <option value="course">كورس (مبلغ إجمالي)</option>
+                    </select>
+                </div>
+                <div id="ep_courseWrap" style="display:none;">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">قيمة الكورس الكلية</label>
+                    <input id="ep_cost" type="number" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div class="ep-comp-only">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">حالة الأوراق</label>
+                    <select id="ep_paperStatus" onchange="epTogglePaper()" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                        <option value="مكتمل">كامل ✓</option>
+                        <option value="ناقص">ناقص</option>
+                    </select>
+                </div>
+                <div class="ep-comp-only" id="ep_paperMissingWrap" style="display:none;">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">الناقص إيه؟</label>
+                    <input id="ep_paperMissing" type="text" placeholder="مثلاً: صورة بطاقة، تقرير طبي" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">الفرع</label>
+                    <select id="ep_branch" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                        <option>المهندسين</option><option>أكتوبر</option><option>الهرم</option><option>العبور</option><option>الإدارة المركزية</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">إجمالي الجلسات</label>
+                    <input id="ep_totalSess" type="number" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div>
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">الجلسات الحاضرة</label>
+                    <input id="ep_attended" type="number" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div class="ep-cash-only">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">المدفوع (كاش)</label>
+                    <input id="ep_paid" type="number" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div class="ep-comp-only">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">إجمالي التحمل</label>
+                    <input id="ep_copayTotal" type="number" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+                <div class="ep-comp-only">
+                    <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">المدفوع من التحمل</label>
+                    <input id="ep_copayPaid" type="number" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                </div>
+            </div>
+            <!-- رفع ملفات وصور -->
+            <div style="background:#f7f9fc; border:2px dashed #cdd5e0; border-radius:14px; padding:16px; margin-top:16px;">
+                <div style="font-weight:900;color:#0b132b;font-size:0.95rem;margin-bottom:10px;"><i class="fas fa-paperclip" style="color:#d4af37;"></i> ملفات وصور المريض (تأمين، تقارير، إلخ)</div>
+                <input type="file" id="ep_files" accept="image/*,.pdf" multiple onchange="epPreviewFiles()" style="width:100%; padding:10px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal';">
+                <div id="ep_filesPreview" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;"></div>
+            </div>
+            <!-- ملاحظات -->
+            <div style="margin-top:16px;">
+                <label style="font-weight:800; font-size:0.9rem; color:#0b132b; display:block; margin-bottom:6px;"><i class="fas fa-sticky-note" style="color:#d4af37;"></i> ملاحظات على الملف</label>
+                <textarea id="ep_notes" rows="2" placeholder="أي ملاحظات عن المريض أو التعديلات..." style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:600; resize:vertical;"></textarea>
+            </div>
+            <!-- استرداد فلوس -->
+            <div style="background:#fdecea; border:2px solid #f5b7b1; border-radius:14px; padding:16px; margin-top:16px;">
+                <div style="font-weight:900;color:#c0392b;font-size:0.95rem;margin-bottom:12px;"><i class="fas fa-rotate-left"></i> استرداد فلوس (لو رجّعت فلوس للمريض)</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div>
+                        <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">قيمة الاسترداد</label>
+                        <input id="ep_refundAmount" type="number" placeholder="0" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                    </div>
+                    <div>
+                        <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">تاريخ الاسترداد</label>
+                        <input id="ep_refundDate" type="date" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                    </div>
+                </div>
+                <div style="font-size:0.8rem;color:#922b21;margin-top:8px;background:#fff;padding:8px 12px;border-radius:8px;">
+                    ⚠️ الاسترداد بيتخصم من المدفوع وبيظهر في اليومية بالسالب بتاريخه.
+                </div>
+            </div>
+            <!-- تسجيل دفعة جديدة -->
+            <div style="background:#f0f7ff; border:2px solid #90caf9; border-radius:14px; padding:16px; margin-top:16px;">
+                <div style="font-weight:900;color:#1565c0;font-size:0.95rem;margin-bottom:12px;"><i class="fas fa-money-bill-wave"></i> تسجيل دفعة جديدة (لو نسيت تسجلها)</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div>
+                        <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;" id="ep_payLabel">قيمة الدفعة</label>
+                        <input id="ep_payAmount" type="number" placeholder="0" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                    </div>
+                    <div>
+                        <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">تاريخ الدفعة</label>
+                        <input id="ep_payDate" type="date" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                    </div>
+                    <div style="grid-column:1/-1;">
+                        <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:5px;">طريقة الدفع</label>
+                        <select id="ep_payMethod" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700;">
+                            <option value="cash">كاش</option>
+                            <option value="instapay">إنستاباي</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="font-size:0.8rem;color:#666;margin-top:8px;background:#fff;padding:8px 12px;border-radius:8px;">
+                    💡 لو التاريخ = النهاردة → تتسجل في يومية النهاردة. لو تاريخ قديم → تتحفظ في الملف بس.
+                </div>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+                <button id="btnSaveEditPatient" onclick="saveEditPatient()" style="flex:1; background:linear-gradient(135deg,#27ae60,#1e8449); color:white; border:none; padding:14px; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; font-family:'Tajawal';"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                <button onclick="closeEditPatient()" style="background:#eee; color:#555; border:none; padding:14px 28px; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; font-family:'Tajawal';">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+    <style id="ledger-mobile-final">
+    @media screen and (max-width: 900px) {
+        body { display:block !important; overflow-x:hidden !important; }
+        .main-content, .main-content.unlocked { margin:58px 0 0 !important; width:100% !important; max-width:100vw !important; padding:10px !important; overflow-x:hidden !important; }
+        .sidebar { transform:translateX(100%) !important; }
+        .sidebar.mobile-open { transform:translateX(0) !important; }
+        #tableInsu .table-scroll, #tableCash .table-scroll, #tableExp .table-scroll { overflow:visible !important; width:100% !important; }
+        #tableInsu table, #tableCash table, #tableExp table,
+        #tableInsu tbody, #tableCash tbody, #tableExp tbody,
+        #tableInsu tr, #tableCash tr, #tableExp tr,
+        #tableInsu td, #tableCash td, #tableExp td { display:block !important; width:100% !important; min-width:0 !important; }
+        #tableInsu thead, #tableCash thead, #tableExp thead { display:none !important; }
+        #tableInsu tr, #tableCash tr, #tableExp tr { margin:9px !important; padding:7px 11px !important; border:1px solid #e5eaf1 !important; border-radius:12px !important; }
+        #tableInsu td, #tableCash td, #tableExp td { min-height:32px !important; padding:7px 0 !important; white-space:normal !important; overflow-wrap:anywhere !important; text-align:left !important; border-bottom:1px dashed #e5eaf1 !important; }
+        #tableInsu td::before, #tableCash td::before, #tableExp td::before { float:right !important; width:42% !important; font-size:.74rem !important; font-weight:900 !important; color:#657286 !important; text-align:right !important; }
+        #tableInsu td:last-child, #tableCash td:last-child, #tableExp td:last-child { border-bottom:0 !important; }
+        .summary-bar { flex-direction:column !important; align-items:flex-start !important; padding:14px !important; gap:6px !important; }
+    }
+    </style>
+    <script>
+    // كشف هاتف مستقل عن عرض الـ viewport لمعالجة وضع "سطح المكتب" في المتصفح.
+    (function(){
+        if (!window.screen || Math.min(screen.width, screen.height) > 900 || navigator.maxTouchPoints < 1) return;
+        document.documentElement.classList.add('ls-phone');
+        document.querySelectorAll('#tableInsu table,#tableCash table,#tableExp table').forEach(table=>{
+            const labels=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());
+            table.querySelectorAll('tbody tr').forEach(row=>row.querySelectorAll('td').forEach((td,i)=>td.dataset.label=labels[i]||''));
+        });
+        const style=document.createElement('style');
+        style.textContent=`
+            html.ls-phone body{display:block!important;overflow-x:hidden!important}
+            html.ls-phone .main-content,html.ls-phone .main-content.unlocked{margin:58px 0 0!important;width:100%!important;max-width:100vw!important;padding:10px!important;overflow-x:hidden!important}
+            html.ls-phone .sidebar{transform:translateX(100%)!important} html.ls-phone .sidebar.mobile-open{transform:translateX(0)!important}
+            html.ls-phone #tableInsu .table-scroll,html.ls-phone #tableCash .table-scroll,html.ls-phone #tableExp .table-scroll{overflow:visible!important;width:100%!important}
+            html.ls-phone #tableInsu table,html.ls-phone #tableCash table,html.ls-phone #tableExp table,html.ls-phone #tableInsu tbody,html.ls-phone #tableCash tbody,html.ls-phone #tableExp tbody,html.ls-phone #tableInsu tr,html.ls-phone #tableCash tr,html.ls-phone #tableExp tr,html.ls-phone #tableInsu td,html.ls-phone #tableCash td,html.ls-phone #tableExp td{display:block!important;width:100%!important;min-width:0!important}
+            html.ls-phone #tableInsu thead,html.ls-phone #tableCash thead,html.ls-phone #tableExp thead{display:none!important}
+            html.ls-phone #tableInsu tr,html.ls-phone #tableCash tr,html.ls-phone #tableExp tr{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 7px!important;margin:5px!important;padding:5px 7px!important;border:1px solid #e5eaf1!important;border-radius:10px!important}
+            html.ls-phone #tableInsu td,html.ls-phone #tableCash td,html.ls-phone #tableExp td{min-height:23px!important;padding:3px 0!important;font-size:.76rem!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:right!important;border-bottom:1px dashed #e5eaf1!important}
+            html.ls-phone #tableInsu td:nth-child(1),html.ls-phone #tableCash td:nth-child(1),html.ls-phone #tableExp td:nth-child(1){display:none!important}
+            html.ls-phone #tableInsu td:nth-child(2),html.ls-phone #tableCash td:nth-child(2),html.ls-phone #tableExp td:nth-child(2),html.ls-phone #tableInsu td:last-child,html.ls-phone #tableCash td:last-child,html.ls-phone #tableExp td:last-child{grid-column:1/-1!important}
+            html.ls-phone #tableInsu td:nth-child(2),html.ls-phone #tableCash td:nth-child(2),html.ls-phone #tableExp td:nth-child(2){font-size:.9rem!important;font-weight:900!important}
+            html.ls-phone #tableInsu td::before,html.ls-phone #tableCash td::before,html.ls-phone #tableExp td::before{content:attr(data-label)!important;display:block!important;float:none!important;width:auto!important;font-size:.6rem!important;font-weight:900!important;color:#657286!important;text-align:right!important;margin-bottom:1px!important}
+            html.ls-phone #tableInsu td:last-child,html.ls-phone #tableCash td:last-child,html.ls-phone #tableExp td:last-child{border-bottom:0!important}`;
+        document.head.appendChild(style);
+    })();
+    </script>
+</body>
+</html>

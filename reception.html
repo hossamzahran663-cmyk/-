@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - الاستقبال الشامل</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="app-icon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="premium.css">
+    
+    <script>
+        let currentRole = localStorage.getItem('userRole');
+        if (currentRole === 'reception' || currentRole === 'receptionist') {
+            document.write('<style>.admin-only { display: none !important; }</style>');
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        :root {
+            --navy: #0b132b;
+            --navy2: #1a2a5e;
+            --gold: #d4af37;
+            --gold2: #c49a2a;
+            --bg: #f0f3f8;
+            --white: #ffffff;
+            --border: #e4e9f2;
+            --text: #1a1f36;
+            --muted: #8892a4;
+            --green: #27ae60;
+            --red: #e74c3c;
+            --blue: #2196f3;
+            --radius: 14px;
+            --shadow: 0 4px 24px rgba(11,19,43,0.08);
+            --shadow-lg: 0 12px 40px rgba(11,19,43,0.14);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: var(--bg); display: flex; overflow-x: hidden; color: var(--text); min-height: 100vh; }
+
+        /* ===== HEADER ===== */
+        .header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%); height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; border-bottom: 2px solid rgba(212,175,55,0.4); z-index: 1000; box-shadow: 0 2px 30px rgba(11,19,43,0.3); }
+        .header-logo { display: flex; align-items: center; gap: 13px; }
+        .header-logo img { height: 42px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar { background: #0b1120; width: 255px; height: 100vh; position: fixed; top: 72px; right: 0; padding-top: 20px; z-index: 900; border-left: 1px solid rgba(255,255,255,0.05); }
+        .sidebar a { display: flex; align-items: center; gap: 11px; color: rgba(163,174,209,0.8); text-decoration: none; padding: 12px 20px; transition: 0.22s; font-size: 0.95rem; border-right: 2px solid transparent; margin: 1px 8px; border-radius: 10px; }
+        .sidebar a i { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; background: rgba(255,255,255,0.06); border-radius: 7px; flex-shrink: 0; }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.05); border-right-color: transparent; }
+        .sidebar a.active { background: rgba(212,175,55,0.12); color: var(--gold); font-weight: 800; border-right: 2px solid var(--gold); }
+        .sidebar a.active i { background: rgba(212,175,55,0.2); }
+
+        /* ===== MAIN ===== */
+        .main-content { margin-right: 255px; margin-top: 72px; padding: 26px 28px; width: calc(100% - 255px); }
+
+        /* ===== SHIFT INFO BAR ===== */
+        .shift-info-bar { background: var(--white); padding: 14px 20px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
+        .shift-info-bar .branch-info { display: flex; align-items: center; gap: 12px; }
+        .shift-info-bar .branch-info i { color: var(--gold); font-size: 1.2rem; background: rgba(212,175,55,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0; }
+        .shift-info-bar .branch-info span { display: block; font-size: 0.74rem; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+        .shift-info-bar .branch-info strong { color: var(--navy); font-size: 1rem; font-weight: 900; }
+        .shift-info-bar .date-info { display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); }
+        .shift-info-bar .date-info span { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+        .shift-info-bar .date-info input { border: 1.5px solid var(--gold); background: white; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.92rem; color: var(--navy); text-align: center; cursor: pointer; outline: none; font-family: 'Tajawal'; transition: 0.25s; }
+        .shift-info-bar .date-info input:disabled { background: transparent; border-color: var(--border); cursor: not-allowed; }
+
+        /* ===== MAIN TABS ===== */
+        .main-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .main-tab-btn { flex: 1; padding: 14px 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--muted); font-size: 1rem; font-weight: 800; border-radius: var(--radius); cursor: pointer; transition: 0.28s cubic-bezier(0.34,1.3,0.64,1); user-select: none; display: flex; align-items: center; justify-content: center; gap: 9px; box-shadow: var(--shadow); }
+        .main-tab-btn i { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 9px; background: #f0f3f8; font-size: 1rem; transition: 0.25s; }
+        .main-tab-btn:hover { border-color: var(--navy); color: var(--navy); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .main-tab-btn:hover i { background: rgba(11,19,43,0.07); }
+        .main-tab-btn.active { background: linear-gradient(135deg, var(--navy), var(--navy2)); color: var(--gold); border-color: transparent; box-shadow: 0 8px 24px rgba(11,19,43,0.22); transform: translateY(-1px); }
+        .main-tab-btn.active i { background: rgba(212,175,55,0.18); color: var(--gold); }
+        .btn-exp { border-color: var(--border); color: var(--muted); }
+        .btn-exp i { color: var(--red); }
+        .btn-exp:hover { border-color: var(--red); color: var(--red); }
+        .btn-exp:hover i { background: rgba(231,76,60,0.08); }
+        .btn-exp.active { background: linear-gradient(135deg, #c0392b, var(--red)); color: white; border-color: transparent; box-shadow: 0 8px 24px rgba(231,76,60,0.28); }
+        .btn-exp.active i { background: rgba(255,255,255,0.15); color: white; }
+
+        /* ===== FORM CONTAINER ===== */
+        .form-container { background: var(--white); padding: 26px; border-radius: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+
+        /* ===== SUB TABS ===== */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 22px; background: var(--bg); padding: 6px; border-radius: 12px; }
+        .sub-tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--muted); font-weight: 700; border-radius: 9px; cursor: pointer; transition: 0.22s; font-family: 'Tajawal'; font-size: 0.92rem; }
+        .sub-tab-btn:hover { background: rgba(212,175,55,0.08); color: var(--navy); }
+        .sub-tab-btn.active { background: linear-gradient(135deg, var(--navy), var(--navy2)); color: var(--gold); font-weight: 900; box-shadow: 0 4px 14px rgba(11,19,43,0.2); }
+
+        /* ===== GRID + INPUTS ===== */
+        .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+        .input-group { display: flex; flex-direction: column; text-align: right; }
+        .input-group label { color: var(--muted); margin-bottom: 6px; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.5px; text-transform: uppercase; }
+        .input-group input, .input-group select { padding: 11px 13px; border: 1.5px solid var(--border); border-radius: 10px; outline: none; font-family: 'Tajawal'; font-size: 0.95rem; transition: 0.22s; background: #fafbfd; color: var(--text); }
+        .input-group input:focus, .input-group select:focus { border-color: var(--gold); background: white; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+        .full-width { grid-column: span 3; }
+        .locked-input { background: var(--bg) !important; color: var(--navy) !important; font-weight: 800; cursor: not-allowed; border-color: var(--border) !important; }
+
+        /* ===== BOXES ===== */
+        .medical-box { background: linear-gradient(135deg, #f0f7ff, #e8f2ff); padding: 18px; border-radius: var(--radius); border-right: 4px solid var(--blue); margin-bottom: 16px; }
+        .paper-box { background: linear-gradient(135deg, #fffaf5, #fff5e8); padding: 14px; border-radius: var(--radius); border: 1.5px dashed #e8a060; margin-bottom: 16px; }
+        .finance-box { background: linear-gradient(135deg, #f5fff8, #eafaf0); padding: 18px; border-radius: var(--radius); border: 1.5px solid #80cfa0; }
+
+        /* ===== ALERTS ===== */
+        .alert-box { padding: 14px 18px; border-radius: var(--radius); font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 13px; font-size: 0.95rem; border: 1.5px solid transparent; }
+        .alert-box i { font-size: 1.8rem; flex-shrink: 0; }
+
+        /* ===== SAVE BTN ===== */
+        .save-btn { background: linear-gradient(135deg, var(--navy), var(--navy2)); color: var(--gold); border: none; padding: 14px; border-radius: 11px; font-size: 1rem; font-weight: 800; cursor: pointer; width: 100%; margin-top: 16px; transition: 0.28s; font-family: 'Tajawal'; letter-spacing: 0.3px; }
+        .save-btn:hover { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: var(--navy); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,175,55,0.35); }
+        .save-btn:disabled { background: #dde1e8 !important; color: #aaa !important; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ===== SEARCH ===== */
+        .hidden { display: none !important; }
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container input { width: 100%; padding: 13px 18px 13px 44px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 0.98rem; font-family: 'Tajawal'; outline: none; transition: 0.22s; background: #fafbfd; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='%238892a4' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 14px center; }
+        .search-container input:focus { border-color: var(--gold); background-color: white; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+        .search-results { position: absolute; top: calc(100% + 6px); width: 100%; background: white; border: 1.5px solid rgba(212,175,55,0.4); z-index: 100; border-radius: 12px; max-height: 260px; overflow-y: auto; box-shadow: 0 16px 40px rgba(11,19,43,0.14); }
+        .search-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: 0.18s; font-weight: 700; }
+        .search-item:hover { background: #fdfaf0; }
+        .search-item:last-child { border-bottom: none; }
+        .badge-company { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: var(--navy); padding: 3px 11px; border-radius: 20px; font-size: 0.76rem; font-weight: 900; }
+
+        /* ===== PRINT BTN ===== */
+        .btn-print-main { background: linear-gradient(135deg, #27ae60, #1e8449); color: white; border: none; padding: 10px 20px; border-radius: 11px; font-size: 0.95rem; font-weight: 800; cursor: pointer; margin-bottom: 18px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(39,174,96,0.3); transition: 0.28s; font-family: 'Tajawal'; }
+        .btn-print-main:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(39,174,96,0.4); }
+
+        /* ===== SERVER STATUS ===== */
+        .server-status { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #27ae60; background: rgba(39,174,96,0.1); padding: 5px 13px; border-radius: 20px; margin-right: 12px; border: 1px solid rgba(39,174,96,0.3); }
+
+        /* ===== ACTION BUTTONS ===== */
+        .btn-upload-missing { background: linear-gradient(135deg, #d35400, #e67e22); color: white; border: none; padding: 10px 14px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; gap: 7px; align-items: center; width: 100%; justify-content: center; margin-top: 10px; transition: 0.28s; font-family: 'Tajawal'; font-size: 0.92rem; }
+        .btn-upload-missing:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(211,84,0,0.3); }
+        .btn-wa { background: linear-gradient(135deg, #20b857, #25D366); color: white; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 800; flex: 1; transition: 0.28s; display: flex; justify-content: center; align-items: center; gap: 6px; font-family: 'Tajawal'; font-size: 0.92rem; }
+        .btn-wa:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(37,211,102,0.35); }
+        .btn-print-card { background: linear-gradient(135deg, #7b2d9e, #9b4dca); color: white; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 800; flex: 1; transition: 0.28s; display: flex; justify-content: center; align-items: center; gap: 6px; font-family: 'Tajawal'; font-size: 0.92rem; }
+        .btn-print-card:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(142,68,173,0.35); }
+
+        /* ===== TOAST ===== */
+        #toastContainer { position: fixed; bottom: 24px; left: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 9px; }
+        .toast { background: var(--navy); color: white; padding: 13px 20px; border-radius: 14px; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 35px rgba(11,19,43,0.25); transform: translateX(-200%); transition: 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-right: 4px solid var(--gold); }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-right-color: var(--green); }
+        .toast.error   { border-right-color: var(--red); }
+
+        /* ===== MODALS ===== */
+        .image-modal, .docs-modal, .pdf-modal, #renewModalOverlay { position: fixed; inset: 0; background: rgba(11,19,43,0.9); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 3000; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .image-modal.active, .docs-modal.active, .pdf-modal.active, #renewModalOverlay.active { opacity: 1; pointer-events: auto; }
+        .image-modal img { max-width: 80%; max-height: 80vh; border-radius: 16px; border: 3px solid var(--gold); box-shadow: 0 24px 60px rgba(0,0,0,0.5); transform: scale(0.88); transition: 0.32s cubic-bezier(0.34,1.2,0.64,1); }
+        .image-modal.active img { transform: scale(1); }
+        .pdf-modal iframe { width: 80%; height: 85vh; border-radius: 14px; border: 3px solid var(--gold); background: white; transform: scale(0.88); transition: 0.32s; }
+        .pdf-modal.active iframe { transform: scale(1); }
+        .close-btn-modal { position: absolute; top: 24px; right: 32px; color: rgba(255,255,255,0.7); font-size: 2.4rem; cursor: pointer; z-index: 3001; transition: 0.2s; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.08); }
+        .close-btn-modal:hover { color: white; background: rgba(231,76,60,0.4); transform: scale(1.1); }
+        .docs-content { background: white; padding: 26px; border-radius: 20px; width: 680px; max-width: 95%; box-shadow: 0 24px 60px rgba(0,0,0,0.35); transform: translateY(-30px) scale(0.97); transition: 0.32s cubic-bezier(0.34,1.2,0.64,1); max-height: 90vh; overflow-y: auto; border-top: 4px solid var(--gold); }
+        .docs-modal.active .docs-content, #renewModalOverlay.active .docs-content { transform: translateY(0) scale(1); }
+        .docs-content h3 { color: var(--navy); margin-bottom: 16px; border-bottom: 1.5px solid var(--border); padding-bottom: 10px; font-weight: 900; }
+        .doc-item { background: var(--bg); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #555; transition: 0.22s; cursor: pointer; }
+        .doc-item:hover { background: #e8f4fd; border-color: var(--blue); transform: translateX(-3px); }
+
+        /* ===== TOGGLE FIELDS ===== */
+        .cash-price-field { display: none !important; }
+        body.show-cash-prices .cash-price-field { display: flex !important; }
+        .past-sessions-field { display: none !important; }
+        body.show-past-sessions .past-sessions-field { display: flex !important; }
+        #printCardArea { display: none; }
+
+        /* ===== DUPLICATE CONFIRM MODAL ===== */
+        #dupConfirmOverlay { position: fixed; inset: 0; background: rgba(11,19,43,0.85); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 8000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        #dupConfirmOverlay.active { opacity: 1; pointer-events: auto; }
+        .dup-confirm-box { background: white; border-radius: 22px; padding: 36px 32px 28px; width: 420px; max-width: 94vw; text-align: center; box-shadow: 0 30px 70px rgba(0,0,0,0.35); transform: scale(0.88) translateY(20px); transition: 0.35s cubic-bezier(0.34,1.4,0.64,1); border-top: 5px solid #e67e22; }
+        #dupConfirmOverlay.active .dup-confirm-box { transform: scale(1) translateY(0); }
+        .dup-confirm-icon { width: 72px; height: 72px; background: linear-gradient(135deg, #fff3cd, #ffe8a1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; border: 3px solid #e67e22; }
+        .dup-confirm-icon i { font-size: 2rem; color: #e67e22; }
+        .dup-confirm-box h3 { color: #c0392b; font-size: 1.3rem; font-weight: 900; margin-bottom: 10px; }
+        .dup-confirm-box p { color: #555; font-size: 0.95rem; font-weight: 700; line-height: 1.7; margin-bottom: 6px; }
+        .dup-confirm-name { background: #fff3cd; color: #7d4e00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 1rem; margin: 10px 0 22px; display: inline-block; border: 1px solid #ffd48a; }
+        .dup-confirm-btns { display: flex; gap: 12px; }
+        .dup-btn-cancel  { flex: 1; padding: 13px; border: 2px solid #e0e0e0; background: white; color: #666; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: 0.25s; font-family: 'Tajawal'; }
+        .dup-btn-cancel:hover  { background: #f5f5f5; border-color: #ccc; }
+        .dup-btn-confirm { flex: 1; padding: 13px; border: none; background: linear-gradient(135deg, #e67e22, #d35400); color: white; border-radius: 12px; font-size: 1rem; font-weight: 900; cursor: pointer; transition: 0.25s; font-family: 'Tajawal'; box-shadow: 0 4px 14px rgba(211,84,0,0.35); }
+        .dup-btn-confirm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(211,84,0,0.45); }
+
+        /* ===== تحذير التكرار - واضح وكبير ===== */
+        .dup-warning { display: none; background: linear-gradient(135deg, #fff3cd, #ffe8a1); border: 3px solid #e67e22; border-radius: 14px; padding: 18px 22px; margin-bottom: 15px; align-items: center; gap: 16px; box-shadow: 0 4px 20px rgba(230,126,34,0.25); animation: none; }
+        .dup-warning.show { display: flex; animation: dupPulse 0.5s ease; }
+        @keyframes dupPulse { 0%{transform:scale(0.97);opacity:0.5} 60%{transform:scale(1.02)} 100%{transform:scale(1);opacity:1} }
+        .dup-warning i { font-size: 2.5rem; color: #e67e22; flex-shrink: 0; }
+        .dup-warning .dup-msg strong { display: block; color: #c0392b; font-size: 1.15rem; font-weight: 900; margin-bottom: 5px; }
+        .dup-warning .dup-msg span { color: #7d6608; font-size: 0.95rem; font-weight: 700; }
+        .dup-count-badge { background: #e74c3c; color: white; padding: 3px 12px; border-radius: 15px; font-size: 0.9rem; font-weight: 900; }
+
+        /* ===== منع الأرقام السالبة في خانات الفلوس ===== */
+        input[type="number"] { -moz-appearance: textfield; }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* ===== فلتر الفرع للأدمن في الهيدر - جديد ===== */
+        #adminBranchWrap { display: none; align-items: center; gap: 8px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.4); border-radius: 20px; padding: 5px 14px; margin-left: 10px; }
+        #adminBranchWrap label { color: rgba(255,255,255,0.75); font-size: 0.78rem; font-weight: 800; white-space: nowrap; }
+        #adminBranchWrap select { background: transparent; border: none; color: #d4af37; font-weight: 800; font-size: 0.88rem; outline: none; cursor: pointer; font-family: 'Tajawal'; }
+        #adminBranchWrap select option { background: #0b132b; color: white; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body.printing-card .header, body.printing-card .sidebar,
+            body.printing-card .main-content, body.printing-card #toastContainer,
+            body.printing-card #dupConfirmOverlay { display: none !important; }
+            body.printing-card { background: white !important; margin: 0; padding: 0; width: 100vw; height: 100vh; }
+            body.printing-card #printCardArea {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 210mm !important;
+                min-height: 297mm !important;
+                height: 297mm !important;
+                padding: 8mm !important;
+                box-sizing: border-box !important;
+                font-family: 'Tajawal', sans-serif !important;
+                direction: rtl !important;
+                background: white !important;
+            }
+
+            /* ===== هيدر الكارت ===== */
+            .pc-header {
+                background: linear-gradient(135deg, #0b132b 0%, #1a2a5e 100%) !important;
+                color: white !important;
+                padding: 14px 20px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                border-radius: 14px 14px 0 0 !important;
+                flex-shrink: 0 !important;
+            }
+            .pc-title-side h2 { font-size: 26px !important; font-weight: 900 !important; color: white !important; margin: 0 !important; letter-spacing: 1px !important; }
+            .pc-title-side p  { font-size: 11px !important; color: rgba(212,175,55,0.8) !important; margin: 2px 0 0 !important; }
+            .pc-logo-side { text-align: left !important; direction: ltr !important; }
+            .pc-logo-side h1 { font-size: 24px !important; font-weight: 900 !important; color: #d4af37 !important; margin: 0 !important; letter-spacing: 3px !important; }
+            .pc-logo-side p  { font-size: 10px !important; color: rgba(255,255,255,0.55) !important; margin: 0 !important; letter-spacing: 2px !important; }
+
+            /* شريط ذهبي تحت الهيدر */
+            .pc-gold-bar {
+                background: linear-gradient(90deg, #d4af37, #f0d060, #d4af37) !important;
+                height: 4px !important;
+                margin-bottom: 10px !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* ===== بيانات المريض ===== */
+            .pc-info-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                border: 2px solid #0b132b !important;
+                border-radius: 0 0 10px 10px !important;
+                overflow: hidden !important;
+                margin-bottom: 10px !important;
+                flex-shrink: 0 !important;
+            }
+            .pc-info-row {
+                display: flex !important;
+                border-bottom: 1px solid #c8d4e8 !important;
+            }
+            .pc-info-row:nth-child(odd) { background: #fafbfd !important; }
+            .pc-info-row:nth-child(even) { background: white !important; }
+            .pc-info-row:last-child { border-bottom: none !important; }
+            .pc-info-label {
+                background: linear-gradient(135deg, #0b132b, #1a2a5e) !important;
+                color: #d4af37 !important;
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                font-weight: 800 !important;
+                width: 36% !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 5px !important;
+                flex-shrink: 0 !important;
+            }
+            .pc-info-value {
+                padding: 8px 12px !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
+                color: #0b132b !important;
+                flex: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+            .pc-info-value.big { font-size: 15px !important; font-weight: 900 !important; }
+            .pc-info-value.gold { color: #b8850a !important; font-weight: 900 !important; font-size: 14px !important; }
+
+            /* ===== البرنامج العلاجي ===== */
+            .pc-program {
+                border: 2px solid #0b132b !important;
+                border-radius: 10px !important;
+                margin-bottom: 10px !important;
+                overflow: hidden !important;
+                flex-shrink: 0 !important;
+            }
+            .pc-program-title {
+                background: linear-gradient(135deg, #d4af37, #c49a2a) !important;
+                color: #0b132b !important;
+                font-size: 13px !important;
+                font-weight: 900 !important;
+                padding: 7px 14px !important;
+                letter-spacing: 0.5px !important;
+            }
+            .pc-program-grid {
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr) !important;
+                background: #f8f9fc !important;
+            }
+            .pc-prog-item {
+                border-left: 1px solid #d0d8e8 !important;
+                padding: 10px 4px !important;
+                text-align: center !important;
+                font-size: 13px !important;
+                font-weight: 900 !important;
+                color: #0b132b !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+            .pc-prog-item:first-child { border-left: none !important; }
+            .pc-prog-checkbox {
+                width: 20px !important;
+                height: 20px !important;
+                border: 2px solid #0b132b !important;
+                border-radius: 5px !important;
+                display: block !important;
+                background: white !important;
+            }
+
+            /* ===== عنوان جلسات ===== */
+            .pc-sessions-title {
+                background: linear-gradient(135deg, #0b132b, #1a2a5e) !important;
+                color: #d4af37 !important;
+                font-size: 15px !important;
+                font-weight: 900 !important;
+                padding: 8px 14px !important;
+                text-align: center !important;
+                border-radius: 8px 8px 0 0 !important;
+                letter-spacing: 1px !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* ===== جدول الجلسات ===== */
+            .sess-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                border: 2px solid #0b132b !important;
+                margin-bottom: 10px !important;
+                flex-shrink: 0 !important;
+            }
+            .sess-table thead tr th {
+                background: linear-gradient(135deg, #1a2a5e, #2a3a7e) !important;
+                color: #d4af37 !important;
+                font-size: 13px !important;
+                font-weight: 900 !important;
+                padding: 8px 3px !important;
+                text-align: center !important;
+                border: 1px solid #2a3a7e !important;
+                width: 8.33% !important;
+            }
+            .sess-table tbody tr td {
+                height: 44px !important;
+                border: 1px solid #b8cce0 !important;
+                font-size: 11px !important;
+                font-weight: 800 !important;
+                color: #1a6b2a !important;
+                text-align: center !important;
+                vertical-align: middle !important;
+                background: #f5fff8 !important;
+                padding: 3px !important;
+            }
+            .sess-table tbody tr:nth-child(even) td { background: #eefff4 !important; }
+
+            /* ===== الملاحظات - تملا الباقي ===== */
+            .pc-notes {
+                border: 2px solid #0b132b !important;
+                border-radius: 10px !important;
+                overflow: hidden !important;
+                flex: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 0 !important;
+            }
+            .pc-notes-title {
+                background: linear-gradient(135deg, #27ae60, #1e8449) !important;
+                color: white !important;
+                font-size: 13px !important;
+                font-weight: 900 !important;
+                padding: 7px 14px !important;
+                flex-shrink: 0 !important;
+            }
+            .pc-notes-body {
+                padding: 10px 14px !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
+                color: #0b132b !important;
+                line-height: 2 !important;
+                flex: 1 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .pc-notes-body span {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* إخفاء باقي الصفحة */
+            body:not(.printing-card) .header, body:not(.printing-card) .sidebar,
+            body:not(.printing-card) .main-tabs, body:not(.printing-card) .sub-tabs,
+            body:not(.printing-card) .btn-print-main, body:not(.printing-card) .search-container,
+            body:not(.printing-card) .save-btn, body:not(.printing-card) .server-status,
+            body:not(.printing-card) .image-modal, body:not(.printing-card) .docs-modal,
+            body:not(.printing-card) .pdf-modal, body:not(.printing-card) .btn-upload-missing,
+            body:not(.printing-card) .shift-info-bar, body:not(.printing-card) #renewModalOverlay,
+            body:not(.printing-card) .btn-wa, body:not(.printing-card) .btn-print-card,
+            body:not(.printing-card) .dup-warning { display: none !important; }
+            body:not(.printing-card) .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+            body:not(.printing-card) { background: white !important; }
+            body:not(.printing-card) .form-container { box-shadow: none !important; border: 2px solid #000 !important; }
+            body:not(.printing-card) .locked-input { background: white !important; color: black !important; border: none !important; border-bottom: 1px dashed #000 !important; border-radius: 0 !important; }
+            body:not(.printing-card) .alert-box { border: 2px dashed #000 !important; color: black !important; background: white !important; }
+        }
+    
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+    </style>
+
+    <style>
+
+
+
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            .stat-card, .kpi-card { min-width: 140px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+        }
+
+    </style>
+
+
+
+
+</head>
+<body>
+
+    <div id="toastContainer"></div>
+
+    <!-- ===== DUPLICATE CONFIRM MODAL ===== -->
+    <div id="dupConfirmOverlay">
+        <div class="dup-confirm-box">
+            <div class="dup-confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>⚠️ تحذير: تسجيل مكرر!</h3>
+            <p>هذا المريض سجّل حضور اليوم بالفعل.</p>
+            <div class="dup-confirm-name" id="dupConfirmPatientName">-</div>
+            <p style="color:#e74c3c; font-size:0.88rem;">هل أنت متأكد من تسجيل جلسة إضافية له اليوم؟</p>
+            <div class="dup-confirm-btns" style="margin-top:20px;">
+                <button class="dup-btn-cancel" onclick="closeDupConfirm(false)"><i class="fas fa-times"></i> إلغاء</button>
+                <button class="dup-btn-confirm" onclick="closeDupConfirm(true)"><i class="fas fa-check"></i> نعم، سجّل الجلسة</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="printCardArea">
+        <!-- هيدر -->
+        <div class="pc-header">
+            <div class="pc-title-side">
+                <h2>كارت متابعة جلسات</h2>
+                <p>PATIENT FOLLOW-UP CARD</p>
+            </div>
+            <div class="pc-logo-side">
+                <h1>LIFE SPORT</h1>
+                <p>CLINIC &amp; REHABILITATION</p>
+            </div>
+        </div>
+        <div class="pc-gold-bar"></div>
+
+        <!-- بيانات المريض -->
+        <div class="pc-info-grid">
+            <div class="pc-info-row">
+                <div class="pc-info-label">👤 اسم المريض</div>
+                <div class="pc-info-value big" id="pcName"></div>
+            </div>
+            <div class="pc-info-row">
+                <div class="pc-info-label">📞 التليفون</div>
+                <div class="pc-info-value" id="pcPhone"></div>
+            </div>
+            <div class="pc-info-row">
+                <div class="pc-info-label">🩺 طبيب العظام</div>
+                <div class="pc-info-value" id="pcDoc"></div>
+            </div>
+            <div class="pc-info-row">
+                <div class="pc-info-label">🏢 الشركة / نوع</div>
+                <div class="pc-info-value" id="pcComp"></div>
+            </div>
+            <div class="pc-info-row">
+                <div class="pc-info-label">🔬 التشخيص / الإصابة</div>
+                <div class="pc-info-value" id="pcInj"></div>
+            </div>
+            <div class="pc-info-row">
+                <div class="pc-info-label">📋 فئة الحالة</div>
+                <div class="pc-info-value" id="pcCat"></div>
+            </div>
+            <div class="pc-info-row">
+                <div class="pc-info-label">💰 سعر الجلسة الثابت</div>
+                <div class="pc-info-value gold" id="pcPrice"></div>
+            </div>
+            <div class="pc-info-row">
+                <div class="pc-info-label">📊 موقف الجلسات</div>
+                <div class="pc-info-value gold" id="pcSessions"></div>
+            </div>
+        </div>
+
+        <!-- البرنامج العلاجي -->
+        <div class="pc-program">
+            <div class="pc-program-title">⚕️ البرنامج العلاجي الموصى به — TREATMENT PLAN</div>
+            <div class="pc-program-grid">
+                <div class="pc-prog-item"><span>TENS</span><div class="pc-prog-checkbox"></div></div>
+                <div class="pc-prog-item"><span>IR</span><div class="pc-prog-checkbox"></div></div>
+                <div class="pc-prog-item"><span>US</span><div class="pc-prog-checkbox"></div></div>
+                <div class="pc-prog-item"><span>MAGN.</span><div class="pc-prog-checkbox"></div></div>
+                <div class="pc-prog-item"><span>LASER</span><div class="pc-prog-checkbox"></div></div>
+                <div class="pc-prog-item"><span>MASSAGE</span><div class="pc-prog-checkbox"></div></div>
+            </div>
+        </div>
+
+        <!-- جدول الجلسات -->
+        <div class="pc-sessions-title">📅 سجل الحضور والجلسات — 24 جلسة</div>
+        <table class="sess-table" id="sessionsTable">
+            <thead>
+                <tr>
+                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+                    <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="sd1"></td><td id="sd2"></td><td id="sd3"></td>
+                    <td id="sd4"></td><td id="sd5"></td><td id="sd6"></td>
+                    <td id="sd7"></td><td id="sd8"></td><td id="sd9"></td>
+                    <td id="sd10"></td><td id="sd11"></td><td id="sd12"></td>
+                </tr>
+            </tbody>
+            <thead>
+                <tr>
+                    <th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th>
+                    <th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="sd13"></td><td id="sd14"></td><td id="sd15"></td>
+                    <td id="sd16"></td><td id="sd17"></td><td id="sd18"></td>
+                    <td id="sd19"></td><td id="sd20"></td><td id="sd21"></td>
+                    <td id="sd22"></td><td id="sd23"></td><td id="sd24"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- الملاحظات - تملا الباقي -->
+        <div class="pc-notes">
+            <div class="pc-notes-title">💰 الماليات والملاحظات — FINANCIAL NOTES</div>
+            <div class="pc-notes-body" id="pcNotes"></div>
+        </div>
+    </div>
+
+    <!-- نافذة التجديد -->
+    <div id="renewModalOverlay" onclick="closeRenewModal(event)">
+        <div class="docs-content" style="position:relative;" onclick="event.stopPropagation()">
+            <span class="close-btn-modal" style="position:absolute; top: 15px; right: 20px; color:#e74c3c; font-size:2.5rem;" onclick="closeRenewModal()">&times;</span>
+            <h3 id="renewModalTitle" style="color:#0b132b; margin-bottom:20px; font-size:1.3rem; border-bottom:2px solid #eee; padding-bottom:10px;">
+                <i class="fas fa-sync-alt" style="color:#2196f3;"></i> التجديد
+            </h3>
+            <form id="renewForm" onsubmit="submitRenewal(event)">
+                <div class="medical-box" style="margin-bottom: 15px;">
+                    <div class="grid-inputs">
+                        <div class="input-group"><label>التشخيص / الإصابة</label><input type="text" id="rnwInjury" required></div>
+                        <div class="input-group"><label>فئة الحالة</label><select id="rnwCat"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+                        <div class="input-group"><label>📅 تاريخ الموافقة الجديدة</label><input type="date" id="rnwApprovalDate"></div>
+                        <div class="input-group"><label>نوع الجلسة</label>
+                            <select id="rnwSessionType">
+                                <option>علاج طبيعي عادي</option><option>تأهيل</option><option>تأهيل بعد عملية</option>
+                                <option>جلسة علاج طبيعي (عضو واحد)</option><option>جلسة علاج طبيعي (عضوين)</option>
+                                <option>جلسة علاج طبيعي يدوي (عضو واحد)</option><option>جلسة علاج طبيعي يدوي (عضوين)</option>
+                                <option>جلسة تصادمي (عضو واحد)</option><option>جلسة تصادمي (عضوين)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="paper-box" id="rnwPaperBoxContainer" style="margin-bottom: 15px;">
+                    <div style="display:flex; gap:20px; margin-bottom:10px;">
+                        <label><input type="radio" name="rnwPaperStatus" value="كامل" checked onclick="document.getElementById('rnwPaperNotesGroup').classList.add('hidden')"> الورق كامل</label>
+                        <label><input type="radio" name="rnwPaperStatus" value="ناقص" onclick="document.getElementById('rnwPaperNotesGroup').classList.remove('hidden')"> الورق ناقص</label>
+                    </div>
+                    <div class="input-group hidden" id="rnwPaperNotesGroup"><input type="text" id="rnwPaperNotes" placeholder="ما الورق الناقص؟"></div>
+                </div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label id="rnwDocsLabel">المستندات الجديدة</label>
+                    <input type="file" id="rnwDocs" multiple accept="image/*,.pdf">
+                </div>
+                <div class="finance-box">
+                    <div class="grid-inputs" style="margin-bottom: 0;">
+                        <div class="input-group"><label id="lblRnwPrice">💰 سعر الجلسة الثابت</label><input type="number" id="rnwPrice" min="0" placeholder="سعر الجلسة" value="0"></div>
+                        <div class="input-group"><label id="lblRnwSess">عدد الجلسات الإضافية / الكورس</label><input type="number" id="rnwSess" required placeholder="مثال: 12"></div>
+                        <div class="input-group" id="rnwCostGroup"><label id="lblRnwCost">إجمالي التكلفة / التحمل الجديد</label><input type="number" id="rnwCost" min="0" placeholder="مثال: 1500" value="0"></div>
+                        <div class="input-group" id="rnwPaidGroup"><label id="lblRnwPaid">المدفوع مقدماً الآن</label><input type="number" id="rnwPaid" min="0" value="0"></div>
+                        <div class="input-group"><label>طريقة الدفع</label><select id="rnwPayMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div>
+                    </div>
+                </div>
+                <button type="submit" class="save-btn" style="background:#2196f3; color:white; margin-top:15px;" id="btnSaveRenew">تأكيد وتحديث الملف</button>
+            </form>
+        </div>
+    </div>
+
+    <header class="header">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.src='app-icon.png'"><div style="color:white; font-size: 1.2rem; font-weight:bold;">LIFE SPORT <span style="color:#d4af37">SYSTEM</span></div></div>
+        <div style="display:flex; align-items:center;">
+            <!-- فلتر الفرع للأدمن فقط -->
+            <div id="adminBranchWrap">
+                <label><i class="fas fa-map-marker-alt"></i> الفرع:</label>
+                <select id="adminBranchSelect" onchange="changeAdminBranch(this.value)">
+                    <option value="المهندسين">المهندسين</option>
+                    <option value="أكتوبر">أكتوبر</option>
+                    <option value="الهرم">الهرم</option>
+                    <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+                </select>
+            </div>
+            <span id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</span>
+            <button onclick="sendReceptionWhatsApp()" title="إرسال ملخص اليوم واتساب" style="background:linear-gradient(135deg,#25D366,#128C7E); color:white; border:none; padding:9px 16px; border-radius:20px; font-weight:800; cursor:pointer; font-family:'Tajawal'; margin-left:8px; display:flex; align-items:center; gap:7px; font-size:0.85rem;">
+                <i class="fab fa-whatsapp" style="font-size:1.1rem;"></i> ملخص اليوم
+            </button>
+            <div id="branchInfo" style="color:#d4af37; font-weight:bold; background:#1a1f36; padding:8px 20px; border-radius:20px; border:1px solid #d4af37;">جاري التحميل...</div>
+        </div>
+    </header>
+
+    <nav class="sidebar">
+        <a href="dashboard.html" class="admin-only"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+        <a href="reception.html" class="active"><i class="fas fa-user-plus"></i> الاستقبال</a>
+        <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+        <a href="patients.html" class="admin-only"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html" class="admin-only"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+        <a href="ledger.html" class="admin-only"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+        <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+        <a href="hr.html" class="admin-only"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+        <a href="analytics.html" class="admin-only"><i class="fas fa-chart-pie"></i> التحليل الشهري (VIP)</a>
+        <a href="support.html" class="admin-only"><i class="fas fa-shield-alt"></i> الدعم وسجل المراقبة</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="shift-info-bar">
+            <div class="branch-info"><i class="fas fa-map-marker-alt"></i><div><span>الفرع الحالي</span><strong id="displayCurrentBranch">جاري التحميل...</strong></div></div>
+            <div class="date-info">
+                <div class="date-box">
+                    <span>تاريخ اليومية النشط</span>
+                    <input type="date" id="displayDate" disabled title="تاريخ تسجيل الحضور والماليات">
+                </div>
+            </div>
+        </div>
+        <button class="btn-print-main" onclick="window.print()"><i class="fas fa-print"></i> طباعة شاشة الاستقبال</button>
+        
+        <div class="main-tabs">
+            <button class="main-tab-btn active" id="btnSysInsu" onclick="switchSystem('insu')"><i class="fas fa-building"></i> قسم شركات التأمين</button>
+            <button class="main-tab-btn" id="btnSysCash" onclick="switchSystem('cash')"><i class="fas fa-wallet"></i> قسم الكاش والتحويلات</button>
+            <button class="main-tab-btn btn-exp" id="btnSysExp" onclick="switchSystem('exp')"><i class="fas fa-minus-circle"></i> تسجيل المصروفات</button>
+        </div>
+
+        <!-- قسم التأمين -->
+        <div id="systemInsu" class="form-container">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn" id="tabInsuNew" onclick="showInsuTab('new')"><i class="fas fa-plus"></i> فتح ملف تأمين جديد</button>
+                <button class="sub-tab-btn active" id="tabInsuFollow" onclick="showInsuTab('follow')">مريض تأمين حالي</button>
+            </div>
+            <form id="formInsuNew" class="hidden">
+                <div class="grid-inputs">
+                    <div class="input-group" style="grid-column: span 2;"><label>اسم المريض الرباعي</label><input type="text" id="iName" required></div>
+                    <div class="input-group"><label>رقم التليفون</label><input type="tel" id="iPhone" required></div>
+                    <div class="input-group"><label>الطبيب المحول</label><input type="text" id="iRefDoctor" placeholder="دكتور العظام"></div>
+                    <div class="input-group" style="grid-column:span 2;"><label>الخدمة</label><div style="display:flex;gap:8px;flex-wrap:wrap;"><button type="button" onclick="chooseService('insu','تغذية')" id="iServiceNutrition" style="border:1px solid #16a085;background:#f1fffb;color:#107162;border-radius:8px;padding:8px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;">🥗 تغذية</button><button type="button" onclick="chooseService('insu','ريكفري')" id="iServiceRecovery" style="border:1px solid #6a1b9a;background:#f8f1ff;color:#6a1b9a;border-radius:8px;padding:8px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;">💆 ريكفري</button><button type="button" onclick="chooseService('insu','علاج طبيعي')" id="iServiceTherapy" style="border:1px solid #087eaf;background:#eef9ff;color:#087eaf;border-radius:8px;padding:8px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;">علاج طبيعي</button></div><input type="hidden" id="iServiceType" value="علاج طبيعي"></div>
+                    <div class="input-group hidden" id="iServiceDoctorGroup"><label>اسم دكتور الخدمة (لحساب النسبة)</label><input type="text" id="iServiceDoctor" placeholder="اكتب اسم الدكتور"></div>
+                    <div class="grid-inputs hidden" id="iSimpleServiceFields" style="grid-column:span 2;"><div class="input-group"><label>المبلغ المدفوع</label><input id="iSimplePaid" type="number" min="0" value="0" placeholder="0"></div><div class="input-group"><label>طريقة الدفع</label><select id="iSimplePayMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div><div class="input-group"><label>ملاحظات</label><input id="iSimpleNotes" type="text" placeholder="ملاحظات الخدمة"></div></div>
+                    <div class="input-group"><label>جهة التأمين</label><input type="text" id="iCompany" list="compList" placeholder="اسم الشركة" required><datalist id="compList"><option value="مجموعة عثمان"><option value="العدل"><option value="نيكست كير"></datalist></div>
+                    <div class="input-group"><label>سعر الجلسة الثابت</label><input type="number" id="iPrice" min="0" required></div>
+                    <div class="input-group"><label>إجمالي الجلسات بالروشتة</label><input type="number" id="iTotalSessions" min="0" required></div>
+                    <div class="input-group"><label>📅 تاريخ الموافقة</label><input type="date" id="iApprovalDate"></div>
+                    <div class="input-group admin-only past-sessions-field"><label>الجلسات السابقة المستهلكة (إن وجد)</label><input type="number" id="iPastSessions" value="0" placeholder="مثال: 5"></div>
+                </div>
+                <div class="medical-box">
+                    <div class="grid-inputs">
+                        <div class="input-group"><label>التشخيص</label><input type="text" id="iInjury" required></div>
+                        <div class="input-group"><label>فئة الحالة</label><select id="iCat"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+                        <div class="input-group"><label>نوع الجلسة</label>
+                            <select id="iSessionType">
+                                <option>علاج طبيعي عادي</option><option>تأهيل</option><option>تأهيل بعد عملية</option>
+                                <option>جلسة علاج طبيعي (عضو واحد)</option><option>جلسة علاج طبيعي (عضوين)</option>
+                                <option>جلسة علاج طبيعي يدوي (عضو واحد)</option><option>جلسة علاج طبيعي يدوي (عضوين)</option>
+                                <option>جلسة تصادمي (عضو واحد)</option><option>جلسة تصادمي (عضوين)</option>
+                            </select>
+                        </div>
+                        <div class="input-group full-width"><label>ملاحظات الاستقبال</label><input type="text" id="iNotes" placeholder="أضف أي ملاحظات هامة هنا..."></div>
+                    </div>
+                </div>
+                <div class="paper-box">
+                    <div style="display:flex; gap:20px; margin-bottom:15px;"><label><input type="radio" name="iPaperStatus" value="كامل" checked onclick="document.getElementById('iPaperNotesGroup').classList.add('hidden')"> الورق كامل</label><label><input type="radio" name="iPaperStatus" value="ناقص" onclick="document.getElementById('iPaperNotesGroup').classList.remove('hidden')"> الورق ناقص</label></div>
+                    <div class="input-group hidden" id="iPaperNotesGroup"><input type="text" id="iPaperNotes" placeholder="ما الورق الناقص؟"></div>
+                    <input type="file" id="iDocs" multiple accept="image/*,.pdf" style="margin-top:10px;">
+                </div>
+                <div class="finance-box">
+                    <div class="grid-inputs">
+                        <div class="input-group"><label>إجمالي التحمل</label><input type="number" id="iCopayTotal" min="0" required></div>
+                        <div class="input-group"><label>المدفوع مقدماً</label><input type="number" id="iCopayPaid" min="0" value="0" min="0"></div>
+                        <div class="input-group"><label>طريقة الدفع</label><select id="iPayMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div>
+                    </div>
+                </div>
+                <input type="hidden" id="iIsExam" value="0">
+                <button type="button" id="btnInsuNewExam" onclick="toggleNewExam('insu')" style="width:100%;border:2px dashed #2980b9;background:#f0f9ff;color:#1a6fa8;border-radius:10px;padding:11px;font-family:Tajawal;font-weight:900;cursor:pointer;margin-top:10px;"><i class="fas fa-stethoscope"></i> كشف أول مرة (بدون رسوم)</button>
+                <button type="submit" class="save-btn" id="btnSaveInsuNew">حفظ وتسجيل المريض</button>
+            </form>
+
+            <div id="formInsuFollow">
+                <div class="search-container"><input type="text" id="searchInsu" style="width:100%; padding:15px; border-radius:8px; border:1px solid #d4af37;" placeholder="ابحث بالاسم..."><div id="resInsu" class="search-results"></div></div>
+                <div id="cardInsu" class="hidden">
+                    <!-- تحذير التكرار - تأمين -->
+                    <div id="insuDupWarning" class="dup-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="dup-msg">
+                            <strong>⚠️ تحذير: هذا المريض سجّل اليوم بالفعل!</strong>
+                            <span>عدد مرات التسجيل اليوم: <span id="insuDupCount" class="dup-count-badge">0</span> — هل تريد التسجيل مرة أخرى؟</span>
+                        </div>
+                    </div>
+
+                    <div id="missingAlert" class="alert-box hidden"></div>
+                    <div id="insuClosedWarning" class="alert-box hidden" style="background:#fce4ec; color:#c62828; border-color:#e53935;">
+                        <i class="fas fa-lock"></i> <div><strong>مغلق للتقفيل:</strong> تم تقفيل جلسات هذا المريض بناءً على رغبته أو لانتهاء المدة. يجب عمل "تجديد موافقة" للاستكمال.</div>
+                    </div>
+                    <div id="uploadMissingDiv" class="hidden" style="background:#fff3e0; padding:15px; border-radius:10px; border:2px dashed #e67e22; margin-bottom:15px;">
+                        <input type="file" id="missingDocsInput" multiple accept="image/*,.pdf">
+                        <button class="btn-upload-missing" id="btnUploadMissingDocs" onclick="uploadMissingDocs()">رفع الأوراق واستكمال الملف</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <button onclick="viewPatientDocs('insu')" style="flex:1; background:#0b132b; color:#d4af37; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fas fa-folder-open"></i> الأرشيف</button>
+                        <button onclick="openRenewModal('insu')" style="flex:1; background:#2196f3; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fas fa-sync-alt"></i> تجديد موافقة</button>
+                        <button id="btnWaInsu" onclick="sendClosureWhatsApp('insu')" class="btn-wa" style="display:none;"><i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> إغلاق</button>
+                        <button onclick="printPatientCard('insu')" class="btn-print-card"><i class="fas fa-print"></i> كارت المتابعة</button>
+                    </div>
+                    <div class="medical-box"><h3 id="disInsuName"></h3><div id="insuPaymentStatus"></div><div class="grid-inputs"><div class="input-group"><label>تليفون</label><input type="text" id="disInsuPhone" class="locked-input" readonly></div><div class="input-group"><label>طبيب</label><input type="text" id="disInsuRefDoc" class="locked-input" readonly></div><div class="input-group"><label>جهة</label><input type="text" id="disInsuComp" class="locked-input" readonly></div><div class="input-group"><label>تشخيص</label><input type="text" id="disInsuInj" class="locked-input" readonly></div><div class="input-group"><label>سعر</label><input type="text" id="disInsuPrice" class="locked-input" readonly></div><div class="input-group"><label>أوراق</label><input type="text" id="disInsuPapers" class="locked-input" readonly></div></div></div>
+                    <div class="finance-box">
+                        <div class="grid-inputs">
+                            <div class="input-group"><label>جلسة رقم</label><input type="text" id="disInsuSess" class="locked-input" readonly></div>
+                            <div class="input-group"><label>التحمل المتبقي</label><input type="text" id="disInsuDebt" class="locked-input" readonly></div>
+                            <div class="input-group"><label>مدفوع الآن</label><input type="number" id="payInsu" min="0" value="0" min="0"></div>
+                            <div class="input-group"><label style="color:#e67e22;">فرق جلسة</label><input type="number" id="diffInsu" min="0" value="0" placeholder="0" style="border:2px solid #e67e22;"></div>
+                            <div class="input-group"><label>طريقة الدفع</label><select id="payInsuMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div>
+                        </div>
+                        <div class="input-group" style="margin-top:8px;">
+                            <input type="text" id="insuSessionNotes" placeholder="ملاحظة الجلسة (اختياري)..." style="width:100%; box-sizing:border-box;">
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+                            <button id="btnSaveInsuAtt" onclick="saveInsuAttendance()" class="save-btn" style="background:#27ae60; margin-top:0; flex: 2;">تأكيد الحضور</button>
+                            <button id="btnCloseInsu" onclick="closeInsuSessions()" class="save-btn" style="background:#e74c3c; margin-top:0; flex: 1;">تقفيل الجلسات</button>
+                            <button id="btnManagerBypassInsu" onclick="grantAdminBypass('insu')" class="save-btn hidden admin-only" style="background:#8e44ad; margin-top:0; flex:1;"><i class="fas fa-key"></i> سماح إداري</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم الكاش -->
+        <div id="systemCash" class="form-container hidden">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn" id="tabCashNew" onclick="showCashTab('new')"><i class="fas fa-plus"></i> ملف كاش جديد</button>
+                <button class="sub-tab-btn active" id="tabCashFollow" onclick="showCashTab('follow')">مريض كاش متابعة</button>
+            </div>
+            <form id="formCashNew" class="hidden">
+                <div class="grid-inputs">
+                    <div class="input-group" style="grid-column: span 2;"><label>الاسم بالكامل</label><input type="text" id="cName" required></div>
+                    <div class="input-group"><label>رقم التليفون</label><input type="tel" id="cPhone" required></div>
+                    <div class="input-group"><label>الطبيب المحول</label><input type="text" id="cRefDoctor" placeholder="دكتور العظام"></div>
+                    <div class="input-group" style="grid-column:span 2;"><label>الخدمة</label><div style="display:flex;gap:8px;flex-wrap:wrap;"><button type="button" onclick="chooseService('cash','تغذية')" id="cServiceNutrition" style="border:1px solid #16a085;background:#f1fffb;color:#107162;border-radius:8px;padding:8px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;">🥗 تغذية</button><button type="button" onclick="chooseService('cash','ريكفري')" id="cServiceRecovery" style="border:1px solid #6a1b9a;background:#f8f1ff;color:#6a1b9a;border-radius:8px;padding:8px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;">💆 ريكفري</button><button type="button" onclick="chooseService('cash','علاج طبيعي')" id="cServiceTherapy" style="border:1px solid #087eaf;background:#eef9ff;color:#087eaf;border-radius:8px;padding:8px 12px;font-family:Tajawal;font-weight:800;cursor:pointer;">علاج طبيعي</button></div><input type="hidden" id="cServiceType" value="علاج طبيعي"></div>
+                    <div class="input-group hidden" id="cServiceDoctorGroup"><label>اسم دكتور الخدمة (لحساب النسبة)</label><input type="text" id="cServiceDoctor" placeholder="اكتب اسم الدكتور"></div>
+                    <div class="grid-inputs hidden" id="cSimpleServiceFields" style="grid-column:span 2;"><div class="input-group"><label>المبلغ المدفوع</label><input id="cSimplePaid" type="number" min="0" value="0" placeholder="0"></div><div class="input-group"><label>طريقة الدفع</label><select id="cSimplePayMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div><div class="input-group"><label>ملاحظات</label><input id="cSimpleNotes" type="text" placeholder="ملاحظات الخدمة"></div></div>
+                    <div class="input-group"><label>فئة الجلسة</label><select id="cCat"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+                    <div class="input-group"><label>نوع الجلسة</label>
+                        <select id="cSessionType">
+                            <option>علاج طبيعي عادي</option><option>تأهيل</option><option>تأهيل بعد عملية</option>
+                            <option>جلسة علاج طبيعي (عضو واحد)</option><option>جلسة علاج طبيعي (عضوين)</option>
+                            <option>جلسة علاج طبيعي يدوي (عضو واحد)</option><option>جلسة علاج طبيعي يدوي (عضوين)</option>
+                            <option>جلسة تصادمي (عضو واحد)</option><option>جلسة تصادمي (عضوين)</option>
+                        </select>
+                    </div>
+                    <div class="input-group"><label>النظام</label><select id="cMode" onchange="toggleCashMode()"><option value="session">بالجلسة</option><option value="course">كورس</option></select></div>
+                    <div class="input-group admin-only past-sessions-field"><label>الجلسات السابقة المستهلكة (إن وجد)</label><input type="number" id="cPastSessions" value="0" placeholder="مثال: 5"></div>
+                    <div class="input-group" style="grid-column: span 3;"><label>روشتة</label><input type="file" id="cDocs" multiple accept="image/*,.pdf"></div>
+                    <div class="input-group full-width"><label>ملاحظات</label><input type="text" id="cNotes" placeholder="أضف أي ملاحظات هنا..."></div>
+                </div>
+                <div id="courseFields" class="finance-box hidden">
+                    <div class="grid-inputs">
+                        <div class="input-group"><label>عدد الجلسات الإجمالي</label><input type="number" id="cTotalSessions"></div>
+                        <div class="input-group cash-price-field"><label>إجمالي التكلفة</label><input type="number" id="cTotalCost" min="0" value="0"></div>
+                        <div class="input-group cash-price-field"><label>مقدم</label><input type="number" id="cPaidCourse" min="0" value="0"></div>
+                        <div class="input-group cash-price-field"><label>طريقة الدفع</label><select id="cNewPayMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div>
+                    </div>
+                </div>
+                <div id="sessionFields" class="finance-box cash-price-field">
+                    <div class="grid-inputs">
+                        <div class="input-group"><label>سعر الجلسة</label><input type="number" id="cSessionPrice" min="0" value="0"></div>
+                        <div class="input-group"><label style="color:#27ae60;">💵 المدفوع الآن</label><input type="number" id="cPaidNow" min="0" value="0" style="border:2px solid #27ae60;"></div>
+                        <div class="input-group"><label>طريقة الدفع</label><select id="cSessionPayMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div>
+                    </div>
+                </div>
+                <button type="button" id="btnCashNewExam" onclick="toggleNewExam('cash')" style="width:100%;border:2px dashed #2980b9;background:#f0f9ff;color:#1a6fa8;border-radius:10px;padding:11px;font-family:Tajawal;font-weight:900;cursor:pointer;margin-top:10px;"><i class="fas fa-stethoscope"></i> إضافة كشف أول مرة</button>
+                <!-- كشف أول مرة - كاش -->
+                <div id="cashNewExamFields" class="finance-box hidden" style="background:#f0f9ff; border:2px dashed #2980b9; margin-top:10px;">
+                    <div style="font-weight:900;color:#1a6fa8;margin-bottom:10px;"><i class="fas fa-stethoscope"></i> كشف أول مرة (اختياري)</div>
+                    <div class="grid-inputs">
+                        <div class="input-group"><label>مبلغ الكشف</label><input type="number" id="cExamAmount" min="0" value="0" placeholder="0 = لا يوجد كشف"></div>
+                        <div class="input-group"><label>طريقة دفع الكشف</label><select id="cExamMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div>
+                    </div>
+                </div>
+                <button type="submit" class="save-btn" id="btnSaveCashNew">تسجيل المريض</button>
+            </form>
+
+            <div id="formCashFollow">
+                <div class="search-container"><input type="text" id="searchCash" style="width:100%; padding:15px; border-radius:8px; border:1px solid #d4af37;" placeholder="ابحث كاش..."><div id="resCash" class="search-results"></div></div>
+                <div id="cardCash" class="hidden finance-box">
+                    <!-- تحذير التكرار - كاش -->
+                    <div id="cashDupWarning" class="dup-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="dup-msg">
+                            <strong>⚠️ تحذير: هذا المريض سجّل اليوم بالفعل!</strong>
+                            <span>عدد مرات التسجيل اليوم: <span id="cashDupCount" class="dup-count-badge">0</span> — هل تريد التسجيل مرة أخرى؟</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <button onclick="viewPatientDocs('cash')" style="flex:1; background:#0b132b; color:#d4af37; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fas fa-folder-open"></i> الأرشيف</button>
+                        <button id="btnRenewCash" onclick="openRenewModal('cash')" style="flex:1; background:#2196f3; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fas fa-sync-alt"></i> تجديد كورس</button>
+                        <button id="btnWaCash" onclick="sendClosureWhatsApp('cash')" class="btn-wa" style="display:none;"><i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> رسالة إغلاق</button>
+                        <button onclick="printPatientCard('cash')" class="btn-print-card"><i class="fas fa-print"></i> كارت المتابعة</button>
+                    </div>
+                    <h3 id="disCashName"></h3><div id="cashPaymentStatus"></div>
+                    <div id="courseLockWarning" class="alert-box hidden" style="background:#ffebee; color:#c0392b; border-color:#e74c3c;">
+                        <i class="fas fa-ban"></i> <div id="cashWarningText"><strong>تنبيه:</strong> المريض عليه مديونية ومغلق. يرجى الرجوع للإدارة.</div>
+                    </div>
+                    <div id="cashClosedWarning" class="alert-box hidden" style="background:#fce4ec; color:#c62828; border-color:#e53935;">
+                        <i class="fas fa-lock"></i> <div><strong>مغلق:</strong> تم تقفيل جلسات هذا المريض أو انتهاء الكورس. يجب عمل "تجديد كورس" للاستكمال.</div>
+                    </div>
+                    <div class="grid-inputs"><div class="input-group"><label>تليفون</label><input type="text" id="disCashPhone" class="locked-input" readonly></div><div class="input-group"><label>نظام</label><input type="text" id="disCashMode" class="locked-input" readonly></div><div class="input-group"><label>جلسة رقم</label><input type="text" id="disCashSess" class="locked-input" readonly></div></div>
+                    <button type="button" class="btn-upload-missing admin-only cash-price-field" style="background:#8e44ad; margin-bottom:15px; display:none;" onclick="document.getElementById('qasimDiscountDiv').classList.remove('hidden')" id="btnQasim"><i class="fas fa-tags"></i> تطبيق خصم د. قاسم</button>
+                    <div id="qasimDiscountDiv" class="hidden grid-inputs" style="background:#f3e5f5; padding:15px; border-radius:10px; margin-bottom:15px; border: 2px dashed #8e44ad;">
+                        <div class="input-group"><label>قيمة الخصم بالجنيه</label><input type="number" id="qasimDiscountVal" min="0" value="0"></div>
+                        <button type="button" class="save-btn" style="background:#8e44ad; margin-top:0;" onclick="applyQasimDiscount()">تأكيد الخصم</button>
+                    </div>
+                    <div style="background:white; padding:15px; border-radius:8px; margin-bottom:15px;" class="cash-price-field" id="cashPaymentBlock">
+                        <div class="grid-inputs">
+                            <div class="input-group"><label>المتبقي</label><input type="number" id="payCashReq" class="locked-input" readonly></div>
+                            <div class="input-group"><label style="color:#27ae60;">المدفوع اليوم</label><input type="number" id="payCashToday" min="0" placeholder="0" style="border: 2px solid #27ae60;" value="0" min="0"></div>
+                            <div class="input-group"><label style="color:#e67e22;">فرق جلسة</label><input type="number" id="diffCash" min="0" value="0" placeholder="0" style="border:2px solid #e67e22;"></div>
+                            <div class="input-group"><label>طريقة الدفع</label><select id="payCashMethod"><option value="cash">كاش</option><option value="instapay">إنستاباي</option></select></div>
+                            <div class="input-group" id="cashRemGroup"><label>بعد الدفع</label><input type="number" id="payCashRem" class="locked-input" readonly></div>
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-top:8px;">
+                        <input type="text" id="cashSessionNotes" placeholder="ملاحظة الجلسة (اختياري)..." style="width:100%; box-sizing:border-box;">
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+                        <button id="btnExam" onclick="openExamModal()" class="save-btn" style="background:#d4af37; margin-top:0; flex:1; display:none;">كشف</button>
+                        <button id="btnSaveCashAtt" onclick="saveCashAttendance()" class="save-btn" style="background:#27ae60; margin-top:0; flex: 2;">تأكيد الحضور</button>
+                        <button id="btnCloseSessions" onclick="closeCashSessions()" class="save-btn" style="background:#e74c3c; margin-top:0; flex: 1;">تقفيل الجلسات</button>
+                        <button id="btnManagerBypass" onclick="grantAdminBypass('cash')" class="save-btn hidden admin-only" style="background:#8e44ad; margin-top:0; flex:1;"><i class="fas fa-key"></i> سماح إداري</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="examModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; justify-content:center; align-items:center;">
+            <div style="background:#fff; border-radius:10px; padding:24px; width:320px; max-width:95vw; box-shadow:0 4px 24px #0003;">
+                <h3 style="margin:0 0 16px; font-size:1.1rem; color:#1f2328;">تسجيل كشف</h3>
+                <div class="input-group" style="margin-bottom:12px;">
+                    <label>مبلغ الكشف</label>
+                    <input type="number" id="examAmount" min="0" value="0" style="width:100%; box-sizing:border-box;">
+                </div>
+                <div class="input-group" style="margin-bottom:16px;">
+                    <label>طريقة الدفع</label>
+                    <select id="examMethod" style="width:100%; box-sizing:border-box;">
+                        <option value="cash">كاش</option>
+                        <option value="instapay">إنستاباي</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="saveExam()" class="save-btn" style="background:#d4af37; margin-top:0; flex:2;">تأكيد الكشف</button>
+                    <button onclick="closeExamModal()" class="save-btn" style="background:#888; margin-top:0; flex:1;">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="systemExp" class="form-container hidden">
+            <div class="grid-inputs">
+                <div class="input-group"><label>البيان</label><input type="text" id="expReason" required></div>
+                <div class="input-group"><label>المبلغ</label><input type="number" id="expAmount" min="0" required></div>
+                <div class="input-group"><label>طريقة الصرف</label><select id="expType"><option value="expense">مصروف من الكاش (درج)</option><option value="instapay">مصروف اتدفع بالإنستاباي</option></select></div>
+                <div class="input-group"><label>تصنيف المصروف</label><select id="expCategory"><option value="center">تبع المركز (إيجار، كهرباء، خامات...)</option><option value="doctor">تبع د. قاسم (رواتب، حاجات شخصية)</option><option value="advance">سلفة</option></select></div>
+            </div>
+            <button id="btnSaveExp" onclick="confirmExpense()" class="save-btn" style="background:#c62828;">اعتماد الصرف</button>
+        </div>
+
+        <!-- معاينة كارت المتابعة (تظهر تلقائياً عند اختيار مريض) -->
+        <div id="cardPreviewArea" style="display:none; margin-top:20px;"></div>
+    </main>
+
+    <div id="docsViewer" class="docs-modal" onclick="closeDocs(event)"><div class="docs-content" onclick="event.stopPropagation()"><span class="close-btn-modal" onclick="closeDocs(event)">&times;</span><h3><i class="fas fa-folder-open" style="color:#d4af37;"></i> الأرشيف الإلكتروني لـ: <span id="docsTitleName" style="color:#2196f3;"></span></h3><div id="docsListContainer"></div></div></div>
+    <div id="imageViewer" class="image-modal" onclick="closeImage(event)"><span class="close-btn-modal" onclick="closeImage(event)">&times;</span><img id="enlargedPhoto" src="" alt="" onclick="event.stopPropagation()"></div>
+    <div id="pdfViewer" class="pdf-modal" onclick="closePdf(event)"><span class="close-btn-modal" onclick="closePdf(event)">&times;</span><iframe id="pdfIframe" src="" onclick="event.stopPropagation()"></iframe></div>
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+
+        // تأكيد الاتصال بعد 3 ثواني حتى لو مفيش بيانات
+        setTimeout(() => {
+            const st = document.getElementById('serverStatus');
+            if (st && st.innerHTML.includes('جاري')) {
+                st.innerHTML = '<i class="fas fa-check-circle"></i> متصل';
+            }
+        }, 3000);
+
+        let globalInsu = [], globalCash = [], userBranch = "المهندسين", isManager = false, showCashPrices = false;
+        // الرسائل القابلة للتعديل من السابورت
+        let CUSTOM_MSGS = {};
+        db.collection("settings").doc("system_settings").onSnapshot(doc => { if (doc.exists) CUSTOM_MSGS = doc.data(); });
+        let activeInsu = null, activeCash = null;
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div'); toast.className = `toast ${type}`;
+            toast.innerHTML = type === 'success' ? `<i class="fas fa-check-circle" style="color:#27ae60;"></i> ${message}` : `<i class="fas fa-times-circle" style="color:#e74c3c;"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let role = localStorage.getItem('userRole');
+            let name = localStorage.getItem('userName') || "مستخدم";
+            userBranch = localStorage.getItem('userBranch') || "المهندسين";
+            // الأدمن (owner) أو الإدارة المركزية: يشوف كل الفروع ويقدر يغيّر
+            // مدير الفرع (manager): يشوف فرعه بس
+            let isAdmin = (role === "owner" || userBranch === "الإدارة المركزية");
+            isManager = isAdmin; // الصلاحية الكاملة للأدمن فقط
+            if (!role) { window.location.href = 'index.html'; return; }
+            if (role === 'reception' || role === 'receptionist') {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            }
+            document.getElementById('branchInfo').innerText = `أهلاً: ${name} - ${userBranch}`;
+            document.getElementById('displayCurrentBranch').innerText = userBranch;
+
+            let dateInput = document.getElementById('displayDate');
+            dateInput.value = new Date().toISOString().split('T')[0];
+            if (isAdmin) {
+                dateInput.disabled = false;
+                dateInput.removeAttribute('readonly');
+                dateInput.style.border = '2px solid #d4af37';
+                dateInput.style.background = '#fff';
+                // إظهار فلتر الفرع للأدمن فقط
+                let wrap = document.getElementById('adminBranchWrap');
+                if (wrap) {
+                    wrap.style.display = 'flex';
+                    let sel = document.getElementById('adminBranchSelect');
+                    // لو الأدمن على "الإدارة المركزية"، خليه يبدأ بأول فرع حقيقي للتسجيل
+                    if (userBranch === 'الإدارة المركزية' || !userBranch) {
+                        userBranch = sel.options[0].value; // المهندسين
+                        document.getElementById('displayCurrentBranch').innerText = userBranch;
+                        document.getElementById('branchInfo').innerText = `أهلاً: ${name} - ${userBranch}`;
+                    }
+                    for (let opt of sel.options) {
+                        if (opt.value === userBranch) { opt.selected = true; break; }
+                    }
+                }
+            }
+            // مدير الفرع: يتقفل على فرعه، مايقدرش يغيّره
+
+            db.collection('settings').doc('system_settings').onSnapshot(doc => {
+                if (doc.exists) {
+                    if (doc.data().showCashPrices === true) { document.body.classList.add('show-cash-prices'); showCashPrices = true; }
+                    else { document.body.classList.remove('show-cash-prices'); showCashPrices = false; }
+                    if (doc.data().allowPastSessions === true) document.body.classList.add('show-past-sessions');
+                    else document.body.classList.remove('show-past-sessions');
+                }
+            });
+            fetchDataRealtime();
+        });
+
+        // ===== تغيير الفرع للأدمن =====
+        function changeAdminBranch(newBranch) {
+            userBranch = newBranch;
+            // حفظ الفرع في localStorage عشان يفضل محفوظ لما تتنقل بين الصفحات
+            localStorage.setItem('userBranch', newBranch);
+            document.getElementById('displayCurrentBranch').innerText = newBranch;
+            let name = localStorage.getItem('userName') || "مستخدم";
+            document.getElementById('branchInfo').innerText = `أهلاً: ${name} - ${newBranch}`;
+            // إعادة ضبط البحث
+            activeInsu = null; activeCash = null;
+            document.getElementById('cardInsu').classList.add('hidden');
+            document.getElementById('cardCash').classList.add('hidden');
+            const cpa = document.getElementById('cardPreviewArea'); if (cpa) cpa.style.display = 'none';
+            document.getElementById('searchInsu').value = '';
+            document.getElementById('searchCash').value = '';
+            document.getElementById('insuDupWarning').classList.remove('show');
+            document.getElementById('cashDupWarning').classList.remove('show');
+            showToast(`تم التحويل إلى فرع: ${newBranch}`);
+        }
+
+        // ===== منع الأرقام السالبة في كل خانات الأرقام =====
+        document.addEventListener('input', function(e) {
+            if (e.target.type === 'number') {
+                let val = parseFloat(e.target.value);
+                if (!isNaN(val) && val < 0) e.target.value = 0;
+            }
+        });
+
+        // ===== Duplicate Confirm Modal =====
+        let _dupResolve = null;
+        function showDupConfirm(patientName) {
+            return new Promise(resolve => {
+                _dupResolve = resolve;
+                document.getElementById('dupConfirmPatientName').innerText = patientName;
+                const overlay = document.getElementById('dupConfirmOverlay');
+                overlay.style.display = 'flex';
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        overlay.style.opacity = '1';
+                        overlay.style.pointerEvents = 'auto';
+                        overlay.classList.add('active');
+                    });
+                });
+            });
+        }
+        function closeDupConfirm(result) {
+            const overlay = document.getElementById('dupConfirmOverlay');
+            overlay.classList.remove('active');
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+            setTimeout(() => { overlay.style.display = 'none'; }, 350);
+            if (_dupResolve) { _dupResolve(result); _dupResolve = null; }
+        }
+
+        // ===== التحقق من التكرار =====
+        async function checkDuplicateToday(patientName, sysType) {
+            const todayDate = getLedgerFormattedDate();
+            try {
+                const snap = await db.collection("daily_ledger")
+                    .where("patientName", "==", patientName)
+                    .where("date", "==", todayDate)
+                    .get();
+                // عد الجلسات الفعلية بس (مش الدفعات والاستردادات)
+                let count = 0;
+                snap.forEach(d => { const x = d.data(); if (!x.isPaymentOnly && !x.isRefund) count++; });
+                if (sysType === 'insu') {
+                    document.getElementById('insuDupCount').innerText = count;
+                    document.getElementById('insuDupWarning').classList.toggle('show', count > 0);
+                } else {
+                    document.getElementById('cashDupCount').innerText = count;
+                    document.getElementById('cashDupWarning').classList.toggle('show', count > 0);
+                }
+            } catch(e) { console.warn('dup check error', e); }
+        }
+
+        function getLedgerFormattedDate() {
+            let d = document.getElementById('displayDate') ? document.getElementById('displayDate').value : '';
+            if (!d) {
+                // fallback لتاريخ النهاردة الفعلي لو الحقل فاضي
+                const now = new Date();
+                d = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            }
+            let parts = d.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return d;
+        }
+
+        function chooseService(kind, service) {
+            const prefix = kind === 'insu' ? 'i' : 'c';
+            const simple = service === 'تغذية' || service === 'ريكفري';
+            document.getElementById(prefix+'ServiceType').value = service;
+            document.getElementById(prefix+'ServiceDoctorGroup').classList.toggle('hidden', service === 'علاج طبيعي');
+            document.getElementById(prefix+'SimpleServiceFields').classList.toggle('hidden', !simple);
+            const form=document.getElementById(kind==='insu'?'formInsuNew':'formCashNew');
+            const extras = kind==='insu'
+                ? ['iRefDoctor','iCompany','iPrice','iTotalSessions','iApprovalDate','iPastSessions','iInjury','iCat','iSessionType','iNotes','iCopayTotal','iCopayPaid','iPayMethod','iDocs']
+                : ['cRefDoctor','cCat','cSessionType','cMode','cPastSessions','cDocs','cNotes'];
+            extras.forEach(id=>{const input=document.getElementById(id), group=input&&input.closest('.input-group');if(group)group.classList.toggle('hidden',simple);if(input){if(simple&&input.required){input.dataset.serviceRequired='1';input.required=false;}else if(!simple&&input.dataset.serviceRequired==='1')input.required=true;}});
+            form.querySelectorAll('.medical-box,.paper-box,.finance-box').forEach(box=>box.classList.toggle('hidden',simple));
+            const examButton=document.getElementById(kind==='insu'?'btnInsuNewExam':'btnCashNewExam'); if(examButton) examButton.classList.toggle('hidden',simple);
+            ['Nutrition','Recovery','Therapy'].forEach(key => {
+                const button=document.getElementById(prefix+'Service'+key);
+                if (button) button.style.outline = 'none';
+            });
+            const selected=document.getElementById(prefix+(service==='تغذية'?'ServiceNutrition':service==='ريكفري'?'ServiceRecovery':'ServiceTherapy'));
+            if (selected) selected.style.outline='3px solid #d4af37';
+        }
+
+        async function sendToLedger(name, amount, type, method, notes = "", extra = {}) {
+            let finalAmount = parseFloat(amount) || 0;
+            await db.collection("daily_ledger").add({
+                patientName: name, amount: finalAmount, type: type, method: method || "كاش",
+                date: getLedgerFormattedDate(), branch: userBranch, notes: notes,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(), ...extra
+            });
+            // الدفعات فقط (تجديد/فرق جلسة) لا تُعد حضوراً ولا تغيّر حالة الحجز.
+            if (extra.isPaymentOnly || extra.skipAttendance || extra.isRefund) return;
+            // تحديث حجز المريض لـ "حضر" — بالخلفية (مايعطّلش الحفظ)
+            (async () => {
+                try {
+                    const todayDMY = getLedgerFormattedDate();
+                    const todayISO = document.getElementById('displayDate') ? document.getElementById('displayDate').value : new Date().toISOString().split('T')[0];
+                    const resSnap = await db.collection("reservations").where("patientName","==",name).get();
+                    const batch = db.batch();
+                    let found = false;
+                    resSnap.forEach(doc => {
+                        const r = doc.data();
+                        const rDate = r.date || '';
+                        if ((rDate === todayISO || rDate === todayDMY) && r.status !== 'حضر') {
+                            batch.update(doc.ref, { status: 'حضر' });
+                            found = true;
+                        }
+                    });
+                    if (found) await batch.commit();
+                } catch(e) { console.warn('mark reservation:', e); }
+            })();
+        }
+
+        function fetchDataRealtime() {
+            db.collection("patients_insu").limit(1200).onSnapshot(snap => {
+                globalInsu = [];
+                snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalInsu.push(d); });
+                document.getElementById('serverStatus').innerHTML = '<i class="fas fa-check-circle"></i> متصل';
+                if (activeInsu) { let p = globalInsu.find(x => x.id === activeInsu); if (p) selectInsu(p); }
+            });
+            db.collection("patients_cash").limit(1200).onSnapshot(snap => {
+                globalCash = [];
+                snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalCash.push(d); });
+                if (activeCash) { let p = globalCash.find(x => x.id === activeCash); if (p) selectCash(p); }
+            });
+        }
+
+        async function addSessionDifference(kind) {
+            const p = kind === 'insu' ? globalInsu.find(x=>x.id===activeInsu) : globalCash.find(x=>x.id===activeCash);
+            if (!p) return showToast('اختر المريض أولاً', 'error');
+            const amount = parseFloat(prompt('اكتب قيمة فرق الجلسة بالجنيه:') || 0);
+            if (!amount || amount <= 0) return;
+            const reason = (prompt('فرق الجلسة بسبب ماذا؟') || 'فرق جلسة').trim();
+            const method = (prompt('طريقة الدفع: اكتب cash أو instapay', 'cash') || 'cash').toLowerCase() === 'instapay' ? 'instapay' : 'cash';
+            const collection = kind === 'insu' ? 'patients_insu' : 'patients_cash';
+            // معرّف واحد يربط الدفعة بسطر اليومية حتى لو تم تسجيل يوم سابق.
+            const operationId = `difference_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+            const selectedDate = document.getElementById('displayDate')?.value || new Date().toISOString().split('T')[0];
+            const history = Array.isArray(p.paymentsHistory) ? [...p.paymentsHistory] : [];
+            history.push({amount,date:selectedDate,type:'فرق جلسة',method,note:reason,operationId});
+            const update = {paymentsHistory:history};
+            if (kind === 'insu') update.copayPaid=(parseFloat(p.copayPaid)||0)+amount;
+            else update.paid=(parseFloat(p.paid)||0)+amount;
+            await db.collection(collection).doc(p.id).update(update);
+            await sendToLedger(p.id,amount,kind==='insu'?'فرق جلسة — تحمل':'فرق جلسة — كاش',method,reason,{isPaymentOnly:true,paymentType:'فرق جلسة',operationId});
+            showToast('تم تسجيل فرق الجلسة في اليومية وكارت المتابعة');
+            setTimeout(()=>showCardPreview(kind,p),500);
+        }
+
+        // فلترة المرضى حسب الفرع الحالي
+        function getFilteredInsu() {
+            // لو مدير فرع: بيشوف فرعه بس
+            // لو أدمن غيّر الفرع: بيشوف الفرع المحدد
+            // المرضى اللي مالهمش branch يظهروا دايماً
+            if (!userBranch || userBranch === 'الإدارة المركزية') return globalInsu;
+            return globalInsu.filter(p => !p.branch || p.branch === userBranch);
+        }
+        function getFilteredCash() {
+            if (!userBranch || userBranch === 'الإدارة المركزية') return globalCash;
+            return globalCash.filter(p => !p.branch || p.branch === userBranch);
+        }
+
+        function switchSystem(sys) {
+            document.getElementById('systemInsu').classList.toggle('hidden', sys !== 'insu');
+            document.getElementById('systemCash').classList.toggle('hidden', sys !== 'cash');
+            document.getElementById('systemExp').classList.toggle('hidden', sys !== 'exp');
+            document.getElementById('btnSysInsu').classList.toggle('active', sys === 'insu');
+            document.getElementById('btnSysCash').classList.toggle('active', sys === 'cash');
+        }
+        function showInsuTab(tab) {
+            document.getElementById('formInsuNew').classList.toggle('hidden', tab !== 'new');
+            document.getElementById('formInsuFollow').classList.toggle('hidden', tab !== 'follow');
+            if (tab === 'new') {
+                // امسح البحث والكارت لما تفتح ملف جديد
+                document.getElementById('searchInsu').value = '';
+                document.getElementById('resInsu').innerHTML = '';
+                document.getElementById('cardInsu').classList.add('hidden');
+                document.getElementById('insuDupWarning').classList.remove('show');
+                activeInsu = null;
+                const cpa = document.getElementById('cardPreviewArea'); if (cpa) cpa.style.display = 'none';
+            }
+            if (tab === 'follow' && activeInsu) {
+                document.getElementById('cardInsu').classList.remove('hidden');
+            }
+            document.getElementById('tabInsuNew').classList.toggle('active', tab === 'new');
+            document.getElementById('tabInsuFollow').classList.toggle('active', tab === 'follow');
+        }
+        function showCashTab(tab) {
+            document.getElementById('formCashNew').classList.toggle('hidden', tab !== 'new');
+            document.getElementById('formCashFollow').classList.toggle('hidden', tab !== 'follow');
+            if (tab === 'new') {
+                document.getElementById('searchCash').value = '';
+                document.getElementById('resCash').innerHTML = '';
+                document.getElementById('cardCash').classList.add('hidden');
+                document.getElementById('cashDupWarning').classList.remove('show');
+                activeCash = null;
+                const cpa = document.getElementById('cardPreviewArea'); if (cpa) cpa.style.display = 'none';
+            }
+            if (tab === 'follow' && activeCash) {
+                document.getElementById('cardCash').classList.remove('hidden');
+            }
+            document.getElementById('tabCashNew').classList.toggle('active', tab === 'new');
+            document.getElementById('tabCashFollow').classList.toggle('active', tab === 'follow');
+        }
+        function toggleCashMode() { let mode = document.getElementById('cMode').value; document.getElementById('courseFields').classList.toggle('hidden', mode === 'session'); document.getElementById('sessionFields').classList.toggle('hidden', mode === 'course'); }
+
+        function toggleNewExam(type) {
+            const isInsu = type === 'insu';
+            const btn = document.getElementById(isInsu ? 'btnInsuNewExam' : 'btnCashNewExam');
+            if (isInsu) {
+                const marker = document.getElementById('iIsExam');
+                const active = marker.value !== '1';
+                marker.value = active ? '1' : '0';
+                btn.innerHTML = active ? '<i class="fas fa-check-circle"></i> كشف أول مرة — مُفعّل' : '<i class="fas fa-stethoscope"></i> كشف أول مرة (بدون رسوم)';
+                btn.style.background = active ? '#cfe9ff' : '#f0f9ff';
+                btn.style.borderColor = active ? '#1565c0' : '#2980b9';
+                return;
+            }
+            const fields = document.getElementById('cashNewExamFields');
+            const isOpen = !fields.classList.contains('hidden');
+            fields.classList.toggle('hidden', isOpen);
+            btn.innerHTML = isOpen ? '<i class="fas fa-stethoscope"></i> إضافة كشف أول مرة' : '<i class="fas fa-times"></i> إلغاء الكشف';
+            btn.style.background = isOpen ? '#f0f9ff' : '#dbeeff';
+        }
+
+        function formatPatientDate(value) {
+            if (!value) return '-';
+            const text = String(value).trim();
+            const ymd = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (ymd) return `${ymd[3].padStart(2,'0')}/${ymd[2].padStart(2,'0')}/${ymd[1]}`;
+            const dmy = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+            if (dmy) return `${dmy[1].padStart(2,'0')}/${dmy[2].padStart(2,'0')}/${dmy[3]}`;
+            return text;
+        }
+
+        function readFileAsBase64(file) { return new Promise((resolve) => { let r = new FileReader(); r.onload = (e) => resolve(e.target.result); r.readAsDataURL(file); }); }
+        function resizeImage(file) { return new Promise((resolve) => { let r = new FileReader(); r.onload = function(e) { let img = new Image(); img.onload = function() { let canvas = document.getElementById('canvas'); let ctx = canvas.getContext('2d'); let w = img.width, h = img.height, max = 800; if(w > h && w > max) { h *= max/w; w = max; } else if(h > max) { w *= max/h; h = max; } canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h); resolve(canvas.toDataURL('image/jpeg', 0.8)); }; img.src = e.target.result; }; r.readAsDataURL(file); }); }
+        async function processFiles(inputId) { let files = document.getElementById(inputId).files; let arr = []; for(let i=0;i<files.length;i++){let f=files[i];let b64=f.type.includes('image')?await resizeImage(f):await readFileAsBase64(f);arr.push({name:f.name,type:f.type,data:b64});}return arr; }
+
+        function viewPatientDocs(sysType) { let p = sysType === 'insu' ? globalInsu.find(x => x.id === activeInsu) : globalCash.find(x => x.id === activeCash); document.getElementById('docsTitleName').innerText = p.id; let lc = document.getElementById('docsListContainer'); lc.innerHTML = ''; if(p && p.docs && p.docs.length > 0) { p.docs.forEach((doc) => { let isPdf = doc.type.includes('pdf'); let icon = isPdf ? 'fa-file-pdf' : 'fa-image'; let act = isPdf ? `openPdf('${doc.data}')` : `openImage('${doc.data}')`; lc.innerHTML += `<div class="doc-item" onclick="${act}"><span><i class="fas ${icon}" style="color:#d4af37;"></i> ${doc.name}</span></div>`; }); } else { lc.innerHTML = `<div style="text-align:center; color:#e74c3c;">لا توجد مستندات!</div>`; } document.getElementById('docsViewer').classList.add('active'); }
+        function closeDocs(e) { document.getElementById('docsViewer').classList.remove('active'); }
+        function openImage(src) { document.getElementById('enlargedPhoto').src = src; document.getElementById('imageViewer').classList.add('active'); }
+        function closeImage(e) { document.getElementById('imageViewer').classList.remove('active'); }
+        function openPdf(b) { document.getElementById('pdfIframe').src = b; document.getElementById('pdfViewer').classList.add('active'); }
+        function closePdf(e) { document.getElementById('pdfViewer').classList.remove('active'); document.getElementById('pdfIframe').src = ""; }
+
+        // ===== بحث التأمين =====
+        document.getElementById('searchInsu').addEventListener('input', function() {
+            let q = this.value.trim().toLowerCase();
+            let res = document.getElementById('resInsu');
+            if (!q) {
+                res.innerHTML = '';
+                const cpa = document.getElementById('cardPreviewArea'); if (cpa) cpa.style.display = 'none';
+                document.getElementById('cardInsu').classList.add('hidden');
+                activeInsu = null;
+                return;
+            }
+            let matches = getFilteredInsu().filter(p => p.id.toLowerCase().includes(q)).slice(0, 30);
+            res.innerHTML = matches.length ? matches.map(p => `<div class="search-item" onclick="selectInsu(globalInsu.find(x=>x.id==='${p.id.replace(/'/g,"\\'")}'))"><span style="font-weight:bold;">${p.id}</span><span class="badge-company">${p.comp||''}</span></div>`).join('') : `<div style="padding:15px;color:#999;text-align:center;">لا توجد نتائج في فرع ${userBranch}</div>`;
+        });
+
+        function selectInsu(p) {
+            activeInsu = p.id;
+            document.getElementById('resInsu').innerHTML = '';
+            document.getElementById('searchInsu').value = p.id;
+            document.getElementById('cardInsu').classList.remove('hidden');
+            // إخفاء التحذير أولاً ثم تحقق
+            document.getElementById('insuDupWarning').classList.remove('show');
+            checkDuplicateToday(p.id, 'insu');
+
+            let debt = Math.max(0, (p.copayTotal || 0) - (p.copayPaid || 0));
+            document.getElementById('disInsuName').innerText = p.id;
+            document.getElementById('disInsuPhone').value = p.phone || '';
+            document.getElementById('disInsuRefDoc').value = p.refDoctor || '';
+            document.getElementById('disInsuComp').value = p.comp || '';
+            document.getElementById('disInsuInj').value = p.injury || '';
+            document.getElementById('disInsuPrice').value = (p.price || 0) + ' ج';
+            document.getElementById('disInsuPapers').value = p.paperStatus || '';
+            document.getElementById('disInsuSess').value = `${(p.attended||0)+1} من ${p.totalSess||0}`;
+            document.getElementById('disInsuDebt').value = debt + ' ج';
+
+            let payStatusDiv = document.getElementById('insuPaymentStatus');
+            payStatusDiv.innerHTML = debt > 0 ? `<div style="background:#ffebee;color:#c62828;padding:6px 12px;border-radius:8px;font-weight:bold;margin-bottom:10px;display:inline-block;">متبقي تحمل: ${debt} ج.م</div>` : `<div style="background:#e8f5e9;color:#2e7d32;padding:6px 12px;border-radius:8px;font-weight:bold;margin-bottom:10px;display:inline-block;">خالص ✓</div>`;
+
+            let missingAlert = document.getElementById('missingAlert');
+            if (p.paperStatus && p.paperStatus.includes("ناقص")) {
+                missingAlert.style.background='#fff3e0'; missingAlert.style.color='#e67e22'; missingAlert.style.borderColor='#e67e22';
+                missingAlert.innerHTML = `<i class="fas fa-exclamation-triangle"></i><div><strong>ناقص:</strong> ${p.paperStatus}</div>`;
+                missingAlert.classList.remove('hidden');
+                document.getElementById('uploadMissingDiv').classList.remove('hidden');
+            } else { missingAlert.classList.add('hidden'); document.getElementById('uploadMissingDiv').classList.add('hidden'); }
+
+            let isClosed = p.isClosed === true;
+            let hasAllSess = (p.attended||0) >= (p.totalSess||0);
+            let canProceed = p.adminBypass === true;
+            let shouldBlock = (isClosed || hasAllSess) && !canProceed;
+            document.getElementById('insuClosedWarning').classList.toggle('hidden', !shouldBlock);
+            document.getElementById('btnSaveInsuAtt').disabled = shouldBlock;
+            document.getElementById('btnManagerBypassInsu').classList.toggle('hidden', !shouldBlock);
+            document.getElementById('btnWaInsu').style.display = isClosed ? 'flex' : 'none';
+
+            // فتح نافذة التجديد تلقائياً لو خلّص جلساته (ومش متجاوز بالأدمن)
+            if (hasAllSess && !canProceed && (p.totalSess||0) > 0) {
+                setTimeout(() => openRenewModal('insu'), 400);
+            }
+            // اعرض كارت المتابعة كمعاينة تلقائياً
+            showCardPreview('insu', p);
+        }
+
+        // ===== بحث الكاش =====
+        document.getElementById('searchCash').addEventListener('input', function() {
+            let q = this.value.trim().toLowerCase();
+            let res = document.getElementById('resCash');
+            if (!q) {
+                res.innerHTML = '';
+                const cpa = document.getElementById('cardPreviewArea'); if (cpa) cpa.style.display = 'none';
+                document.getElementById('cardCash').classList.add('hidden');
+                activeCash = null;
+                return;
+            }
+            let matches = getFilteredCash().filter(p => p.id.toLowerCase().includes(q)).slice(0, 30);
+            res.innerHTML = matches.length ? matches.map(p => `<div class="search-item" onclick="selectCash(globalCash.find(x=>x.id==='${p.id.replace(/'/g,"\\'")}'))"><span style="font-weight:bold;">${p.id}</span><span class="badge-company">${p.mode==='course'?'كورس':'جلسات'}</span></div>`).join('') : `<div style="padding:15px;color:#999;text-align:center;">لا توجد نتائج في فرع ${userBranch}</div>`;
+        });
+
+        function selectCash(p) {
+            activeCash = p.id;
+            document.getElementById('resCash').innerHTML = '';
+            document.getElementById('searchCash').value = p.id;
+            document.getElementById('cardCash').classList.remove('hidden');
+            // إخفاء التحذير أولاً ثم تحقق
+            document.getElementById('cashDupWarning').classList.remove('show');
+            checkDuplicateToday(p.id, 'cash');
+
+            document.getElementById('disCashName').innerText = p.id;
+            document.getElementById('disCashPhone').value = p.phone || '';
+            document.getElementById('disCashMode').value = p.mode === 'course' ? 'كورس' : 'بالجلسة';
+            document.getElementById('disCashSess').value = `${(p.attended||0)+1}`;
+
+            let isCourse = p.mode === 'course';
+            let debt = isCourse ? Math.max(0,(p.cost||0)-(p.paid||0)) : 0;
+            let allDone = isCourse && (p.attended||0) >= (p.totalSess||0);
+            let isClosed = p.isClosed === true;
+            let hasDebt = debt > 0 && !p.adminBypass;
+            let canProceed = p.adminBypass === true;
+
+            let cashPayStatus = document.getElementById('cashPaymentStatus');
+            if (isCourse) {
+                cashPayStatus.innerHTML = debt > 0 ? `<div style="background:#ffebee;color:#c62828;padding:6px 12px;border-radius:8px;font-weight:bold;margin-bottom:10px;display:inline-block;">مديونية: ${debt} ج.م</div>` : `<div style="background:#e8f5e9;color:#2e7d32;padding:6px 12px;border-radius:8px;font-weight:bold;margin-bottom:10px;display:inline-block;">خالص ✓</div>`;
+            } else { cashPayStatus.innerHTML = ''; }
+
+            if (showCashPrices) {
+                document.getElementById('payCashReq').value = debt;
+                document.getElementById('payCashRem').value = debt;
+            }
+
+            document.getElementById('courseLockWarning').classList.toggle('hidden', !hasDebt || canProceed);
+            if (hasDebt && !canProceed) document.getElementById('cashWarningText').innerHTML = `<strong>تنبيه:</strong> المريض عليه مديونية ${debt} ج.م.`;
+            document.getElementById('cashClosedWarning').classList.toggle('hidden', !(isClosed||allDone)||canProceed);
+            document.getElementById('btnSaveCashAtt').disabled = (hasDebt||isClosed||allDone)&&!canProceed;
+            document.getElementById('btnManagerBypass').classList.toggle('hidden', !((hasDebt||isClosed||allDone)&&!canProceed));
+            document.getElementById('btnExam').style.display = (p.attended||0) === 0 ? 'inline-block' : 'none';
+            document.getElementById('btnWaCash').style.display = (isClosed||allDone) ? 'flex' : 'none';
+            document.getElementById('btnQasim').style.display = (isManager && isCourse) ? 'block' : 'none';
+
+            document.getElementById('payCashToday').oninput = function() {
+                if (showCashPrices) document.getElementById('payCashRem').value = Math.max(0, debt - (parseFloat(this.value)||0));
+            };
+
+            // فتح نافذة التجديد تلقائياً لو كورس خلّص جلساته
+            if (allDone && !canProceed && (p.totalSess||0) > 0) {
+                setTimeout(() => openRenewModal('cash'), 400);
+            }
+            // اعرض كارت المتابعة كمعاينة تلقائياً
+            showCardPreview('cash', p);
+        }
+
+        let _savingInsuAtt = false;
+        async function saveInsuAttendance(withCard) {
+            if (_savingInsuAtt) return; // منع الضغط المتكرر
+            let p = globalInsu.find(x => x.id === activeInsu); if (!p) return;
+            _savingInsuAtt = true;
+            // عطّل الزرار فوراً (قبل أي انتظار) عشان مايتسجلش أكتر من مرة
+            let btn = document.getElementById('btnSaveInsuAtt');
+            if (btn) { btn.disabled = true; btn.innerText = 'جاري الحفظ...'; }
+            // أمان: فك القفل بعد 15 ثانية مهما حصل
+            const _unlock = setTimeout(() => { _savingInsuAtt = false; if (btn) { btn.disabled = false; btn.innerText = 'تأكيد الحضور'; } }, 15000);
+            // تحقق من التكرار مباشرة من Firebase
+            const todayDate = getLedgerFormattedDate();
+            const todayGB = new Date().toLocaleDateString('en-GB');
+            let dupCount = 0;
+            try {
+                // استعلام بحقل واحد بس (من غير composite index) والفلترة على التاريخ في الكود
+                const snap = await db.collection("daily_ledger")
+                    .where("patientName", "==", p.id)
+                    .get();
+                snap.forEach(d => {
+                    const x = d.data();
+                    // تجاهل دفعات التجديد القديمة والجديدة: ليست حضور جلسة.
+                    if ((x.date === todayDate || x.date === todayGB) && !x.isPaymentOnly && !x.isRefund && !/تجديد|فتح كورس جديد/.test(x.type || '')) dupCount++;
+                });
+            } catch(e) { console.warn('dup check:', e); }
+            if (dupCount > 0) {
+                const confirmed = await showDupConfirm(p.id);
+                if (!confirmed) { clearTimeout(_unlock); _savingInsuAtt = false; if (btn) { btn.disabled = false; btn.innerText = 'تأكيد الحضور'; } return; }
+            }
+            try {
+                let paid = parseFloat(document.getElementById('payInsu').value) || 0;
+                let difference = parseFloat(document.getElementById('diffInsu').value) || 0;
+                let method = document.getElementById('payInsuMethod').value;
+                let insuNotes = document.getElementById('insuSessionNotes').value.trim();
+                const diffOperationId = difference > 0 ? `difference_${Date.now()}_${Math.random().toString(36).slice(2,8)}` : '';
+                const paymentDate = document.getElementById('displayDate')?.value || new Date().toISOString().split('T')[0];
+                let updateInsu = { attended: (p.attended||0)+1, copayPaid: (p.copayPaid||0)+paid+difference };
+                // سجّل الدفعة في السجل لو فيه مبلغ
+                if (paid > 0) {
+                    const hist = Array.isArray(p.paymentsHistory) ? [...p.paymentsHistory] : [];
+                    hist.push({ amount:paid, date:new Date().toISOString().split('T')[0], type:'تحمل', method:method, note:'دفعة عند الحضور' });
+                    if (difference > 0) hist.push({ amount:difference, date:paymentDate, type:'فرق جلسة', method:method, note:insuNotes || 'فرق جلسة', operationId:diffOperationId });
+                    updateInsu.paymentsHistory = hist;
+                } else if (difference > 0) updateInsu.paymentsHistory=[...(Array.isArray(p.paymentsHistory)?p.paymentsHistory:[]),{ amount:difference, date:paymentDate, type:'فرق جلسة', method:method, note:insuNotes || 'فرق جلسة', operationId:diffOperationId }];
+                if (insuNotes) updateInsu.sessionNotesHistory=[...(Array.isArray(p.sessionNotesHistory)?p.sessionNotesHistory:[]),{date:getLedgerFormattedDate(),note:insuNotes,session:(p.attended||0)+1}];
+                await db.collection("patients_insu").doc(p.id).update(updateInsu);
+                await sendToLedger(p.id, paid, 'تحمل', method, insuNotes || p.injury||'');
+                if (difference > 0) await sendToLedger(p.id, difference, 'فرق جلسة — تحمل', method, insuNotes || 'فرق جلسة',{isPaymentOnly:true,paymentType:'فرق جلسة',operationId:diffOperationId});
+                showToast(`تم تسجيل جلسة ${p.id} ✅`);
+                document.getElementById('payInsu').value = 0;
+                document.getElementById('diffInsu').value = 0;
+                document.getElementById('insuSessionNotes').value = '';
+                // حدّث المعاينة بعد ثانية (عشان البيانات تتحدّث)
+                setTimeout(() => { const np = globalInsu.find(x=>x.id===p.id); if(np) showCardPreview('insu', np); }, 1300);
+            } catch(e) { showToast("خطأ!", "error"); }
+            finally { clearTimeout(_unlock); _savingInsuAtt = false; if (btn) { btn.disabled = false; btn.innerText = 'تأكيد الحضور'; } }
+        }
+
+        async function closeInsuSessions() {
+            if (!confirm("هل أنت متأكد من تقفيل جلسات هذا المريض؟")) return;
+            try { await db.collection("patients_insu").doc(activeInsu).update({ isClosed: true, adminBypass: false }); showToast("تم تقفيل الجلسات."); }
+            catch(e) { showToast("خطأ!", "error"); }
+        }
+
+        let _savingCashAtt = false;
+        async function saveCashAttendance(withCard) {
+            if (_savingCashAtt) return; // منع الضغط المتكرر
+            let p = globalCash.find(x => x.id === activeCash); if (!p) return;
+            _savingCashAtt = true;
+            let btn = document.getElementById('btnSaveCashAtt');
+            if (btn) { btn.disabled = true; btn.innerText = 'جاري الحفظ...'; }
+            const _unlock = setTimeout(() => { _savingCashAtt = false; if (btn) { btn.disabled = false; btn.innerText = 'تأكيد الحضور'; } }, 15000);
+            // تحقق من التكرار مباشرة من Firebase
+            const todayDate = getLedgerFormattedDate();
+            const todayGB = new Date().toLocaleDateString('en-GB');
+            let dupCount = 0;
+            try {
+                // استعلام بحقل واحد بس (من غير composite index) والفلترة على التاريخ في الكود
+                const snap = await db.collection("daily_ledger")
+                    .where("patientName", "==", p.id)
+                    .get();
+                snap.forEach(d => {
+                    const x = d.data();
+                    // تجاهل دفعات التجديد القديمة والجديدة: ليست حضور جلسة.
+                    if ((x.date === todayDate || x.date === todayGB) && !x.isPaymentOnly && !x.isRefund && !/تجديد|فتح كورس جديد/.test(x.type || '')) dupCount++;
+                });
+            } catch(e) { console.warn('dup check:', e); }
+            if (dupCount > 0) {
+                const confirmed = await showDupConfirm(p.id);
+                if (!confirmed) { clearTimeout(_unlock); _savingCashAtt = false; if (btn) { btn.disabled = false; btn.innerText = 'تأكيد الحضور'; } return; }
+            }
+            try {
+                let paid = parseFloat(document.getElementById('payCashToday').value) || 0;
+                let difference = parseFloat(document.getElementById('diffCash').value) || 0;
+                let method = document.getElementById('payCashMethod').value;
+                let cashNotes = document.getElementById('cashSessionNotes').value.trim();
+                const diffOperationId = difference > 0 ? `difference_${Date.now()}_${Math.random().toString(36).slice(2,8)}` : '';
+                const paymentDate = document.getElementById('displayDate')?.value || new Date().toISOString().split('T')[0];
+                let updateData = { attended: (p.attended||0)+1 };
+                if (paid > 0 || difference > 0) updateData.paid = (p.paid||0)+paid+difference;
+                // سجّل الدفعة في السجل التاريخي دائماً لو فيه مبلغ (حتى لو الفرع مايظهرش الأسعار)
+                if (paid > 0) {
+                    const hist = Array.isArray(p.paymentsHistory) ? [...p.paymentsHistory] : [];
+                    hist.push({ amount:paid, date:new Date().toISOString().split('T')[0], type:(p.mode==='course'?'كورس':'كاش'), method:method, note:'دفعة عند الحضور' });
+                    if (difference > 0) hist.push({ amount:difference, date:paymentDate, type:'فرق جلسة', method:method, note:cashNotes || 'فرق جلسة', operationId:diffOperationId });
+                    updateData.paymentsHistory = hist;
+                } else if (difference > 0) updateData.paymentsHistory=[...(Array.isArray(p.paymentsHistory)?p.paymentsHistory:[]),{ amount:difference, date:paymentDate, type:'فرق جلسة', method:method, note:cashNotes || 'فرق جلسة', operationId:diffOperationId }];
+                if (cashNotes) updateData.sessionNotesHistory=[...(Array.isArray(p.sessionNotesHistory)?p.sessionNotesHistory:[]),{date:getLedgerFormattedDate(),note:cashNotes,session:(p.attended||0)+1}];
+                await db.collection("patients_cash").doc(p.id).update(updateData);
+                await sendToLedger(p.id, paid, 'كاش', method, cashNotes || p.notes||'');
+                if (difference > 0) await sendToLedger(p.id, difference, 'فرق جلسة — كاش', method, cashNotes || 'فرق جلسة',{isPaymentOnly:true,paymentType:'فرق جلسة',operationId:diffOperationId});
+                showToast(`تم تسجيل جلسة ${p.id} ✅`);
+                if (showCashPrices) document.getElementById('payCashToday').value = 0;
+                document.getElementById('diffCash').value = 0;
+                document.getElementById('cashSessionNotes').value = '';
+                setTimeout(() => { const np = globalCash.find(x=>x.id===p.id); if(np) showCardPreview('cash', np); }, 1300);
+            } catch(e) { showToast("خطأ!", "error"); }
+            finally { clearTimeout(_unlock); _savingCashAtt = false; if (btn) { btn.disabled = false; btn.innerText = 'تأكيد الحضور'; } }
+        }
+
+        async function closeCashSessions() {
+            if (!confirm("هل أنت متأكد من تقفيل الجلسات؟")) return;
+            try { await db.collection("patients_cash").doc(activeCash).update({ isClosed: true, adminBypass: false }); showToast("تم تقفيل الجلسات."); }
+            catch(e) { showToast("خطأ!", "error"); }
+        }
+
+        async function confirmExpense() {
+            let reason = document.getElementById('expReason').value.trim();
+            let amount = parseFloat(document.getElementById('expAmount').value)||0;
+            let type = document.getElementById('expType').value;
+            let category = document.getElementById('expCategory').value;
+            if (!reason||!amount) return showToast("أكمل بيانات المصروف!", "error");
+            if (!confirm(`اعتماد صرف: ${reason} — ${amount} ج.م؟`)) return;
+            try {
+                await db.collection("daily_transactions").add({ reason, amount, type, category, branch: userBranch, date: getLedgerFormattedDate(), timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                showToast("تم اعتماد المصروف.");
+                document.getElementById('expReason').value = ''; document.getElementById('expAmount').value = '';
+                document.getElementById('expCategory').value = 'center';
+            } catch(e) { showToast("خطأ!", "error"); }
+        }
+
+        function openExamModal() {
+            document.getElementById('examAmount').value = 0;
+            document.getElementById('examMethod').value = 'cash';
+            document.getElementById('examModal').style.display = 'flex';
+        }
+
+        function closeExamModal() {
+            document.getElementById('examModal').style.display = 'none';
+        }
+
+        async function saveExam() {
+            let p = globalCash.find(x => x.id === activeCash); if (!p) return;
+            let amount = parseFloat(document.getElementById('examAmount').value) || 0;
+            let method = document.getElementById('examMethod').value;
+            try {
+                await db.collection("daily_ledger").add({
+                    patientName: p.id,
+                    amount: amount,
+                    type: 'كشف كاش',
+                    method: method,
+                    isExam: true,
+                    date: getLedgerFormattedDate(),
+                    branch: userBranch,
+                    notes: '',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast(`تم تسجيل الكشف ✅`);
+                closeExamModal();
+            } catch(e) { showToast("خطأ!", "error"); }
+        }
+
+        async function grantAdminBypass(sysType) {
+            let collection = sysType === 'insu' ? 'patients_insu' : 'patients_cash';
+            let pid = sysType === 'insu' ? activeInsu : activeCash;
+            try { await db.collection(collection).doc(pid).update({ adminBypass: true }); showToast("تم السماح الإداري."); }
+            catch(e) { showToast("خطأ", "error"); }
+        }
+
+        async function uploadMissingDocs() {
+            let p = globalInsu.find(x => x.id === activeInsu); if (!p) return;
+            let newDocs = await processFiles('missingDocsInput');
+            if (!newDocs.length) return showToast("لم تختر أي ملفات!", "error");
+            try {
+                await db.collection('patients_insu').doc(p.id).update({ docs: (p.docs||[]).concat(newDocs), paperStatus: "مكتمل" });
+                showToast("تم رفع الأوراق!"); document.getElementById('uploadMissingDiv').classList.add('hidden');
+            } catch(e) { showToast("خطأ!", "error"); }
+        }
+
+        async function applyQasimDiscount() {
+            let p = globalCash.find(x => x.id === activeCash); if (!p) return;
+            let discount = parseFloat(document.getElementById('qasimDiscountVal').value)||0;
+            if (!discount) return showToast("أدخل قيمة الخصم!", "error");
+            if (!confirm(`تطبيق خصم ${discount} ج.م على ${p.id}؟`)) return;
+            try {
+                await db.collection('patients_cash').doc(p.id).update({ cost: Math.max(0,(p.cost||0)-discount) });
+                showToast(`تم تطبيق خصم ${discount} ج.م`); document.getElementById('qasimDiscountDiv').classList.add('hidden');
+            } catch(e) { showToast("خطأ!", "error"); }
+        }
+
+        function sendClosureWhatsApp(type) {
+            let p, msg;
+            if (type === 'insu') {
+                p = globalInsu.find(x => x.id === activeInsu);
+                msg = (CUSTOM_MSGS.msgCloseInsu || `أستاذ/ة {الاسم}،
+نبلغ حضرتك أننا قمنا بإغلاق جلساتك لدينا لأن لشركة التأمين الخاصة بحضرتك "ديد لاين" وحضرتك متغيب منذ فترة.
+إذا كنت ترغب في الاستكمال، يرجى الكشف وإحضار "موافقة جديدة".
+نتمنى لحضرتك دوام الصحة والعافية.`).replace(/\{الاسم\}/g, p.id||'');
+            }
+            else {
+                p = globalCash.find(x => x.id === activeCash);
+                msg = (CUSTOM_MSGS.msgCloseCash || `أستاذ/ة {الاسم}،
+نبلغ حضرتك بانتهاء جلسات الكورس الخاص بك وتم تقفيل الملف.
+في حال رغبتك في استكمال العلاج، يمكنك تشريفنا لفتح كورس جديد.
+نتمنى لحضرتك دوام الصحة والعافية.`).replace(/\{الاسم\}/g, p.id||'');
+            }
+            if (!p || !p.phone) return showToast("لا يوجد رقم هاتف!", "error");
+            let phone = p.phone.trim();
+            if (phone.startsWith('0')) phone = '2' + phone;
+            else if (!phone.startsWith('20')) phone = '20' + phone;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // ===== معاينة كارت المتابعة (الديزاين الملوّن الأحلى) =====
+        async function showCardPreview(type, p) {
+            const area = document.getElementById('cardPreviewArea');
+            if (!p) { area.style.display = 'none'; return; }
+
+            const price = type==='insu' ? (p.price||0) : (p.mode==='course' ? (p.cost||0) : (p.sessPrice||0));
+            const att = parseInt(p.attended||0), total = parseInt(p.totalSess||0);
+            let debt;
+            if (type==='insu') debt = Math.max(0,(p.copayTotal||0)-(p.copayPaid||0));
+            else if (p.mode==='course') debt = Math.max(0,(p.cost||0)-(p.paid||0));
+            else debt = Math.max(0,(price*total)-(p.paid||0));
+
+            // اعرض الكارت فوراً بالبيانات الأساسية (من غير ما تستنى التواريخ والغياب)
+            renderCardHtml(type, p, price, att, total, debt, [], []);
+
+            // حمّل التواريخ والغياب في الخلفية بالتوازي (مش بالتسلسل) وحدّث الكارت لما توصل
+            Promise.allSettled([
+                (async () => {
+                    try {
+                        const q = db.collection("daily_ledger").where("patientName","==",p.id).get();
+                        const to = new Promise((_, rej) => setTimeout(() => rej(new Error('t')), 6000));
+                        const snap = await Promise.race([q, to]);
+                        let rows = [];
+                        snap.forEach(d => { const x=d.data(); if(!x.isPaymentOnly && !x.isRefund && !/تجديد|فتح كورس جديد/.test(x.type || '') && x.date) rows.push(x); });
+                        rows.sort((a,b) => {
+                            const ta = a.timestamp && a.timestamp.seconds ? a.timestamp.seconds : 0;
+                            const tb = b.timestamp && b.timestamp.seconds ? b.timestamp.seconds : 0;
+                            if (ta && tb) return ta - tb;
+                            return 0;
+                        });
+                        return rows.map(r => r.date);
+                    } catch(e){ return []; }
+                })(),
+                (async () => {
+                    try {
+                        const absSnap = await db.collection("follow_up_reports").where("patientName","==",p.id).get();
+                        let absences = [];
+                        absSnap.forEach(d => { const x = d.data(); absences.push({ date: x.date||'', reason: x.reason||'', notes: x.notes||'' }); });
+                        absences.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+                        return absences;
+                    } catch(e){ return []; }
+                })()
+            ]).then(([sessionRes, absRes]) => {
+                const sessionDates = sessionRes.status === 'fulfilled' ? sessionRes.value : [];
+                const absences = absRes.status === 'fulfilled' ? absRes.value : [];
+                if (sessionDates.length || absences.length) {
+                    renderCardHtml(type, p, price, att, total, debt, sessionDates, absences);
+                }
+            });
+        }
+
+        function renderCardHtml(type, p, price, att, total, debt, sessionDates, absences) {
+            const area = document.getElementById('cardPreviewArea');
+
+            // خانات الجلسات
+            let boxes = '';
+            // الكارت يتمدّد تلقائيًا إذا تجاوزت الموافقات 24 جلسة.
+            for (let i=0; i<Math.max(24, total); i++){
+                const num = i+1;
+                const has = i < sessionDates.length;
+                boxes += `<div style="aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;${has?'background:linear-gradient(135deg,#27ae60,#1e8449);color:white;':'background:#f0f2f5;color:#bbb;border:2px dashed #d5d9e0;'}">
+                    <div style="font-size:0.6rem;opacity:0.8;">${num}</div>
+                    <div style="font-size:0.72rem;">${has?(sessionDates[i]||'✓'):''}</div>
+                </div>`;
+            }
+
+            // الموافقات
+            const approvals = Array.isArray(p.approvalsHistory) ? p.approvalsHistory : (p.approvalDate ? [{date:p.approvalDate, sessions:p.totalSess}] : []);
+            let approvalsHtml = approvals.length ? `<div style="margin-top:12px;background:#f0f7ff;border:1px solid #bbdefb;border-radius:8px;padding:10px;"><b style="color:#1565c0;">📋 سجل الموافقات (${approvals.length}):</b><div style="display:grid;gap:7px;margin-top:8px;">${approvals.map((a,i)=>`<div style="background:#e3f2fd;color:#0b4f7b;padding:8px 10px;border-radius:8px;font-size:0.82rem;"><b>${i===0?'موافقة أولى':'تجديد '+i}</b> · ${a.startSession||'?'}–${a.endSession||a.sessions||'?'} جلسة (${a.sessions||''}) · 📅 ${formatPatientDate(a.date)}${a.injury?`<br>التشخيص: ${a.injury}`:''}${a.sessionType?` · ${a.sessionType}`:''}${a.price!==undefined?` · السعر: ${a.price} ج`:''}</div>`).join('')}</div></div>` : '';
+
+            // الدفعات والاستردادات (مع طريقة الدفع)
+            const payments = Array.isArray(p.paymentsHistory) ? p.paymentsHistory : [];
+            let paymentsHtml = payments.length ? `<div style="margin-top:10px;background:#f1f8f4;border:1px solid #c8e6c9;border-radius:8px;padding:10px;"><b style="color:#2e7d32;">💵 سجل الدفعات والاستردادات:</b><br>${payments.map(pay=>{
+                const r = pay.amount < 0 || pay.type === 'استرداد';
+                // طريقة الدفع
+                const isInsta = (pay.method === 'instapay') || (pay.note||'').includes('انستا') || (pay.note||'').includes('إنستا');
+                const methodTag = r ? '' : (isInsta
+                    ? '<span style="background:#6a1b9a;color:white;padding:1px 7px;border-radius:6px;font-size:0.68rem;font-weight:800;margin-right:4px;">📱 إنستاباي</span>'
+                    : '<span style="background:#2e7d32;color:white;padding:1px 7px;border-radius:6px;font-size:0.68rem;font-weight:800;margin-right:4px;">💵 كاش</span>');
+                return `<div style="background:${r?'#ffebee':'#e8f5e9'};color:${r?'#c62828':'#2e7d32'};padding:5px 10px;border-radius:8px;font-size:0.82rem;margin:4px 0 0 0;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    ${methodTag}
+                    <b>${r?'↩ استرداد '+Math.abs(pay.amount)+' ج':pay.amount+' ج'}</b>
+                    ${!r&&pay.type?`<span style="background:${String(pay.type).includes('فرق جلس')?'#fff3e0':'#e3f2fd'};color:${String(pay.type).includes('فرق جلس')?'#e65100':'#1565c0'};padding:1px 7px;border-radius:6px;font-size:.68rem;font-weight:900;">${pay.type}</span>`:''}
+                    <span style="opacity:0.75;">📅 ${pay.date||'-'}</span>
+                    ${pay.note?`<span style="width:100%;font-size:.76rem;opacity:.82;">📝 ${pay.note}</span>`:''}
+                </div>`;
+            }).join('')}</div>` : '';
+            const sessionNotes = Array.isArray(p.sessionNotesHistory) ? p.sessionNotesHistory : [];
+            const sessionNotesHtml = sessionNotes.length ? `<div style="margin-top:10px;background:#f5f0fb;border:1px solid #dfccef;border-radius:8px;padding:10px;"><b style="color:#6a1b9a;">📝 ملاحظات الجلسات:</b>${sessionNotes.slice().reverse().map(n=>`<div style="margin-top:5px;background:white;padding:6px 9px;border-radius:7px;font-size:.82rem;">جلسة ${n.session||'-'} · ${n.date||'-'} — ${n.note||''}</div>`).join('')}</div>` : '';
+
+            // الغياب
+            let absencesHtml = absences.length ? `<div style="margin-top:12px;background:#fff5f5;border:1px solid #ffcdd2;border-radius:8px;padding:10px;"><b style="color:#c62828;">🚫 سجل الغياب:</b><br>${absences.map(a=>`<span style="display:inline-block;background:#ffebee;color:#c62828;padding:3px 10px;border-radius:8px;font-size:0.82rem;margin:3px 3px 0 0;">📅 ${a.date} — ${a.reason}${a.notes?' ('+a.notes+')':''}</span>`).join('')}</div>` : '';
+
+            area.innerHTML = `
+            <div style="background:white;border-radius:18px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.1);border:1px solid #eee;">
+                <div style="background:linear-gradient(135deg,#0b132b,#1a2a5e);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="color:white;font-size:1.3rem;font-weight:900;">LIFE <span style="color:#d4af37;">SPORT</span></div>
+                        <div style="color:rgba(255,255,255,0.7);font-size:0.85rem;">كارت متابعة الجلسات</div>
+                    </div>
+                    <button onclick="printPatientCard('${type}')" style="background:#d4af37;color:#0b132b;border:none;padding:9px 18px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';"><i class="fas fa-print"></i> طباعة</button>
+                </div>
+                <div style="padding:22px;">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px;">
+                        <div><span style="color:#888;font-size:0.8rem;">👤 المريض:</span><br><b>${p.id}</b></div>
+                        <div><span style="color:#888;font-size:0.8rem;">📞 التليفون:</span><br><b>${p.phone||'-'}</b></div>
+                        <div><span style="color:#888;font-size:0.8rem;">🏥 ${type==='insu'?'الشركة':'النوع'}:</span><br><b>${type==='insu'?(p.comp||'-'):(p.mode==='course'?'كاش (كورس)':'كاش')}</b></div>
+                        ${p.injury?`<div><span style="color:#888;font-size:0.8rem;">🔬 التشخيص:</span><br><b>${p.injury}</b></div>`:''}
+                        ${p.cat?`<div><span style="color:#888;font-size:0.8rem;">📊 الفئة:</span><br><b>${p.cat}</b></div>`:''}
+                        <div><span style="color:#888;font-size:0.8rem;">🩺 نوع الجلسة:</span><br><b>${p.sessionType||p.type||'-'}</b></div>
+                        <div><span style="color:#888;font-size:0.8rem;">💰 سعر الجلسة:</span><br><b>${price} ج</b></div>
+                        ${p.approvalDate?`<div><span style="color:#888;font-size:0.8rem;">📅 تاريخ الموافقة:</span><br><b>${formatPatientDate(p.approvalDate)}</b></div>`:''}
+                        ${type==='insu'&&p.paperStatus?`<div><span style="color:#888;font-size:0.8rem;">📄 الأوراق:</span><br><b>${p.paperStatus}</b></div>`:''}
+                    </div>
+                    <div style="display:flex;gap:10px;margin-bottom:16px;">
+                        <div style="flex:1;text-align:center;background:#f7f8fa;border-radius:10px;padding:10px;"><div style="font-size:1.4rem;font-weight:900;color:#27ae60;">${att}</div><div style="font-size:0.72rem;color:#888;">حضر</div></div>
+                        <div style="flex:1;text-align:center;background:#f7f8fa;border-radius:10px;padding:10px;"><div style="font-size:1.4rem;font-weight:900;color:#e67e22;">${Math.max(0,total-att)}</div><div style="font-size:0.72rem;color:#888;">متبقي</div></div>
+                        <div style="flex:1;text-align:center;background:#f7f8fa;border-radius:10px;padding:10px;"><div style="font-size:1.4rem;font-weight:900;">${total}</div><div style="font-size:0.72rem;color:#888;">الإجمالي</div></div>
+                        <div style="flex:1;text-align:center;background:#f7f8fa;border-radius:10px;padding:10px;"><div style="font-size:1.4rem;font-weight:900;color:${debt>0?'#c0392b':'#27ae60'};">${debt>0?debt:'✓'}</div><div style="font-size:0.72rem;color:#888;">${debt>0?'المتبقي':'خالص'}</div></div>
+                    </div>
+                    <div style="font-weight:800;margin-bottom:8px;">📅 سجل الحضور:</div>
+                    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;">${boxes}</div>
+                    ${approvalsHtml}
+                    ${paymentsHtml}
+                    ${sessionNotesHtml}
+                    ${absencesHtml}
+                    ${p.notes?`<div style="margin-top:12px;background:#fffdf5;border:1px solid #ffe082;border-radius:8px;padding:10px;"><b>📝 ملاحظات:</b> ${p.notes}</div>`:''}
+                </div>
+            </div>`;
+            area.style.display = 'block';
+        }
+
+        async function printPatientCard(type) {
+            let p = type === 'insu' ? globalInsu.find(x => x.id === activeInsu) : globalCash.find(x => x.id === activeCash);
+            if (!p) return showToast("لم يتم تحديد مريض", "error");
+            await fillPatientCard(type, p);
+            document.body.classList.add('printing-card');
+            window.print();
+            setTimeout(() => document.body.classList.remove('printing-card'), 500);
+        }
+
+        async function fillPatientCard(type, p) {
+            if (!p) return;
+
+            document.getElementById('pcName').innerText = p.id||'-';
+            document.getElementById('pcPhone').innerText = p.phone||'-';
+            document.getElementById('pcDoc').innerText = p.refDoctor||'-';
+            document.getElementById('pcComp').innerText = (type==='insu'?p.comp:(p.mode==='course'?'كاش - كورس':'كاش - جلسات'))||'-';
+            document.getElementById('pcCat').innerText = p.cat||'-';
+            document.getElementById('pcInj').innerText = (type==='insu'?p.injury:p.notes)||'-';
+            // سعر الجلسة الثابت
+            let sessPrice = type==='insu' ? (p.price||0) : (p.mode==='course' ? (p.cost||0) : (p.sessPrice||0));
+            document.getElementById('pcPrice').innerText = sessPrice ? sessPrice + ' ج.م' : '-';
+            // موقف الجلسات
+            document.getElementById('pcSessions').innerText = `حضر ${p.attended||0} من ${p.totalSess||0} جلسة`;
+            let debt = type==='insu'?(p.copayTotal||0)-(p.copayPaid||0):(p.mode==='course'?(p.cost||0)-(p.paid||0):p.sessPrice||0);
+
+            // مسح كل خانات التواريخ أولاً
+            for (let i = 1; i <= 24; i++) {
+                let cell = document.getElementById(`sd${i}`);
+                if (cell) cell.innerText = '';
+            }
+
+            // جلب تواريخ الجلسات من daily_ledger مرتبة بالوقت
+            let sessionDates = [];
+            try {
+                // جرب مع الترتيب الأول
+                let snap;
+                try {
+                    snap = await db.collection("daily_ledger")
+                        .where("patientName","==",p.id)
+                        .orderBy("timestamp","asc")
+                        .get();
+                } catch(orderErr) {
+                    // لو الترتيب فشل (مفيش index)، جيب من غير ترتيب
+                    snap = await db.collection("daily_ledger")
+                        .where("patientName","==",p.id)
+                        .get();
+                }
+                let rows = [];
+                snap.forEach(doc => {
+                    let d = doc.data();
+                    let t = d.type || '';
+                    // استثني الدفعات والاستردادات (مش جلسات)
+                    if (d.isPaymentOnly || d.isRefund) return;
+                    let isMatch = type==='insu' ? (t.includes('تحمل')||t.includes('تأمين')) : t.includes('كاش');
+                    if (isMatch && d.date) rows.push({ date: d.date, ts: d.timestamp ? d.timestamp.seconds || 0 : 0 });
+                });
+                // رتّب بالتاريخ يدوياً
+                rows.sort((a,b) => {
+                    if (a.ts && b.ts) return a.ts - b.ts;
+                    return new Date(a.date.split('/').reverse().join('-')) - new Date(b.date.split('/').reverse().join('-'));
+                });
+                sessionDates = rows.map(r => r.date);
+            } catch(e) { console.warn('session dates error:', e); }
+
+            // كتابة التواريخ في خانات الجدول (24 جلسة بس)
+            sessionDates.slice(0, 24).forEach((d, i) => {
+                let cell = document.getElementById(`sd${i+1}`);
+                if (cell) cell.innerText = d;
+            });
+
+            // الملاحظات: الحالة المالية + سجل الدفعات + سجل الموافقات
+            let notesHtml = '';
+            // الحالة المالية
+            notesHtml += `<div style="margin-bottom:8px;"><b>إجمالي الجلسات:</b> ${p.totalSess||0} &nbsp;|&nbsp; <b>حضر:</b> ${p.attended||0} &nbsp;|&nbsp; `;
+            notesHtml += debt > 0 ? `<span style="color:#c0392b;"><b>متبقي:</b> ${debt} ج.م</span>` : `<span style="color:#27ae60;"><b>خالص ✓</b></span>`;
+            notesHtml += `</div>`;
+
+            // سجل الموافقات
+            const approvals = Array.isArray(p.approvalsHistory) ? p.approvalsHistory : (p.approvalDate ? [{date:p.approvalDate, sessions:p.totalSess}] : []);
+            if (approvals.length) {
+                notesHtml += `<div style="margin-bottom:6px;"><b>📋 الموافقات:</b> `;
+                notesHtml += approvals.map((a,i) => {
+                    const details = [a.injury, a.sessionType, a.price !== undefined ? `السعر ${a.price} ج` : ''].filter(Boolean).join(' · ');
+                    return `${i===0?'موافقة':'تجديد'} ${a.startSession||'?'}–${a.endSession||a.sessions||'?'} جلسة (${formatPatientDate(a.date)})${details ? ` — ${details}` : ''}`;
+                }).join(' • ');
+                notesHtml += `</div>`;
+            }
+
+            // سجل الدفعات
+            const payments = Array.isArray(p.paymentsHistory) ? p.paymentsHistory : [];
+            if (payments.length) {
+                notesHtml += `<div style="margin-bottom:4px;"><b>💵 الدفعات والاستردادات:</b></div>`;
+                notesHtml += `<div style="display:flex;flex-wrap:wrap;gap:6px;">`;
+                payments.forEach(pay => {
+                    const isRef = pay.amount < 0 || pay.type === 'استرداد';
+                    if (isRef) {
+                        notesHtml += `<span style="background:#ffebee;color:#c62828;padding:2px 10px;border-radius:10px;font-size:0.85rem;">↩ استرداد ${Math.abs(pay.amount)} ج — ${pay.date||'-'}</span>`;
+                    } else {
+                        notesHtml += `<span style="background:#e8f5e9;color:#2e7d32;padding:2px 10px;border-radius:10px;font-size:0.85rem;">${pay.amount} ج — ${pay.date||'-'}</span>`;
+                    }
+                });
+                notesHtml += `</div>`;
+            }
+
+            // حالة الأوراق
+            if (type==='insu' && p.paperStatus) notesHtml += `<div style="margin-top:8px;"><b>الأوراق:</b> ${p.paperStatus}</div>`;
+            // ملاحظات الملف
+            if (p.notes) notesHtml += `<div style="margin-top:8px;color:#555;"><b>ملاحظات:</b> ${p.notes}</div>`;
+
+            document.getElementById('pcNotes').innerHTML = notesHtml;
+        }
+
+        let currentRenewType = '';
+        function openRenewModal(type) {
+            currentRenewType = type; document.getElementById('renewForm').reset();
+            let p = type==='insu'?globalInsu.find(x=>x.id===activeInsu):globalCash.find(x=>x.id===activeCash);
+            if (type==='cash') {
+                document.getElementById('renewModalTitle').innerHTML='<i class="fas fa-sync-alt" style="color:#2196f3;"></i> تجديد كورس';
+                document.getElementById('rnwDocsLabel').innerText='روشتة الكورس الجديد (اختياري)';
+                document.getElementById('rnwPaperBoxContainer').classList.add('hidden');
+                document.getElementById('rnwCostGroup').style.display=showCashPrices?'flex':'none';
+                document.getElementById('rnwPaidGroup').style.display=showCashPrices?'flex':'none';
+            } else {
+                document.getElementById('renewModalTitle').innerHTML='<i class="fas fa-sync-alt" style="color:#2196f3;"></i> تجديد موافقة';
+                document.getElementById('rnwDocsLabel').innerText='الموافقة / الروشتة الجديدة (إلزامي)';
+                document.getElementById('rnwPaperBoxContainer').classList.remove('hidden');
+                document.getElementById('rnwCostGroup').style.display='flex';
+                document.getElementById('rnwPaidGroup').style.display='flex';
+            }
+            if (p) {
+                document.getElementById('rnwInjury').value=p.injury||p.notes||'';
+                document.getElementById('rnwCat').value=p.cat||'A';
+                document.getElementById('rnwSessionType').value=p.sessionType||p.type||'علاج طبيعي عادي';
+                // سعر الجلسة الثابت
+                if (document.getElementById('rnwPrice')) {
+                    document.getElementById('rnwPrice').value = p.price || p.sessPrice || 0;
+                }
+                // تاريخ الموافقة الحالي
+                if (document.getElementById('rnwApprovalDate')) {
+                    document.getElementById('rnwApprovalDate').value = new Date().toISOString().split('T')[0];
+                }
+            }
+            document.getElementById('renewModalOverlay').classList.add('active');
+        }
+
+        function closeRenewModal(e) { if (!e||e.target===document.getElementById('renewModalOverlay')) document.getElementById('renewModalOverlay').classList.remove('active'); }
+
+        async function submitRenewal(e) {
+            e.preventDefault();
+            let btn = document.getElementById('btnSaveRenew'); btn.disabled=true; btn.innerHTML='جاري التحديث...';
+            try {
+                let exInjury=document.getElementById('rnwInjury').value, exCat=document.getElementById('rnwCat').value, exSessionType=document.getElementById('rnwSessionType').value;
+                let exSess=parseInt(document.getElementById('rnwSess').value)||0, exCost=parseFloat(document.getElementById('rnwCost').value)||0, exPaid=parseFloat(document.getElementById('rnwPaid').value)||0;
+                let payMethod=document.getElementById('rnwPayMethod').value, newDocs=await processFiles('rnwDocs');
+                const rnwApprovalDate = document.getElementById('rnwApprovalDate') ? document.getElementById('rnwApprovalDate').value : '';
+                const rnwPriceVal = document.getElementById('rnwPrice') ? (parseFloat(document.getElementById('rnwPrice').value)||0) : 0;
+                if (currentRenewType==='insu') {
+                    let pStatus=document.querySelector('input[name="rnwPaperStatus"]:checked').value, pNotes=document.getElementById('rnwPaperNotes').value;
+                    let p=globalInsu.find(x=>x.id===activeInsu);
+                    // سجل الموافقات: ضيف الموافقة الجديدة
+                    let approvalsHist = Array.isArray(p.approvalsHistory) ? [...p.approvalsHistory] : (p.approvalDate ? [{date:p.approvalDate, sessions:p.totalSess}] : []);
+                    const useApprovalDate = rnwApprovalDate || new Date().toISOString().split('T')[0];
+                    approvalsHist.push({
+                        date: useApprovalDate, sessions: exSess,
+                        startSession: (parseInt(p.totalSess)||0) + 1,
+                        endSession: (parseInt(p.totalSess)||0) + exSess,
+                        injury: exInjury, sessionType: exSessionType, price: rnwPriceVal || p.price || p.sessPrice || 0
+                    });
+                    let updObj = { injury:exInjury,cat:exCat,type:exSessionType,totalSess:(p.totalSess||0)+exSess,copayTotal:(p.copayTotal||0)+exCost,copayPaid:(p.copayPaid||0)+exPaid,docs:(p.docs||[]).concat(newDocs),paperStatus:pStatus==='ناقص'?"ناقص: "+pNotes:"مكتمل",approvalDate:useApprovalDate,approvalsHistory:approvalsHist,adminBypass:false,isClosed:false,isRenewed:true,renewalDate:firebase.firestore.FieldValue.serverTimestamp() };
+                    if (exPaid > 0) {
+                        const paymentHistory = Array.isArray(p.paymentsHistory) ? [...p.paymentsHistory] : [];
+                        paymentHistory.push({ amount:exPaid, date:new Date().toISOString().split('T')[0], type:'تجديد موافقة', method:payMethod, note:`تجديد موافقة: ${exInjury}` });
+                        updObj.paymentsHistory = paymentHistory;
+                    }
+                    if (rnwPriceVal > 0) { updObj.price = rnwPriceVal; updObj.sessPrice = rnwPriceVal; }
+                    await db.collection('patients_insu').doc(p.id).update(updObj);
+                    if (exPaid > 0) {
+                        const renewalNote = `تجديد موافقة — ${p.comp || 'شركة تأمين'} | ${exInjury} | ${exSessionType} | ${exSess} جلسة | سعر الجلسة ${rnwPriceVal || p.price || p.sessPrice || 0} ج`;
+                        await sendToLedger(p.id,exPaid,'تأمين (تجديد)',payMethod,renewalNote,{isPaymentOnly:true,paymentType:'تجديد موافقة'});
+                    }
+                } else {
+                    let p=globalCash.find(x=>x.id===activeCash);
+                    let finalCost=showCashPrices?exCost:0, finalPaid=showCashPrices?exPaid:0;
+                    let updObjC = { notes:exInjury,cat:exCat,sessionType:exSessionType,totalSess:(p.totalSess||0)+exSess,cost:(p.cost||0)+finalCost,paid:(p.paid||0)+finalPaid,docs:(p.docs||[]).concat(newDocs),adminBypass:false,isClosed:false,isRenewed:true,renewalDate:firebase.firestore.FieldValue.serverTimestamp() };
+                    if (finalPaid > 0) {
+                        const paymentHistory = Array.isArray(p.paymentsHistory) ? [...p.paymentsHistory] : [];
+                        paymentHistory.push({ amount:finalPaid, date:new Date().toISOString().split('T')[0], type:'تجديد كورس', method:payMethod, note:`فتح كورس جديد: ${exInjury}` });
+                        updObjC.paymentsHistory = paymentHistory;
+                    }
+                    if (rnwPriceVal > 0) { updObjC.price = rnwPriceVal; updObjC.sessPrice = rnwPriceVal; }
+                    await db.collection('patients_cash').doc(p.id).update(updObjC);
+                    if (finalPaid > 0) {
+                        const renewalNote = `تجديد كورس: ${exInjury} | ${exSessionType} | ${exSess} جلسة | السعر ${rnwPriceVal || p.price || p.sessPrice || 0} ج`;
+                        await sendToLedger(p.id,finalPaid,'كاش (فتح كورس جديد)',payMethod,renewalNote,{isPaymentOnly:true,paymentType:'تجديد كورس'});
+                    }
+                }
+                showToast('تم التحديث بنجاح!'); document.getElementById('renewModalOverlay').classList.remove('active');
+            } catch(err) { showToast('خطأ!', 'error'); }
+            finally { btn.disabled=false; btn.innerHTML='تأكيد وتحديث الملف'; }
+        }
+
+        let _savingNewPatientFile = false;
+        document.getElementById('formInsuNew').onsubmit = async function(e) {
+            e.preventDefault(); if(_savingNewPatientFile) return; _savingNewPatientFile=true; let name = document.getElementById('iName').value.trim();
+            try {
+                let pStatus=document.querySelector('input[name="iPaperStatus"]:checked').value, docsArr=await processFiles('iDocs');
+                let paidAdv=parseFloat(document.getElementById('iCopayPaid').value)||0, payMethod=document.getElementById('iPayMethod').value, notes=document.getElementById('iNotes').value;
+                let pastSess=parseInt(document.getElementById('iPastSessions').value)||0;
+                const approvalDate = document.getElementById('iApprovalDate').value || new Date().toISOString().split('T')[0];
+                const iService = document.getElementById('iServiceType').value;
+                const iServiceDoctor = document.getElementById('iServiceDoctor').value.trim();
+                const isSimpleService = ['تغذية','ريكفري'].includes(iService);
+                if (isSimpleService) { paidAdv=parseFloat(document.getElementById('iSimplePaid').value)||0; payMethod=document.getElementById('iSimplePayMethod').value; notes=document.getElementById('iSimpleNotes').value.trim(); }
+                const totalS = isSimpleService ? 0 : (parseInt(document.getElementById('iTotalSessions').value)||0);
+                const isInsuExam = document.getElementById('iIsExam').value === '1';
+                await db.collection("patients_insu").doc(name).set({ phone:document.getElementById('iPhone').value, comp:document.getElementById('iCompany').value, refDoctor:document.getElementById('iRefDoctor').value||"", serviceType:iService, serviceDoctor:iServiceDoctor, price:parseFloat(document.getElementById('iPrice').value), totalSess:totalS, injury:document.getElementById('iInjury').value, cat:document.getElementById('iCat').value, type:isInsuExam?'كشف':document.getElementById('iSessionType').value, paperStatus:pStatus==='ناقص'?"ناقص: "+document.getElementById('iPaperNotes').value:"مكتمل", notes:notes, copayTotal:parseFloat(document.getElementById('iCopayTotal').value), copayPaid:paidAdv, paymentsHistory:isSimpleService&&paidAdv>0?[{amount:paidAdv,date:new Date().toISOString().split('T')[0],type:iService,method:payMethod,note:notes||`خدمة ${iService}`}]:[], attended:pastSess, branch:userBranch, docs:docsArr, approvalDate:approvalDate, approvalsHistory:[{date:approvalDate, sessions:totalS, startSession:1, endSession:totalS, injury:document.getElementById('iInjury').value, sessionType:isInsuExam?'كشف':document.getElementById('iSessionType').value, price:parseFloat(document.getElementById('iPrice').value)||0}], adminBypass:false, isClosed:false, createdAt:firebase.firestore.FieldValue.serverTimestamp() });
+                if (paidAdv > 0) await sendToLedger(name, paidAdv, `تحمل — ${iService}`, payMethod, notes || `خدمة ${iService}${iServiceDoctor ? ' | د. '+iServiceDoctor : ''}`);
+                else if (isSimpleService) await sendToLedger(name, 0, `${iService} — تأمين`, document.getElementById('iSimplePayMethod').value, document.getElementById('iSimpleNotes').value.trim() || `خدمة ${iService}${iServiceDoctor ? ' | د. '+iServiceDoctor : ''}`);
+                if (isInsuExam) await db.collection("daily_ledger").add({ patientName:name, amount:0, type:'كشف تأمين', method:'cash', isExam:true, date:getLedgerFormattedDate(), branch:userBranch, notes:'كشف أول مرة بدون رسوم', timestamp:firebase.firestore.FieldValue.serverTimestamp() });
+                showToast('تم التسجيل!'); document.getElementById('formInsuNew').reset(); document.getElementById('iIsExam').value='0'; document.getElementById('btnInsuNewExam').innerHTML='<i class="fas fa-stethoscope"></i> كشف أول مرة (بدون رسوم)'; document.getElementById('btnInsuNewExam').style.background='#f0f9ff'; showInsuTab('follow');
+            } catch(e) { showToast('خطأ!', 'error'); } finally { _savingNewPatientFile=false; }
+        };
+
+        document.getElementById('formCashNew').onsubmit = async function(e) {
+            e.preventDefault(); if(_savingNewPatientFile) return; _savingNewPatientFile=true; let name = document.getElementById('cName').value.trim();
+            try {
+                let mode=document.getElementById('cMode').value, docsArr=await processFiles('cDocs');
+                let pastSess=parseInt(document.getElementById('cPastSessions').value)||0;
+                const cService=document.getElementById('cServiceType').value, cServiceDoctor=document.getElementById('cServiceDoctor').value.trim();
+                let data = { phone:document.getElementById('cPhone').value, refDoctor:document.getElementById('cRefDoctor').value||"", serviceType:cService, serviceDoctor:cServiceDoctor, cat:document.getElementById('cCat').value, sessionType:document.getElementById('cSessionType').value, mode:mode, notes:document.getElementById('cNotes').value, attended:pastSess, branch:userBranch, docs:docsArr, adminBypass:false, isClosed:false, createdAt:firebase.firestore.FieldValue.serverTimestamp() };
+                let paidAdv=0, payMethod='cash';
+                if (['تغذية','ريكفري'].includes(cService)) { paidAdv=parseFloat(document.getElementById('cSimplePaid').value)||0; payMethod=document.getElementById('cSimplePayMethod').value; data.paid=paidAdv; data.notes=document.getElementById('cSimpleNotes').value.trim(); if(paidAdv>0)data.paymentsHistory=[{amount:paidAdv,date:new Date().toISOString().split('T')[0],type:cService,method:payMethod,note:data.notes||`خدمة ${cService}`}]; }
+                if (mode==='course') { data.totalSess=parseInt(document.getElementById('cTotalSessions').value)||0; if(showCashPrices){data.cost=parseFloat(document.getElementById('cTotalCost').value)||0;data.paid=parseFloat(document.getElementById('cPaidCourse').value)||0;paidAdv=data.paid;payMethod=document.getElementById('cNewPayMethod').value; if(data.paid>0) data.paymentsHistory=[{amount:data.paid, date:new Date().toISOString().split('T')[0], type:'كورس', note:'مقدم الكورس'}];}else{data.cost=0;data.paid=0;} }
+                else {
+                    data.sessPrice = showCashPrices ? (parseFloat(document.getElementById('cSessionPrice').value)||0) : 0;
+                    // المدفوع الآن في وضع بالجلسة
+                    if (showCashPrices) {
+                        const paidNow = parseFloat(document.getElementById('cPaidNow').value) || 0;
+                        if (paidNow > 0) {
+                            data.paid = paidNow;
+                            paidAdv = paidNow;
+                            payMethod = document.getElementById('cSessionPayMethod').value;
+                            data.paymentsHistory = [{ amount:paidNow, date:new Date().toISOString().split('T')[0], type:'كاش', note:'مقدم عند التسجيل' }];
+                        }
+                    }
+                }
+                await db.collection("patients_cash").doc(name).set(data);
+                if (paidAdv > 0) await sendToLedger(name, paidAdv, `كاش — ${cService}`, payMethod, data.notes || `خدمة ${cService}${cServiceDoctor ? ' | د. '+cServiceDoctor : ''}`);
+                else if (['تغذية','ريكفري'].includes(cService)) await sendToLedger(name, 0, `${cService} — كاش`, document.getElementById('cSimplePayMethod').value, document.getElementById('cSimpleNotes').value.trim() || `خدمة ${cService}${cServiceDoctor ? ' | د. '+cServiceDoctor : ''}`);
+                // كشف أول مرة لو فيه مبلغ
+                const cExamAmt = parseFloat(document.getElementById('cExamAmount').value)||0;
+                if (cExamAmt > 0) {
+                    const cExamMeth = document.getElementById('cExamMethod').value;
+                    await db.collection("daily_ledger").add({ patientName:name, amount:cExamAmt, type:'كشف كاش', method:cExamMeth, isExam:true, date:getLedgerFormattedDate(), branch:userBranch, notes:'كشف أول مرة', timestamp:firebase.firestore.FieldValue.serverTimestamp() });
+                }
+                showToast('تم التسجيل!'); document.getElementById('formCashNew').reset(); showCashTab('follow');
+            } catch(e) { showToast('خطأ!', 'error'); } finally { _savingNewPatientFile=false; }
+        };
+        // ===== ملخص اليوم واتساب (للاستقبال) =====
+        async function sendReceptionWhatsApp() {
+            // ===== زر التحميل =====
+            const btn = document.querySelector('button[onclick="sendReceptionWhatsApp()"]');
+            const origHTML = btn ? btn.innerHTML : '';
+            if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...'; btn.disabled = true; }
+
+            const branch   = (typeof currentAdminBranch !== 'undefined' && currentAdminBranch) ? currentAdminBranch : userBranch;
+            const todayDMY = getLedgerFormattedDate();                     // dd/mm/yyyy
+            const selectedISO = document.getElementById('displayDate')?.value || new Date().toISOString().split('T')[0];
+            const dateObj  = new Date(selectedISO + 'T00:00:00');
+            const dayName  = dateObj.toLocaleDateString('ar-EG', { weekday: 'long' });
+            const TIMEOUT  = 6000; // مهلة 6 ثواني للكل
+
+            // ===== مساعد timeout =====
+            const withTO = (p) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('timeout')), TIMEOUT))]);
+
+            let cash=0, insta=0, copay=0;
+            let expenses=0, instaExpense=0, insuComp=0;
+            let cashRatioEnabled=false, cashRatioValue=20;
+            let A=0, B=0, C=0, manual=0, surgery=0, normal=0, examCount=0, examTotal=0;
+            let expList=[], absList=[];
+            const processedNames = new Set();
+            const caseNames = new Set();
+            const firstTimeNames = new Set();
+            let ledgerRows = [], transactionRows = [], reportRows = [];
+
+            try {
+                // بعض السجلات القديمة محفوظة dd/mm/yyyy والجديدة قد تكون yyyy-mm-dd.
+                // نجلب الصيغتين ونزيل التكرار لضمان ظهور كل بيانات اليوم.
+                const getDayRecords = async (collection, limit) => {
+                    const dates = [...new Set([todayDMY, selectedISO])];
+                    const results = await Promise.allSettled(dates.map(date => withTO(
+                        db.collection(collection).where('date', '==', date).limit(limit).get()
+                    )));
+                    const unique = new Map();
+                    results.forEach(result => {
+                        if (result.status === 'fulfilled') result.value.forEach(doc => unique.set(doc.id, doc));
+                    });
+                    return [...unique.values()];
+                };
+
+                const resultRows = await Promise.all([
+                    getDayRecords('daily_ledger', 500),
+                    getDayRecords('daily_transactions', 300),
+                    getDayRecords('follow_up_reports', 300),
+                    withTO(db.collection('settings').doc('system_settings').get())
+                ]);
+                [ledgerRows, transactionRows, reportRows] = resultRows;
+                const settingsDoc = resultRows[3];
+                if (settingsDoc && settingsDoc.exists) {
+                    cashRatioEnabled = settingsDoc.data().cashRatioEnabled === true;
+                    cashRatioValue = parseFloat(settingsDoc.data().cashRatio || 20);
+                }
+
+                // ===== معالجة الحركات =====
+                ledgerRows.forEach(doc => {
+                        const e = doc.data();
+                        if (branch && (e.branch||'') !== branch) return;
+                        const amt = parseFloat(e.amount||0);
+                        const isInsta = e.method === 'instapay';
+                        const t = e.type||'';
+                        const isInsu = t.includes('تحمل')||t.includes('تأمين');
+                        const isPaymentOnly = e.isPaymentOnly === true || e.isPaymentOnly === 'true' || t.includes('فرق جلسة') || t.includes('فرق جلسه');
+                        const isRefund = e.isRefund === true || e.isRefund === 'true' || amt < 0;
+                        const pName = (e.patientName||'').trim();
+                        if (e.isCompanyAddition === true) { insuComp += amt; return; }
+                        const isExam = e.isExam === true || t === 'كشف';
+                        if (isExam) { examCount++; examTotal += amt; }
+                        // يشمل الجلسات والكشوفات المجانية، ويستبعد الدفعات/الاسترجاعات فقط.
+                        if (pName && !isPaymentOnly && !isRefund) caseNames.add(pName);
+                        // كل مبلغ له خانة واحدة فقط: إنستاباي أو تحمل أو كاش، بلا تكرار.
+                        if (isInsta) insta += amt;
+                        else if (isInsu) copay += amt;
+                        else cash += amt;
+                        if (pName && !isPaymentOnly && !isRefund && !processedNames.has(pName)) {
+                            processedNames.add(pName);
+                            const p = (isInsu ? globalInsu : globalCash).find(x=>x.id===pName) || {};
+                            if (isInsu && p.price) insuComp += parseFloat(p.price||0);
+                            if (p.cat==='A') A++; else if (p.cat==='B') B++; else if (p.cat==='C') C++;
+                            const st = String(p.type||p.sessionType||'');
+                            if (st.includes('يدوي')) manual++;
+                            else if (st.includes('تأهيل')||st.includes('عملية')||st.includes('تصادمي')) surgery++;
+                            else normal++;
+                            if (parseInt(p.attended||0)===1) firstTimeNames.add(pName);
+                        }
+                    });
+
+                // ===== معالجة المصروفات =====
+                transactionRows.forEach(doc => {
+                        const e = doc.data();
+                        if (branch && (e.branch||'') !== branch) return;
+                        if (e.isTransfer) {
+                            const transferAmount = parseFloat(e.amount||0);
+                            if (e.transferDirection === 'instapay_to_cash') { cash += transferAmount; insta -= transferAmount; }
+                            else { cash -= transferAmount; insta += transferAmount; }
+                        } else if (e.type === 'instapay') {
+                            instaExpense += parseFloat(e.amount||0);
+                            expList.push({r:e.reason||'مصروف إنستاباي', a:parseFloat(e.amount||0), insta:true});
+                        } else if (!e.isRefund) {
+                            expenses += parseFloat(e.amount||0);
+                            expList.push({r:e.reason||'مصروف', a:parseFloat(e.amount||0), insta:false});
+                        }
+                    });
+
+                // ===== معالجة الغياب =====
+                reportRows.forEach(doc => {
+                        const r = doc.data();
+                        if (branch && (r.branch||'') !== branch) return;
+                        absList.push({ n: r.patientName||'-', reason: r.reason||'-', notes: r.notes||'' });
+                    });
+            } catch(e) { console.warn('WhatsApp summary error:', e); }
+
+            // ===== إعادة الزر =====
+            if (btn) { btn.innerHTML = origHTML; btn.disabled = false; }
+
+            // التحويلات الداخلية حُركت بالفعل بين الرصيدين أعلاه ولا تدخل كإيراد أو مصروف.
+            const rawCash     = Math.max(0, cash);
+            const netCash     = cashRatioEnabled ? Math.round(rawCash * cashRatioValue / 100) : rawCash;
+            const totalInsta  = Math.max(0, insta);
+            const expCashOnly = expenses;                          // مصروفات الكاش فقط
+            const netCashCopay   = netCash + copay - expCashOnly; // كاش + تحمل - مصروفات الكاش
+            const netAllRevenue  = netCash + copay + totalInsta - (expenses + instaExpense); // الإجمالي الكلي
+
+            const D = '━━━━━━━━━━━━━━━━━━━━';
+            const d = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
+            const totalCases = caseNames.size;
+
+            let msg = `\n`;
+            msg += `╭${D}╮\n`;
+            msg += `│  🏥 *LIFE SPORT*  │\n`;
+            msg += `│  *التقرير اليومي الشامل*  │\n`;
+            msg += `╰${D}╯\n\n`;
+            msg += `🌟 *أهلاً د. قاسم وشركاه،*\n`;
+            msg += `_نتمنى لكم يومًا موفقًا ومليئًا بالنجاح والعطاء._ 🤍\n\n`;
+            msg += `📍 *الفرع:* ${branch}\n`;
+            msg += `📅 *التاريخ:* ${dayName} — ${todayDMY}\n`;
+            msg += `\n`;
+
+            // ====== الحالات ======
+            msg += `👥 *الحالات*\n`;
+            msg += `${d}\n`;
+            msg += `📊 *إجمالي الحالات:* ${totalCases}\n`;
+            msg += `⭐ *حالات أول مرة:* ${firstTimeNames.size}\n`;
+            if (examCount > 0) msg += `🩺 *كشوفات:* ${examCount} كشف — ${examTotal.toLocaleString()} ج.م\n`;
+            const serviceRows = ledgerRows.map(d=>d.data()).filter(e => {
+                const t=String(e.type||'');
+                return (!branch || (e.branch||'')===branch) && (t.includes('تغذية') || t.includes('ريكفري'));
+            });
+            if (serviceRows.length) {
+                msg += `🥗 *التغذية والريكفري:* ${serviceRows.length} حالة\n`;
+                serviceRows.forEach(e => { msg += `   ├ *${e.patientName||'-'}* — ${e.type||''}${e.notes ? ' ('+e.notes+')' : ''}\n`; });
+            }
+            msg += `\n`;
+
+            // ====== الإيرادات ======
+            msg += `💰 *الإيرادات*\n`;
+            msg += `${d}\n`;
+            msg += `💵 *الكاش:* ${netCash.toLocaleString()} ج.م\n`;
+            msg += `📱 *الإنستاباي:* ${totalInsta > 0 ? totalInsta.toLocaleString() + ' ج.م' : 'لا يوجد'}\n`;
+            msg += `🏥 *التحمل (تأمين):* ${copay.toLocaleString()} ج.م\n`;
+            msg += `📋 *مطالبات شركات التأمين:* ${insuComp.toLocaleString()} ج.م\n`;
+            msg += `\n`;
+
+            // ====== المصروفات ======
+            msg += `💸 *المصروفات*\n`;
+            msg += `${d}\n`;
+            const cashExpList  = expList.filter(x => !x.insta);
+            const instaExpList = expList.filter(x => x.insta);
+            msg += `🔴 *مصروفات الكاش:* ${expCashOnly > 0 ? expCashOnly.toLocaleString() + ' ج.م' : 'لا يوجد'}\n`;
+            if (cashExpList.length) cashExpList.forEach(x => { msg += `   ├ ${x.r}: *${x.a.toLocaleString()} ج.م*\n`; });
+            msg += `\n`;
+            if (instaExpense > 0) {
+                msg += `🟣 *مصروفات الإنستاباي:* ${instaExpense.toLocaleString()} ج.م\n`;
+                if (instaExpList.length) instaExpList.forEach(x => { msg += `   ├ ${x.r}: *${x.a.toLocaleString()} ج.م*\n`; });
+                msg += `\n`;
+            }
+
+            // ====== الغياب ======
+            if (absList.length > 0) {
+                msg += `🚫 *الغياب اليوم:* ${absList.length} حالة\n`;
+                msg += `${d}\n`;
+                absList.forEach(a => { msg += `   ├ *${a.n}* — ${a.reason}${a.notes ? ' (' + a.notes + ')' : ''}\n`; });
+                msg += `\n`;
+            } else {
+                msg += `✅ *الغياب:* لا يوجد غياب اليوم 🎉\n\n`;
+            }
+
+            // ====== الفئات وأنواع الجلسات ======
+            msg += `📊 *الفئات:*\n`;
+            msg += `${d}\n`;
+            msg += `   🅰️ فئة A: *${A}*  |  🅱️ فئة B: *${B}*  |  🇨 فئة C: *${C}*\n\n`;
+            msg += `🩺 *أنواع الجلسات:*\n`;
+            msg += `${d}\n`;
+            msg += `   ✋ يدوي: *${manual}*  |  🦴 تأهيل بعد عملية: *${surgery}*  |  ⚡ علاج عادي: *${normal}*\n\n`;
+
+            // ====== الإجماليات النهائية ======
+            msg += `${D}\n`;
+            msg += `🧾 *الإجماليات النهائية*\n`;
+            msg += `${D}\n`;
+            msg += `💼 كاش + تحمل − مصروفات الكاش:\n`;
+            msg += `   ✅ *${netCashCopay.toLocaleString()} ج.م*\n\n`;
+            msg += `🏆 الإجمالي الكلي (كاش+تحمل+إنستاباي−مصروفات):\n`;
+            msg += `   ✅ *${netAllRevenue.toLocaleString()} ج.م*\n`;
+            msg += `${D}\n`;
+
+            // ====== ختام ======
+            msg += `📊 _نتمنى أن يساهم هذا الملخص في متابعة الأداء واتخاذ أفضل القرارات._\n`;
+            msg += `_مع أطيب تمنياتنا بيوم ناجح._\n`;
+            msg += `🌿 _نظام لايف سبورت للعلاج الطبيعي_\n`;
+            msg += `_تم إعداد التقرير تلقائياً_ 🤍`;
+
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+        window.sendReceptionWhatsApp = sendReceptionWhatsApp;
+    </script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+
+
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - أطباء العظام VIP</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="premium.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background-color: #f4f7f6; display: flex; overflow-x: hidden; color: #1c1e21; }
+
+        .header { background: linear-gradient(135deg,#0b132b,#16233f); height: 75px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; border-bottom: 3px solid #d4af37; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+        .header-logo { display: flex; align-items: center; gap: 15px; }
+        .header-logo img { height: 45px; }
+        .header-title { color: white; font-size: 1.35rem; font-weight: 800; }
+        .header-title span { color: #d4af37; }
+
+        .sidebar { background: linear-gradient(180deg,#1a1f36,#0e1322); width: 260px; height: 100vh; position: fixed; top: 75px; right: 0; padding-top: 30px; box-shadow: -2px 0 10px rgba(0,0,0,0.05); z-index: 900;}
+        .sidebar a { display: flex; align-items: center; gap:12px; color: #a3aed1; text-decoration: none; padding: 16px 25px; transition: 0.3s; font-size: 1.05rem; border-right: 4px solid transparent; margin-bottom: 8px; font-weight: 500;}
+        .sidebar a:hover, .sidebar a.active { color: #d4af37; background-color: rgba(212,175,55,0.08); border-right: 4px solid #d4af37; font-weight: 700; }
+
+        .main-content { margin-right: 260px; margin-top: 75px; padding: 40px; width: 100%; }
+
+        .top-bar { background: linear-gradient(135deg,#0b132b,#16233f); padding: 28px; border-radius: 18px; box-shadow: 0 10px 30px rgba(11,19,43,0.2); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:18px;}
+        .top-bar h1 { color: white; font-size: 1.5rem; display: flex; align-items: center; gap: 12px;}
+        .top-bar h1 i { color:#d4af37; }
+        .filters-row { display:flex; gap:14px; flex-wrap:wrap; }
+        .month-filter { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; border: 2px solid #d4af37; }
+        .month-filter label { font-weight: bold; color: #d4af37; font-size: 0.95rem;}
+        .month-filter input, .month-filter select { border: none; background: transparent; font-weight: bold; font-size: 1rem; color: white; outline: none; font-family: 'Tajawal'; cursor: pointer;}
+        .month-filter select option { color: #0b132b; }
+
+        /* شريط الفرع المختار */
+        .branch-banner { color: white; padding: 16px 24px; border-radius: 14px; margin-bottom: 25px; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+
+        /* ملخص علوي */
+        .summary-row { display:grid; grid-template-columns: repeat(3,1fr); gap:18px; margin-bottom:28px; }
+        .sum-box { padding:22px; border-radius:16px; color:white; position:relative; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.1); }
+        .sum-box i { position:absolute; left:18px; bottom:12px; font-size:3.2rem; opacity:0.15; }
+        .sum-box h4 { font-size:0.92rem; margin-bottom:8px; font-weight:700; }
+        .sum-box .n { font-size:2rem; font-weight:900; }
+        .sb-docs { background: linear-gradient(135deg,#0b132b,#1a2a5e); border:1px solid #d4af37; }
+        .sb-cases { background: linear-gradient(135deg,#2980b9,#1c3d5a); }
+        .sb-rev { background: linear-gradient(135deg,#27ae60,#1e8449); }
+
+        .doctors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 25px; }
+
+        .doc-card { background: white; border-radius: 16px; padding: 25px; border: 1px solid #eaeaea; border-top: 5px solid #0b132b; box-shadow: 0 5px 18px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; position: relative;}
+        .doc-card:hover { transform: translateY(-6px); box-shadow: 0 18px 38px rgba(0,0,0,0.12); border-top-color: #d4af37;}
+        .doc-rank { position:absolute; top:-12px; right:20px; width:38px; height:38px; background:linear-gradient(135deg,#d4af37,#c0982a); color:#0b132b; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem; box-shadow:0 4px 12px rgba(212,175,55,0.4); }
+        .doc-name { font-size: 1.35rem; font-weight: 800; color: #0b132b; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .doc-name i { color: #d4af37; font-size: 1.7rem;}
+        .doc-stat { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #f0f2f5; font-size: 0.98rem; font-weight: bold; color: #555;}
+        .doc-stat strong { color: #0b132b; font-size: 1.1rem;}
+        .doc-stat.today strong { color:#e67e22; }
+        .doc-stat.revenue strong { color: #27ae60; font-size: 1.3rem;}
+        .doc-card-actions { display:flex; gap:8px; margin-top:14px; }
+        .dca-btn { flex:1; border:none; padding:10px; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:6px; }
+        .dca-wa { background:#25d366; color:white; }
+        .dca-view { background:#0b132b; color:#d4af37; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 19, 43, 0.85); display: flex; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(6px); transition: 0.3s;}
+        .modal.hidden { opacity: 0; pointer-events: none; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 1050px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f2f5; padding-bottom: 15px; margin-bottom: 20px;}
+        .modal-header h2 { color: #0b132b; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;}
+        .modal-stats { display:flex; gap:14px; margin-bottom:18px; }
+        .ms-box { flex:1; text-align:center; padding:14px; border-radius:12px; border:2px solid #eee; }
+        .ms-box .v { font-size:1.5rem; font-weight:900; }
+        .ms-box .l { font-size:0.78rem; color:#888; margin-top:3px; }
+
+        .btn-wa-modal { background: #25d366; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Tajawal';}
+        .btn-print-modal { background: #0b132b; color: #d4af37; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Tajawal';}
+        .close-btn { background: #ffebee; color: #c0392b; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; transition: 0.3s;}
+        .close-btn:hover { background: #e74c3c; color: white; }
+
+        .table-scroll { overflow-y: auto; flex: 1; border: 1px solid #eaeaea; border-radius: 10px;}
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th { background: #f8f9fa; padding: 14px; font-weight: 800; color: #0b132b; position: sticky; top: 0; border-bottom: 2px solid #dde1e5; font-size: 0.95rem;}
+        td { padding: 13px; border-bottom: 1px solid #f0f2f5; font-weight: 700; color: #555; font-size: 0.9rem;}
+        .badge-comp { background: #e3f2fd; color: #1565c0; padding: 5px 10px; border-radius: 8px; font-size: 0.82rem; border: 1px solid #bbdefb;}
+        .badge-cash { background: #fff3e0; color: #e67e22; padding: 5px 10px; border-radius: 8px; font-size: 0.82rem; border: 1px solid #ffe0b2;}
+        .badge-sess { background: #f4f6f9; color: #333; padding: 5px 10px; border-radius: 8px; font-size: 0.85rem; border: 1px solid #dde1e5; font-weight: bold; display: inline-block;}
+        .badge-branch { background:#ede7f6; color:#5e35b1; padding:4px 9px; border-radius:8px; font-size:0.8rem; }
+
+        .total-bar { background: #e8f5e9; border: 1px solid #27ae60; padding: 20px; border-radius: 10px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;}
+        .total-bar span { font-size: 1.1rem; font-weight: 800; color: #27ae60; }
+        .total-bar strong { font-size: 1.7rem; color: #0b132b; }
+
+        .server-status { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: bold; color: #27ae60; background: #e8f5e9; padding: 8px 15px; border-radius: 10px; border: 1px solid #27ae60; margin-left: 15px;}
+        .empty-state { text-align: center; padding: 50px; color: #777; font-size: 1.15rem; font-weight: bold; grid-column: 1 / -1;}
+        .print-only-title { display: none; }
+
+        @media print {
+            body { background: white !important; }
+            .header, .sidebar, .main-content { display: none !important; }
+            .modal { position: static !important; background: white !important; display: block !important; opacity: 1 !important; pointer-events: auto !important; }
+            .modal-content { box-shadow: none !important; width: 100% !important; max-width: none !important; padding: 0 !important; border: none !important;}
+            .close-btn, .btn-print-modal, .btn-wa-modal { display: none !important; }
+            .table-scroll { border: none !important; overflow: visible !important; }
+            table { border: 2px solid #000; width: 100%; }
+            th, td { border: 1px solid #ccc !important; padding: 10px !important; color: black !important;}
+            .total-bar { background: white !important; border: 2px solid #000 !important; }
+            .print-only-title { display: block; text-align: center; font-size: 1.8rem; margin-bottom: 20px; color: black; font-weight: 800;}
+        }
+
+        @media (max-width: 768px) {
+            .main-content { margin-right: 0; padding: 14px; }
+            .sidebar { display: none; }
+            .summary-row { grid-template-columns: 1fr; }
+            .doctors-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"><div class="header-title">LIFE SPORT <span>ORTHO VIP</span></div></div>
+        <div style="display:flex; align-items:center;">
+            <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
+            <a href="analytics.html" style="font-weight:bold; margin-right:15px; text-decoration:none; background:#d4af37; color:#0b132b; padding:8px 15px; border-radius:8px;"><i class="fas fa-arrow-right"></i> رجوع للتحليل</a>
+        </div>
+    </header>
+
+    <nav class="sidebar">
+        <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+        <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+        <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+        <a href="ledger.html"><i class="fas fa-file-invoice-dollar"></i> دفتر اليومية</a>
+        <a href="analytics.html" class="active"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+        <a href="support.html"><i class="fas fa-shield-alt"></i> الدعم</a>
+    </nav>
+
+    <main class="main-content">
+
+        <div class="top-bar">
+            <h1><i class="fas fa-crown"></i> إحصائيات الأطباء المحولين (العظام / المخ والأعصاب)</h1>
+            <div class="filters-row">
+                <div class="month-filter">
+                    <label><i class="fas fa-map-marker-alt"></i> الفرع:</label>
+                    <select id="branchSelector" onchange="processDoctorsData()">
+                        <option value="all">كل الفروع</option>
+                        <option value="المهندسين">المهندسين</option>
+                        <option value="أكتوبر">أكتوبر</option>
+                        <option value="الهرم">الهرم</option>
+                        <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+                    </select>
+                </div>
+                <div class="month-filter">
+                    <label>الشهر:</label>
+                    <input type="month" id="monthSelector" onchange="processDoctorsData()">
+                </div>
+            </div>
+        </div>
+
+        <div id="branchBanner" class="branch-banner" style="background:linear-gradient(135deg,#0b132b,#1a2a5e);"><i class="fas fa-globe"></i> جاري التحميل...</div>
+
+        <div class="summary-row">
+            <div class="sum-box sb-docs"><h4>عدد الأطباء المحوّلين</h4><div class="n" id="sumDoctors">0</div><i class="fas fa-user-md"></i></div>
+            <div class="sum-box sb-cases"><h4>إجمالي الحالات</h4><div class="n" id="sumCases">0</div><i class="fas fa-users"></i></div>
+            <div class="sum-box sb-rev"><h4>إجمالي المُكتسب الفعلي</h4><div class="n" id="sumRev">0</div><i class="fas fa-coins"></i></div>
+        </div>
+
+        <div class="doctors-grid" id="doctorsGrid"></div>
+
+    </main>
+
+    <div id="doctorModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="print-only-title">تقرير حالات الطبيب المحول - مركز لايف سبورت</div>
+            <div class="modal-header">
+                <h2 id="modalDocName"><i class="fas fa-user-md" style="color:#d4af37;"></i> دفتر حالات الطبيب</h2>
+                <div style="display:flex;gap:10px;margin-right:auto;margin-left:15px;">
+                    <button class="btn-wa-modal" onclick="sendCurrentDoctorWA()"><i class="fab fa-whatsapp"></i> إرسال واتساب</button>
+                    <button class="btn-print-modal" onclick="window.print()"><i class="fas fa-print"></i> طباعة</button>
+                </div>
+                <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="modal-stats">
+                <div class="ms-box"><div class="v" style="color:#e67e22;" id="msToday">0</div><div class="l">حالات اليوم</div></div>
+                <div class="ms-box"><div class="v" style="color:#0b132b;" id="msMonth">0</div><div class="l">حالات الشهر</div></div>
+                <div class="ms-box"><div class="v" style="color:#27ae60;" id="msRev">0</div><div class="l">المُكتسب الفعلي</div></div>
+            </div>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="22%">اسم المريض</th>
+                            <th width="14%">الشركة / النظام</th>
+                            <th width="13%">الجلسات</th>
+                            <th width="13%">الفرع</th>
+                            <th width="22%">الإصابة / التشخيص</th>
+                            <th width="16%">المُكتسب (ج.م)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="total-bar">
+                <span>إجمالي أرباح المركز من الجلسات المحضورة فعلياً:</span>
+                <strong id="modalTotalAmount">0 ج.م</strong>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com",
+            projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app",
+            messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+        if (window.location.protocol !== 'file:') { db.enablePersistence({synchronizeTabs:true}).catch(e => {}); }
+
+        let globalInsu = []; let globalCash = []; let globalLedger = [];
+        let compiledDocsData = {};
+        let currentModalDoc = null;
+        let _loadedInsu = false, _loadedCash = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let role = localStorage.getItem('userRole');
+            if (role !== 'manager' && role !== 'owner') { window.location.href = 'index.html'; return; }
+
+            // مدير الفرع يشوف فرعه بس
+            let currentBranch = localStorage.getItem('userBranch') || "المهندسين";
+            const bs = document.getElementById('branchSelector');
+            if (role === 'manager') { bs.value = currentBranch; bs.disabled = true; }
+
+            let today = new Date();
+            let currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('monthSelector').value = currentMonth;
+
+            fetchDataRealtime();
+        });
+
+        function fetchDataRealtime() {
+            db.collection("patients_insu").limit(1200).onSnapshot(snap => {
+                globalInsu = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalInsu.push(d); });
+                _loadedInsu = true; checkDataReady();
+            });
+            db.collection("patients_cash").limit(1200).onSnapshot(snap => {
+                globalCash = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalCash.push(d); });
+                _loadedCash = true; checkDataReady();
+            });
+            db.collection("daily_ledger").orderBy("timestamp","desc").limit(1500).onSnapshot(snap => {
+                globalLedger = []; snap.forEach(doc => globalLedger.push(doc.data()));
+                processDoctorsData();
+            }, err => {
+                db.collection("daily_ledger").limit(1500).onSnapshot(snap => {
+                    globalLedger = []; snap.forEach(doc => globalLedger.push(doc.data()));
+                    processDoctorsData();
+                });
+            });
+        }
+
+        function checkDataReady() {
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-check-circle"></i> متصل ومحدث';
+            processDoctorsData();
+        }
+
+        function getMonthYearString(timestamp) {
+            if (!timestamp || !timestamp.toDate) return null;
+            let date = timestamp.toDate();
+            let m = String(date.getMonth() + 1).padStart(2, '0');
+            let y = date.getFullYear();
+            return `${y}-${m}`;
+        }
+
+        function processDoctorsData() {
+            compiledDocsData = {};
+            let selectedMonth = document.getElementById('monthSelector').value;
+            let selectedBranch = document.getElementById('branchSelector').value;
+            if (!selectedMonth) return;
+            const todayStr = new Date().toLocaleDateString('en-GB'); // dd/mm/yyyy
+
+            // امنع الشهور المستقبلية (مفيش بيانات في شهر لسه ماجاش)
+            const nowMonth = new Date().toISOString().substring(0,7);
+            if (selectedMonth > nowMonth) {
+                document.getElementById('doctorsGrid').innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times" style="font-size:3rem; display:block; margin-bottom:15px; opacity:0.5;"></i>الشهر المختار لم يبدأ بعد — لا توجد بيانات.</div>';
+                document.getElementById('sumDoctors').innerText = '0';
+                document.getElementById('sumCases').innerText = '0';
+                document.getElementById('sumRev').innerText = '0 ج';
+                const banner = document.getElementById('branchBanner');
+                banner.innerHTML = '<i class="fas fa-calendar-times"></i> الشهر المختار لم يبدأ بعد';
+                banner.style.background = 'linear-gradient(135deg,#c0392b,#922b21)';
+                return;
+            }
+
+            // 1. التأمين
+            globalInsu.forEach(p => {
+                if (!p.refDoctor || p.refDoctor.trim() === "") return;
+                // فلتر الفرع
+                if (selectedBranch !== 'all' && (p.branch || 'المهندسين') !== selectedBranch) return;
+                let pMonth = getMonthYearString(p.createdAt);
+                // لو مفيش createdAt نعرضه برضو (الفلتر الأساسي بقى الفرع)
+                if (pMonth && pMonth !== selectedMonth) return;
+
+                let docName = p.refDoctor.trim();
+                if (!compiledDocsData[docName]) compiledDocsData[docName] = { totalCases: 0, todayCases:0, expectedTotalValue: 0, actualEarned: 0, patients: [] };
+
+                let caseTotalValue = ((p.price||0) * (p.totalSess || 0)) + (p.copayTotal || 0);
+                let actualEarned = ((p.price||0) * (p.attended || 0)) + (p.copayPaid || 0);
+
+                compiledDocsData[docName].totalCases += 1;
+                compiledDocsData[docName].expectedTotalValue += caseTotalValue;
+                compiledDocsData[docName].actualEarned += actualEarned;
+                compiledDocsData[docName].patients.push({
+                    name: p.id,
+                    rawName: p.id,
+                    phone: p.phone || '',
+                    compType: `<span class="badge-comp">${p.comp || 'تأمين'}</span>`,
+                    compRaw: p.comp || 'تأمين',
+                    totalSess: p.totalSess ? p.totalSess + ' جلسات' : 'غير محدد',
+                    sessRaw: `${p.attended||0}/${p.totalSess||0}`,
+                    branch: p.branch || '-',
+                    injury: p.injury || 'غير مسجل',
+                    earned: actualEarned
+                });
+            });
+
+            // 2. الكاش
+            globalCash.forEach(p => {
+                if (!p.refDoctor || p.refDoctor.trim() === "") return;
+                if (selectedBranch !== 'all' && (p.branch || 'المهندسين') !== selectedBranch) return;
+                let pMonth = getMonthYearString(p.createdAt);
+                if (pMonth && pMonth !== selectedMonth) return;
+
+                let docName = p.refDoctor.trim();
+                if (!compiledDocsData[docName]) compiledDocsData[docName] = { totalCases: 0, todayCases:0, expectedTotalValue: 0, actualEarned: 0, patients: [] };
+
+                let caseTotalValue = 0, actualEarned = 0;
+                if (p.mode === 'course') { caseTotalValue = p.cost || 0; actualEarned = p.paid || 0; }
+                else { caseTotalValue = (p.sessPrice || 0) * (p.attended || 0); actualEarned = caseTotalValue; }
+
+                compiledDocsData[docName].totalCases += 1;
+                compiledDocsData[docName].expectedTotalValue += caseTotalValue;
+                compiledDocsData[docName].actualEarned += actualEarned;
+                compiledDocsData[docName].patients.push({
+                    name: p.id,
+                    rawName: p.id,
+                    phone: p.phone || '',
+                    compType: `<span class="badge-cash">كاش (${p.mode === 'course' ? 'كورس' : 'جلسات'})</span>`,
+                    compRaw: `كاش ${p.mode === 'course' ? 'كورس' : 'جلسات'}`,
+                    totalSess: p.mode === 'course' ? (p.totalSess ? p.totalSess + ' جلسات' : 'غير محدد') : 'مفتوح (بالجلسة)',
+                    sessRaw: `${p.attended||0}/${p.totalSess||0}`,
+                    branch: p.branch || '-',
+                    injury: p.notes || 'غير مسجل',
+                    earned: actualEarned
+                });
+            });
+
+            // حالات اليوم من اليومية
+            globalLedger.forEach(e => {
+                if (e.date !== todayStr) return;
+                if (selectedBranch !== 'all' && (e.branch||'المهندسين') !== selectedBranch) return;
+                if (e.isPaymentOnly || e.isRefund) return;
+                let p = globalInsu.find(x => x.id === e.patientName) || globalCash.find(x => x.id === e.patientName);
+                if (!p || !p.refDoctor) return;
+                let docName = p.refDoctor.trim();
+                if (compiledDocsData[docName]) compiledDocsData[docName].todayCases++;
+            });
+
+            renderDoctorCards();
+        }
+
+        function renderDoctorCards() {
+            let grid = document.getElementById('doctorsGrid');
+            let selectedBranch = document.getElementById('branchSelector').value;
+            grid.innerHTML = '';
+
+            let docNames = Object.keys(compiledDocsData).sort((a, b) => compiledDocsData[b].totalCases - compiledDocsData[a].totalCases);
+
+            // ملخص علوي
+            let totalCases = docNames.reduce((a,d) => a + compiledDocsData[d].totalCases, 0);
+            let totalRev = docNames.reduce((a,d) => a + compiledDocsData[d].actualEarned, 0);
+            document.getElementById('sumDoctors').innerText = docNames.length;
+            document.getElementById('sumCases').innerText = totalCases;
+            document.getElementById('sumRev').innerText = totalRev.toLocaleString() + ' ج';
+
+            // شريط الفرع
+            const banner = document.getElementById('branchBanner');
+            if (selectedBranch === 'all') {
+                banner.innerHTML = `<i class="fas fa-globe"></i> عرض أطباء <b>جميع الفروع</b> — ${docNames.length} طبيب، ${totalCases} حالة`;
+                banner.style.background = 'linear-gradient(135deg,#0b132b,#1a2a5e)';
+            } else {
+                banner.innerHTML = `<i class="fas fa-map-marker-alt"></i> عرض أطباء فرع <b>${selectedBranch}</b> فقط — ${docNames.length} طبيب، ${totalCases} حالة`;
+                banner.style.background = 'linear-gradient(135deg,#16a085,#0e6655)';
+            }
+
+            if (docNames.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><i class="fas fa-search" style="font-size:3rem; display:block; margin-bottom:15px; opacity:0.5;"></i>لا يوجد أطباء محولين مسجلين في هذا الفرع/الشهر.</div>';
+                return;
+            }
+
+            docNames.forEach((doc, i) => {
+                let stats = compiledDocsData[doc];
+                let medal = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':(i+1)));
+                let safe = doc.replace(/'/g,"\\'");
+                grid.innerHTML += `
+                    <div class="doc-card">
+                        <div class="doc-rank">${medal}</div>
+                        <div onclick="openDoctorModal('${safe}')">
+                            <div class="doc-name">
+                                <span>${doc}</span>
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                            <div class="doc-stat today">
+                                <span>حالات اليوم:</span>
+                                <strong>${stats.todayCases} <i class="fas fa-calendar-day" style="margin-right:5px; font-size:0.9rem;"></i></strong>
+                            </div>
+                            <div class="doc-stat">
+                                <span>عدد الحالات (الشهر):</span>
+                                <strong>${stats.totalCases} <i class="fas fa-user-injured" style="color:#3498db; margin-right:5px; font-size:1rem;"></i></strong>
+                            </div>
+                            <div class="doc-stat">
+                                <span>القيمة الإجمالية:</span>
+                                <strong>${stats.expectedTotalValue.toLocaleString()} ج.م</strong>
+                            </div>
+                            <div class="doc-stat revenue" style="border:none; margin-top:5px;">
+                                <span>المُكتسب الفعلي:</span>
+                                <strong>${stats.actualEarned.toLocaleString()} ج.م</strong>
+                            </div>
+                        </div>
+                        <div class="doc-card-actions">
+                            <button class="dca-btn dca-wa" onclick="sendDoctorWA('${safe}')"><i class="fab fa-whatsapp"></i> واتساب</button>
+                            <button class="dca-btn dca-view" onclick="openDoctorModal('${safe}')"><i class="fas fa-eye"></i> عرض وطباعة</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openDoctorModal(docName) {
+            let data = compiledDocsData[docName];
+            if (!data) return;
+            currentModalDoc = docName;
+
+            document.getElementById('modalDocName').innerHTML = `<i class="fas fa-user-md" style="color:#d4af37;"></i> كشف حالات الطبيب: ${docName}`;
+            document.getElementById('modalTotalAmount').innerText = data.actualEarned.toLocaleString() + " ج.م";
+            document.getElementById('msToday').innerText = data.todayCases;
+            document.getElementById('msMonth').innerText = data.totalCases;
+            document.getElementById('msRev').innerText = data.actualEarned.toLocaleString();
+
+            let tbody = document.getElementById('modalTableBody');
+            tbody.innerHTML = '';
+            data.patients.forEach(pt => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color:#0b132b; font-weight:800;">${pt.name}</td>
+                        <td>${pt.compType}</td>
+                        <td><span class="badge-sess">${pt.totalSess}</span></td>
+                        <td><span class="badge-branch">${pt.branch}</span></td>
+                        <td>${pt.injury}</td>
+                        <td style="color:#27ae60; font-weight:800; font-size:1.05rem;">${pt.earned.toLocaleString()} ج.م</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('doctorModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('doctorModal').classList.add('hidden');
+        }
+
+        // إرسال واتساب من الكارت
+        function sendDoctorWA(docName) {
+            const data = compiledDocsData[docName];
+            if (!data) { return; }
+            const branch = document.getElementById('branchSelector').value;
+            const branchTxt = branch === 'all' ? 'كل الفروع' : branch;
+            const L = '━━━━━━━━━━━━━━━';
+
+            let msg = `✨ *أهلاً وسهلاً د. ${docName}* ✨\n`;
+            msg += `🌿 _تحية طيبة من مركز لايف سبورت_\n`;
+            msg += `${L}\n`;
+            msg += `📋 *كشف الحالات المحوّلة من حضرتك*\n`;
+            msg += `📍 ${branchTxt}\n`;
+            msg += `${L}\n\n`;
+            msg += `📊 *ملخص:*\n`;
+            msg += `🔵 حالات اليوم: *${data.todayCases}*\n`;
+            msg += `🗓️ إجمالي الشهر: *${data.totalCases}*\n`;
+            msg += `💰 المُكتسب الفعلي: *${data.actualEarned.toLocaleString()} ج*\n`;
+            msg += `${L}\n\n`;
+            msg += `👥 *تفاصيل الحالات:*\n\n`;
+            data.patients.forEach((pt, i) => {
+                msg += `*${i+1}.* ${pt.rawName}\n`;
+                if (pt.injury && pt.injury !== 'غير مسجل') msg += `   🩺 ${pt.injury}\n`;
+                msg += `   📊 الجلسات: ${pt.sessRaw}\n`;
+                if (pt.branch && pt.branch !== '-') msg += `   📍 ${pt.branch}\n`;
+                msg += `\n`;
+            });
+            msg += `${L}\n`;
+            msg += `🙏 *شكراً لثقتكم وتعاونكم*\n`;
+            msg += `🌿 _مركز لايف سبورت للعلاج الطبيعي_`;
+
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function sendCurrentDoctorWA() {
+            if (currentModalDoc) sendDoctorWA(currentModalDoc);
+        }
+    
+        // زرار قائمة الموبايل
+        function toggleMobileMenu() {
+            const sb = document.querySelector('.sidebar');
+            let ov = document.querySelector('.sidebar-overlay');
+            if (!ov) {
+                ov = document.createElement('div');
+                ov.className = 'sidebar-overlay';
+                ov.onclick = toggleMobileMenu;
+                document.body.appendChild(ov);
+            }
+            sb.classList.toggle('mobile-open');
+            ov.classList.toggle('active');
+        }
+        window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+</body>
+</html>

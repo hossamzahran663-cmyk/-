@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - الكوادر والرواتب</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: #f0f3f8; display: flex; overflow-x: hidden; color: #1c1e21; min-height: 100vh; }
+
+        /* HEADER */
+        .header { background: linear-gradient(135deg, #0b132b, #1a2a5e); height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 35px; border-bottom: 2px solid rgba(212,175,55,0.4); z-index: 1000; box-shadow: 0 4px 20px rgba(11,19,43,0.3); }
+        .header-logo { display: flex; align-items: center; gap: 14px; }
+        .header-logo img { height: 44px; }
+        .header-title { color: white; font-size: 1.2rem; font-weight: 900; }
+        .header-title span { color: #d4af37; }
+        .server-status { display: flex; align-items: center; gap: 7px; font-size: 0.85rem; font-weight: 700; color: #27ae60; background: rgba(39,174,96,0.12); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(39,174,96,0.3); }
+
+        /* SIDEBAR */
+        .sidebar { background: #0b1120; width: 255px; height: 100vh; position: fixed; top: 72px; right: 0; padding-top: 20px; z-index: 900; border-left: 1px solid rgba(255,255,255,0.05); }
+        .sidebar a { display: flex; align-items: center; gap: 11px; color: rgba(163,174,209,0.8); text-decoration: none; padding: 12px 20px; transition: 0.22s; font-size: 0.95rem; border-right: 2px solid transparent; margin: 1px 8px; border-radius: 10px; font-weight: 600; }
+        .sidebar a i { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; background: rgba(255,255,255,0.06); border-radius: 7px; flex-shrink: 0; }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .sidebar a.active { background: rgba(212,175,55,0.12); color: #d4af37; font-weight: 800; border-right: 2px solid #d4af37; }
+        .sidebar a.active i { background: rgba(212,175,55,0.2); }
+
+        /* MAIN */
+        .main-content { margin-right: 255px; margin-top: 72px; padding: 24px 28px; width: calc(100% - 255px); }
+
+        /* TOP BAR */
+        .top-bar { background: white; padding: 14px 22px; border-radius: 16px; border: 1px solid #e4e9f0; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .top-bar h1 { color: #0b132b; font-size: 1.2rem; font-weight: 900; display: flex; align-items: center; gap: 10px; margin: 0; }
+        .btn-print-main { background: linear-gradient(135deg, #27ae60, #1e8449); color: white; border: none; padding: 10px 20px; border-radius: 11px; font-size: 0.92rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(39,174,96,0.3); transition: 0.28s; font-family: 'Tajawal'; }
+        .btn-print-main:hover { transform: translateY(-2px); }
+
+        /* SUMMARY CARDS */
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+        .summary-card { background: white; padding: 18px 20px; border-radius: 16px; border: 1px solid #e4e9f0; box-shadow: 0 2px 12px rgba(0,0,0,0.05); transition: 0.25s; }
+        .summary-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.09); }
+        .summary-card .sc-label { font-size: 0.75rem; color: #9aa0b0; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px; }
+        .summary-card .sc-val { font-size: 1.7rem; font-weight: 900; }
+        .sc-val.green  { color: #27ae60; }
+        .sc-val.red    { color: #e74c3c; }
+        .sc-val.blue   { color: #1565c0; }
+        .sc-val.gold   { color: #c49a2a; }
+        .summary-card .sc-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; float: left; }
+        .ic-green  { background: linear-gradient(135deg, #27ae60, #1e8449); }
+        .ic-red    { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .ic-blue   { background: linear-gradient(135deg, #2196f3, #1565c0); }
+        .ic-gold   { background: linear-gradient(135deg, #d4af37, #c49a2a); }
+
+        /* FILTERS */
+        .filters-bar { background: white; padding: 16px 20px; border-radius: 14px; border: 1px solid #e4e9f0; margin-bottom: 18px; display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
+        .filter-group label { font-size: 0.75rem; font-weight: 800; color: #888; letter-spacing: 0.5px; text-transform: uppercase; }
+        .filter-input { padding: 9px 13px; font-size: 0.92rem; font-weight: 700; border: 1.5px solid #e0e4ea; border-radius: 10px; outline: none; background: #fafbfd; font-family: 'Tajawal'; color: #0b132b; transition: 0.22s; }
+        .filter-input:focus { border-color: #d4af37; }
+        .filter-input:disabled { background: #f0f2f5; cursor: not-allowed; color: #999; }
+
+        /* ADD EMPLOYEE FORM */
+        .add-form { background: white; padding: 22px; border-radius: 16px; border: 1px solid #e4e9f0; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .add-form h3 { font-size: 1rem; font-weight: 900; color: #0b132b; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; gap: 8px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; align-items: end; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: 0.75rem; font-weight: 800; color: #888; letter-spacing: 0.5px; }
+        .input-group input, .input-group select { padding: 10px 13px; border: 1.5px solid #e0e4ea; border-radius: 10px; outline: none; background: #fafbfd; font-family: 'Tajawal'; font-size: 0.92rem; font-weight: 700; color: #0b132b; transition: 0.22s; }
+        .input-group input:focus, .input-group select:focus { border-color: #d4af37; background: white; }
+        .file-wrap { background: #f8f9fc; border: 1.5px dashed #c8d4e8; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; position: relative; transition: 0.22s; font-size: 0.82rem; font-weight: 700; color: #888; }
+        .file-wrap:hover { background: #eef3ff; border-color: #d4af37; }
+        .file-wrap input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+        .btn-add { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; border: none; padding: 11px 22px; border-radius: 11px; font-size: 0.95rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.28s; font-family: 'Tajawal'; white-space: nowrap; }
+        .btn-add:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; transform: translateY(-1px); }
+        .btn-add:disabled { background: #ddd !important; color: #999 !important; cursor: not-allowed; transform: none; }
+
+        /* TABLE CONTAINER */
+        .table-container { background: white; border-radius: 18px; box-shadow: 0 3px 20px rgba(0,0,0,0.06); border: 1px solid #e4e9f0; overflow: hidden; }
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 900px; }
+        th { background: #f8fafc; padding: 12px 16px; font-size: 0.76rem; font-weight: 800; color: #9aa0b0; border-bottom: 2px solid #e8edf4; letter-spacing: 0.8px; text-transform: uppercase; white-space: nowrap; }
+        td { padding: 14px 16px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; font-size: 0.9rem; font-weight: 700; }
+        tr:hover td { background: #fdfcf5; }
+
+        /* EMP PROFILE */
+        .emp-avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 3px solid #d4af37; cursor: pointer; transition: 0.25s; background: #f0f4f8; }
+        .emp-avatar:hover { transform: scale(1.1); box-shadow: 0 4px 14px rgba(212,175,55,0.4); }
+        .emp-name { font-size: 0.98rem; font-weight: 900; color: #0b132b; }
+        .emp-phone { font-size: 0.78rem; color: #999; margin-top: 2px; }
+
+        /* ROLE BADGES */
+        .role-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
+        .role-consultant { background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; }
+        .role-specialist  { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .role-intern      { background: #fff8e1; color: #f57c00; border: 1px solid #ffe0b2; }
+        .role-rehab       { background: #fce4ec; color: #c2185b; border: 1px solid #f8bbd0; }
+        .role-secretary   { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .role-worker      { background: #efebe9; color: #4e342e; border: 1px solid #d7ccc8; }
+
+        /* SALARY CELL */
+        .salary-base  { font-size: 1.05rem; font-weight: 900; color: #2e7d32; }
+        .salary-deduct { font-size: 0.82rem; color: #c62828; font-weight: 800; }
+        .salary-bonus  { font-size: 0.82rem; color: #1565c0; font-weight: 800; }
+        .salary-net   { font-size: 1.1rem; font-weight: 900; color: #0b132b; border-top: 1px dashed #e0e4ea; margin-top: 4px; padding-top: 4px; }
+
+        /* ACTION BUTTONS */
+        .btn-action { padding: 7px 12px; border: none; border-radius: 9px; cursor: pointer; font-size: 0.8rem; font-weight: 800; transition: 0.22s; display: inline-flex; align-items: center; gap: 5px; font-family: 'Tajawal'; }
+        .btn-docs    { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .btn-docs:hover { background: #1565c0; color: white; }
+        .btn-absence { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+        .btn-absence:hover { background: #e65100; color: white; }
+        .btn-bonus   { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .btn-bonus:hover { background: #2e7d32; color: white; }
+        .btn-settle  { background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; }
+        .btn-settle:hover { background: #7b1fa2; color: white; }
+        .btn-delete  { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .btn-delete:hover { background: #c62828; color: white; }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(11,19,43,0.88); display: flex; align-items: center; justify-content: center; z-index: 3000; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(8px); }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: white; padding: 26px; border-radius: 20px; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.3); border-top: 4px solid #d4af37; transform: scale(0.9); transition: 0.32s cubic-bezier(0.34,1.2,0.64,1); }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-box h3 { color: #0b132b; margin-bottom: 16px; font-size: 1.1rem; font-weight: 900; padding-bottom: 10px; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; gap: 9px; }
+        .modal-input { width: 100%; padding: 10px 13px; border: 1.5px solid #e0e4ea; border-radius: 10px; outline: none; font-family: 'Tajawal'; font-weight: 700; font-size: 0.95rem; margin-bottom: 12px; transition: 0.22s; }
+        .modal-input:focus { border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+        .modal-label { font-size: 0.78rem; font-weight: 800; color: #888; margin-bottom: 5px; display: block; }
+        .modal-footer { display: flex; gap: 10px; margin-top: 16px; }
+        .modal-footer button { flex: 1; padding: 11px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; font-family: 'Tajawal'; transition: 0.25s; }
+        .btn-save { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; }
+        .btn-save:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; }
+        .btn-gray { background: #f0f2f5; color: #666; }
+
+        /* RESULT BOX */
+        .result-box { background: linear-gradient(135deg, #f8f9fc, #f0f3f8); border: 1.5px solid #e0e4ea; border-radius: 12px; padding: 14px; margin-top: 14px; font-size: 0.92rem; font-weight: 700; line-height: 2; }
+        .result-box .res-row { display: flex; justify-content: space-between; }
+        .result-box .res-total { font-size: 1.1rem; font-weight: 900; color: #0b132b; border-top: 1.5px solid #d4af37; padding-top: 8px; margin-top: 6px; }
+
+        /* IMAGE & DOCS VIEWER */
+        .image-modal, .docs-modal, .pdf-modal { position: fixed; inset: 0; background: rgba(11,19,43,0.92); display: flex; align-items: center; justify-content: center; z-index: 4000; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(10px); }
+        .image-modal.active, .docs-modal.active, .pdf-modal.active { opacity: 1; pointer-events: auto; }
+        .image-modal img { max-width: 80%; max-height: 80vh; border-radius: 16px; border: 3px solid #d4af37; transform: scale(0.88); transition: 0.32s; }
+        .image-modal.active img { transform: scale(1); }
+        .pdf-modal iframe { width: 80%; height: 85vh; border-radius: 14px; border: 3px solid #d4af37; background: white; }
+        .close-modal-btn { position: absolute; top: 22px; right: 28px; color: rgba(255,255,255,0.7); font-size: 2.4rem; cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.08); transition: 0.2s; z-index: 4001; }
+        .close-modal-btn:hover { color: white; background: rgba(231,76,60,0.4); }
+        .docs-content { background: white; padding: 26px; border-radius: 20px; width: 560px; max-width: 95vw; max-height: 88vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.3); border-top: 4px solid #d4af37; transform: translateY(-20px); transition: 0.32s; }
+        .docs-modal.active .docs-content { transform: translateY(0); }
+        .doc-item { background: #f8fafc; padding: 12px 14px; border-radius: 10px; border: 1px solid #e4e9f0; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; font-weight: 700; color: #555; cursor: pointer; transition: 0.22s; }
+        .doc-item:hover { background: #e8f4fd; border-color: #2196f3; transform: translateX(-3px); }
+        .doc-item i { color: #d4af37; font-size: 1.3rem; flex-shrink: 0; }
+        .doc-view-btn { margin-right: auto; background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; }
+
+        /* TOAST */
+        #toastContainer { position: fixed; bottom: 24px; left: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 9px; }
+        .toast { background: #0b132b; color: white; padding: 13px 20px; border-radius: 14px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 35px rgba(11,19,43,0.25); transform: translateX(-200%); transition: 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-right: 4px solid #d4af37; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-right-color: #27ae60; }
+        .toast.error   { border-right-color: #e74c3c; }
+
+        /* PRINT */
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .header, .sidebar, .add-form, .filters-bar, .top-bar,
+            .btn-delete, .btn-docs, .btn-absence, .btn-bonus, .btn-settle,
+            #toastContainer, .modal-overlay, .image-modal, .docs-modal, .pdf-modal { display: none !important; }
+            .main-content { margin: 0 !important; padding: 10px !important; width: 100% !important; }
+            /* كل فرع في صفحة منفصلة */
+            .branch-print-section { page-break-after: always; }
+            .branch-print-section:last-child { page-break-after: avoid; }
+            .branch-print-header { background: #0b132b !important; color: white !important; padding: 10px 16px; border-radius: 8px; margin-bottom: 10px; display: flex !important; justify-content: space-between; align-items: center; }
+            .branch-print-header h2 { color: #d4af37 !important; font-size: 1.1rem; margin: 0; }
+            .summary-grid { display: none !important; }
+            table { border-collapse: collapse; width: 100%; font-size: 11px; }
+            th { background: #0b132b !important; color: #d4af37 !important; padding: 8px 10px; font-size: 10px; }
+            td { padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
+            .emp-avatar { width: 36px; height: 36px; }
+            .btn-action { display: none !important; }
+            .branch-total { background: #f0f3f8 !important; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-weight: 900; font-size: 1rem; text-align: left; }
+        }
+
+        .hidden { display: none !important; }
+        canvas { display: none; }
+        /* ===== جلسات منزلية ===== */
+        .home-visits-section { background: white; border-radius: 18px; border: 1px solid #e4e9f0; box-shadow: 0 3px 20px rgba(0,0,0,0.06); margin-top: 24px; overflow: hidden; }
+        .hv-header { background: linear-gradient(135deg, #7b1fa2, #9c27b0); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; }
+        .hv-header h2 { color: white; font-size: 1.05rem; font-weight: 900; margin: 0; display: flex; align-items: center; gap: 9px; }
+        .hv-body { padding: 20px 22px; }
+        .hv-doctor-card { background: #fafbfd; border: 1px solid #e4e9f0; border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; border-right: 4px solid #9c27b0; transition: 0.22s; }
+        .hv-doctor-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateX(-2px); }
+        .hv-doc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .hv-doc-name { font-size: 1rem; font-weight: 900; color: #0b132b; }
+        .hv-doc-code { background: linear-gradient(135deg, #7b1fa2, #9c27b0); color: white; padding: 3px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 900; }
+        .hv-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .hv-stat { background: white; border: 1px solid #e4e9f0; border-radius: 9px; padding: 6px 12px; font-size: 0.8rem; font-weight: 800; color: #555; }
+        .hv-stat span { color: #7b1fa2; font-weight: 900; }
+        .hv-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+        .btn-hv-wa { background: linear-gradient(135deg, #25D366, #1ebd5a); color: white; border: none; padding: 7px 14px; border-radius: 9px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Tajawal'; transition: 0.22s; }
+        .btn-hv-wa:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,211,102,0.35); }
+        .btn-hv-cases { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; padding: 7px 14px; border-radius: 9px; font-size: 0.82rem; font-weight: 800; cursor: pointer; font-family: 'Tajawal'; transition: 0.22s; }
+        .btn-hv-cases:hover { background: #1565c0; color: white; }
+        .btn-hv-delete { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; padding: 7px 12px; border-radius: 9px; font-size: 0.82rem; font-weight: 800; cursor: pointer; font-family: 'Tajawal'; transition: 0.22s; }
+        .btn-hv-delete:hover { background: #c62828; color: white; }
+
+        /* Doctor Portal (لما الدكتور بيفتح اللينك) */
+        #doctorPortal { display: none; position: fixed; inset: 0; background: #f0f3f8; z-index: 9000; overflow-y: auto; }
+        .portal-header { background: linear-gradient(135deg, #0b132b, #1a2a5e); padding: 16px 24px; display: flex; align-items: center; gap: 14px; border-bottom: 2px solid rgba(212,175,55,0.4); }
+        .portal-header h1 { color: white; font-size: 1.1rem; font-weight: 900; margin: 0; }
+        .portal-header span { color: #d4af37; font-size: 0.88rem; font-weight: 700; }
+        .portal-body { max-width: 680px; margin: 30px auto; padding: 0 20px; }
+        .portal-welcome { background: linear-gradient(135deg, #7b1fa2, #9c27b0); color: white; padding: 20px 24px; border-radius: 16px; margin-bottom: 20px; }
+        .portal-welcome h2 { font-size: 1.2rem; font-weight: 900; margin-bottom: 5px; }
+        .portal-welcome p { opacity: 0.85; font-size: 0.88rem; }
+        .portal-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .portal-stat { background: white; border-radius: 14px; padding: 16px; text-align: center; border: 1px solid #e4e9f0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .portal-stat .ps-num { font-size: 1.6rem; font-weight: 900; }
+        .portal-stat .ps-lbl { font-size: 0.72rem; color: #9aa0b0; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
+        .portal-cases { background: white; border-radius: 16px; border: 1px solid #e4e9f0; overflow: hidden; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .portal-cases-header { background: #f8fafc; padding: 12px 18px; border-bottom: 1px solid #e4e9f0; display: flex; justify-content: space-between; align-items: center; }
+        .portal-cases-header h3 { font-size: 0.95rem; font-weight: 900; color: #0b132b; margin: 0; }
+        .portal-case-item { padding: 14px 18px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; }
+        .portal-case-item:last-child { border-bottom: none; }
+        .pci-name { font-size: 0.95rem; font-weight: 900; color: #0b132b; }
+        .pci-info { font-size: 0.78rem; color: #999; margin-top: 2px; }
+        .pci-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; }
+        .pci-cash { background: #e8f5e9; color: #2e7d32; }
+        .pci-comp { background: #e3f2fd; color: #1565c0; }
+        .pci-closed { background: #ffebee; color: #c62828; }
+        .btn-register-session { background: linear-gradient(135deg, #7b1fa2, #9c27b0); color: white; border: none; padding: 8px 16px; border-radius: 9px; font-size: 0.82rem; font-weight: 800; cursor: pointer; font-family: 'Tajawal'; transition: 0.22s; }
+        .btn-register-session:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(123,31,162,0.35); }
+        .btn-register-session:disabled { background: #ccc !important; cursor: not-allowed; transform: none; }
+
+    
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+    </style>
+
+    <style>
+
+
+
+    
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            .stat-card, .kpi-card { min-width: 140px !important; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+        }
+
+    </style>
+
+
+
+
+    <link rel="stylesheet" href="premium.css">
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div id="toastContainer"></div>
+
+<!-- IMAGE VIEWER -->
+<div id="imageViewer" class="image-modal" onclick="closeImage()">
+    <span class="close-modal-btn" onclick="closeImage()">&times;</span>
+    <img id="enlargedPhoto" src="" alt="" onclick="event.stopPropagation()">
+</div>
+
+<!-- DOCS VIEWER -->
+<div id="docsViewer" class="docs-modal" onclick="closeDocs(event)">
+    <div class="docs-content" onclick="event.stopPropagation()">
+        <span class="close-modal-btn" style="position:absolute;top:12px;right:14px;font-size:1.8rem;" onclick="closeDocs(event)">&times;</span>
+        <h3 style="border-top:none;padding-top:0;"><i class="fas fa-folder-open" style="color:#d4af37;"></i> مستندات: <span id="docsEmpName" style="color:#2196f3;"></span></h3>
+        <div id="docsListContainer"></div>
+        <button onclick="closeDocs(event)" style="width:100%;padding:10px;margin-top:14px;background:#f0f2f5;color:#555;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';">إغلاق</button>
+    </div>
+</div>
+
+<!-- PDF VIEWER -->
+<div id="pdfViewer" class="pdf-modal" onclick="closePdf()">
+    <span class="close-modal-btn" onclick="closePdf()">&times;</span>
+    <iframe id="pdfIframe" src="" onclick="event.stopPropagation()"></iframe>
+</div>
+
+<!-- ABSENCE MODAL -->
+<div id="absenceModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3><i class="fas fa-calendar-times" style="color:#e65100;"></i> تسجيل غياب / خصم</h3>
+        <span class="modal-label">اسم الموظف</span>
+        <input type="text" id="absEmpName" class="modal-input" readonly style="background:#f0f2f5;">
+        <span class="modal-label">عدد أيام الغياب هذا الشهر</span>
+        <input type="number" id="absDays" class="modal-input" min="0" placeholder="مثال: 3" oninput="calcAbsence()">
+        <div class="result-box" id="absResult" style="display:none;"></div>
+        <div class="modal-footer">
+            <button class="btn-save" onclick="saveAbsence()"><i class="fas fa-save"></i> حفظ الخصم</button>
+            <button class="btn-gray" onclick="closeModal('absenceModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- BONUS MODAL -->
+<div id="bonusModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3><i class="fas fa-gift" style="color:#27ae60;"></i> إضافة بونص / علاوة</h3>
+        <span class="modal-label">اسم الموظف</span>
+        <input type="text" id="bonEmpName" class="modal-input" readonly style="background:#f0f2f5;">
+        <span class="modal-label">نوع الإضافة</span>
+        <select id="bonType" class="modal-input" oninput="calcBonus()">
+            <option value="bonus">بونص شهري</option>
+            <option value="allowance">علاوة خاصة</option>
+            <option value="overtime">أوفرتايم</option>
+        </select>
+        <span class="modal-label">المبلغ (ج.م)</span>
+        <input type="number" id="bonAmount" class="modal-input" min="0" placeholder="مثال: 500" oninput="calcBonus()">
+        <div class="result-box" id="bonResult" style="display:none;"></div>
+        <div class="modal-footer">
+            <button class="btn-save" onclick="saveBonus()"><i class="fas fa-check"></i> إضافة البونص</button>
+            <button class="btn-gray" onclick="closeModal('bonusModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- SETTLEMENT MODAL -->
+<div id="settleModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3><i class="fas fa-handshake" style="color:#7b1fa2;"></i> تسوية نهاية الخدمة</h3>
+        <span class="modal-label">اسم الموظف</span>
+        <input type="text" id="setEmpName" class="modal-input" readonly style="background:#f0f2f5;">
+        <span class="modal-label">تاريخ آخر يوم عمل</span>
+        <input type="date" id="setLastDay" class="modal-input" oninput="calcSettlement()">
+        <div class="result-box" id="setResult" style="display:none;"></div>
+        <div class="modal-footer">
+            <button class="btn-save" onclick="closeModal('settleModal')"><i class="fas fa-check"></i> حسناً</button>
+        </div>
+    </div>
+</div>
+
+<header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
+        <div id="headerUserInfo" style="color:#d4af37;font-weight:800;background:rgba(212,175,55,0.1);padding:7px 16px;border-radius:20px;border:1px solid rgba(212,175,55,0.3);font-size:0.88rem;">جاري التحميل...</div>
+    </div>
+</header>
+
+<nav class="sidebar">
+    <a href="dashboard.html"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+    <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+    <a href="reservations.html"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+    <a href="patients.html"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+    <a href="ledger.html"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+    <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+    <a href="hr.html" class="active"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+    <a href="analytics.html"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+    <a href="support.html"><i class="fas fa-shield-alt"></i> الدعم وسجل المراقبة</a>
+</nav>
+
+<main class="main-content">
+
+    <div class="top-bar">
+        <h1><i class="fas fa-users-cog" style="color:#d4af37;"></i> إدارة الكوادر الطبية والرواتب</h1>
+        <div style="display:flex;gap:10px;">
+            <a href="home_visits.html" style="background:linear-gradient(135deg,#7b1fa2,#9c27b0);color:white;border:none;padding:10px 20px;border-radius:11px;font-size:0.92rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 4px 14px rgba(123,31,162,0.3);">
+                <i class="fas fa-home"></i> الجلسات المنزلية
+            </a>
+            <button class="btn-print-main" onclick="printByBranch()"><i class="fas fa-print"></i> طباعة كشف الرواتب</button>
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="sc-icon ic-green float-left"><i class="fas fa-users"></i></div>
+            <div class="sc-label">إجمالي الموظفين</div>
+            <div class="sc-val blue" id="sumCount">0</div>
+        </div>
+        <div class="summary-card">
+            <div class="sc-icon ic-gold float-left"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="sc-label">إجمالي الرواتب</div>
+            <div class="sc-val green" id="sumSalaries">0 ج</div>
+        </div>
+        <div class="summary-card">
+            <div class="sc-icon ic-red float-left"><i class="fas fa-minus-circle"></i></div>
+            <div class="sc-label">إجمالي الخصومات</div>
+            <div class="sc-val red" id="sumDeductions">0 ج</div>
+        </div>
+        <div class="summary-card">
+            <div class="sc-icon ic-blue float-left"><i class="fas fa-wallet"></i></div>
+            <div class="sc-label">الصافي المستحق</div>
+            <div class="sc-val gold" id="sumNet">0 ج</div>
+        </div>
+    </div>
+
+    <!-- MONTH FILTER BAR -->
+    <div style="background:white;padding:14px 22px;border-radius:14px;border:1px solid #e4e9f0;margin-bottom:18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(0,0,0,0.04);flex-wrap:wrap;">
+        <i class="fas fa-calendar-alt" style="color:#d4af37;font-size:1.2rem;"></i>
+        <span style="font-size:0.78rem;font-weight:800;color:#888;letter-spacing:0.5px;">عرض شهر:</span>
+        <select id="hrMonthFilter" style="padding:9px 14px;border:1.5px solid #e0e4ea;border-radius:10px;outline:none;font-family:'Tajawal';font-size:0.92rem;font-weight:700;color:#0b132b;background:#fafbfd;transition:0.22s;" onchange="onHrMonthChange()"></select>
+        <div style="display:flex;gap:6px;">
+            <button onclick="shiftHrMonth(-1)" style="background:white;border:1.5px solid #e0e4ea;color:#555;padding:7px 14px;border-radius:9px;font-size:0.8rem;font-weight:800;cursor:pointer;font-family:'Tajawal';transition:0.22s;" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='#e0e4ea'">
+                <i class="fas fa-chevron-right"></i> السابق
+            </button>
+            <button onclick="setHrCurrentMonth()" style="background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#d4af37;border:none;padding:7px 14px;border-radius:9px;font-size:0.8rem;font-weight:800;cursor:pointer;font-family:'Tajawal';">
+                الشهر الحالي
+            </button>
+            <button onclick="shiftHrMonth(1)" style="background:white;border:1.5px solid #e0e4ea;color:#555;padding:7px 14px;border-radius:9px;font-size:0.8rem;font-weight:800;cursor:pointer;font-family:'Tajawal';transition:0.22s;" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='#e0e4ea'">
+                التالي <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <span id="hrMonthLabel" style="background:rgba(212,175,55,0.12);color:#c49a2a;padding:5px 14px;border-radius:20px;font-size:0.85rem;font-weight:900;border:1px solid rgba(212,175,55,0.3);">...</span>
+        <span style="font-size:0.78rem;color:#bbb;font-weight:700;">الأرقام بتتصفر تلقائياً كل شهر جديد</span>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label><i class="fas fa-map-marker-alt"></i> الفرع</label>
+            <select id="filterBranch" class="filter-input" onchange="renderTable()">
+                <option value="all">كل الفروع</option>
+                <option value="المهندسين">المهندسين</option>
+                <option value="أكتوبر">أكتوبر</option>
+                <option value="الهرم">الهرم</option>
+                <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+                <option value="الإدارة المركزية">الإدارة المركزية</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="fas fa-briefcase"></i> الوظيفة</label>
+            <select id="filterRole" class="filter-input" onchange="renderTable()">
+                <option value="all">كل الوظائف</option>
+                <option value="consultant">استشاري</option>
+                <option value="specialist">أخصائي</option>
+                <option value="intern">طبيب امتياز</option>
+                <option value="rehab">كابتن تأهيل</option>
+                <option value="secretary">سكرتاريا</option>
+                <option value="worker">عمال / خدمات</option>
+            </select>
+        </div>
+        <div class="filter-group" style="flex:2;">
+            <label><i class="fas fa-search"></i> بحث</label>
+            <input type="text" id="empSearch" class="filter-input" placeholder="ابحث بالاسم..." oninput="renderTable()">
+        </div>
+    </div>
+
+    <!-- ADD FORM -->
+    <div class="add-form">
+        <h3><i class="fas fa-user-plus" style="color:#d4af37;"></i> إضافة موظف جديد</h3>
+        <div class="form-grid">
+            <div class="input-group" style="max-width:90px;">
+                <label>صورة</label>
+                <div class="file-wrap" id="photoWrap">
+                    <i class="fas fa-camera" style="display:block;font-size:1.3rem;margin-bottom:3px;"></i>
+                    <span id="photoLbl" style="font-size:0.7rem;">اختر</span>
+                    <input type="file" id="empPhoto" accept="image/*" onchange="document.getElementById('photoLbl').innerText='✓ تم'">
+                </div>
+            </div>
+            <div class="input-group" style="flex:2;">
+                <label>الاسم الكامل</label>
+                <input type="text" id="empName" placeholder="الاسم ثلاثي...">
+            </div>
+            <div class="input-group">
+                <label>الوظيفة</label>
+                <select id="empRole">
+                    <option value="consultant">استشاري</option>
+                    <option value="specialist">أخصائي</option>
+                    <option value="intern">طبيب امتياز</option>
+                    <option value="rehab">كابتن تأهيل</option>
+                    <option value="secretary">سكرتاريا</option>
+                    <option value="worker">عمال / خدمات</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>الفرع</label>
+                <select id="empBranch">
+                    <option value="المهندسين">المهندسين</option>
+                    <option value="أكتوبر">أكتوبر</option>
+                    <option value="الهرم">الهرم</option>
+                    <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+                    <option value="الإدارة المركزية">الإدارة المركزية</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>الراتب (ج.م)</label>
+                <input type="number" id="empSalary" placeholder="مثال: 5000" min="0">
+            </div>
+            <div class="input-group">
+                <label>أيام العمل/أسبوع</label>
+                <input type="number" id="empWorkDays" placeholder="مثال: 5" min="1" max="7" value="5">
+            </div>
+            <div class="input-group">
+                <label>مستندات</label>
+                <div class="file-wrap">
+                    <i class="fas fa-file-pdf" style="color:#e67e22;display:block;font-size:1.1rem;margin-bottom:2px;"></i>
+                    <span id="docLbl" style="font-size:0.7rem;color:#e67e22;">إرفاق</span>
+                    <input type="file" id="empDocs" multiple accept="image/*,.pdf" onchange="document.getElementById('docLbl').innerText='✓ '+this.files.length+' ملف'">
+                </div>
+            </div>
+            <button class="btn-add" id="addBtn" onclick="addEmployee()">
+                <i class="fas fa-user-check"></i> إضافة
+            </button>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-container">
+        <div class="table-scroll">
+            <table>
+                <thead><tr>
+                    <th>الموظف</th>
+                    <th>الفرع</th>
+                    <th>الوظيفة</th>
+                    <th>الراتب الأساسي</th>
+                    <th>خصومات / بونص</th>
+                    <th>الصافي</th>
+                    <th>إجراءات</th>
+                </tr></thead>
+                <tbody id="empTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PRINT AREA -->
+    <div id="printArea" style="display:none;"></div>
+
+    <!-- ===== قسم الجلسات المنزلية ===== -->
+    <div class="home-visits-section">
+        <div class="hv-header">
+            <h2><i class="fas fa-home"></i> الجلسات المنزلية — بوابة الدكاترة</h2>
+            <button class="btn-add" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);padding:8px 16px;font-size:0.85rem;" onclick="openAddDoctorModal()">
+                <i class="fas fa-user-plus"></i> إضافة دكتور
+            </button>
+        </div>
+        <div class="hv-body">
+            <div id="hvDoctorsList">
+                <div style="text-align:center;padding:30px;color:#bbb;">
+                    <i class="fas fa-stethoscope" style="font-size:2rem;display:block;margin-bottom:10px;color:#e0e0e0;"></i>
+                    <p style="font-weight:700;">لا يوجد دكاترة جلسات منزلية</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ===== Doctor Portal ===== -->
+<div id="doctorPortal">
+    <div class="portal-header">
+        <img src="logo.png" alt="" style="height:36px;" onerror="this.style.display='none'">
+        <div>
+            <h1>LIFE SPORT — بوابة الدكتور</h1>
+            <span id="portalDocName">...</span>
+        </div>
+    </div>
+    <div class="portal-body">
+        <div class="portal-welcome">
+            <h2>أهلاً د. <span id="portalWelcomeName">...</span> 👋</h2>
+            <p>هنا تقدر تشوف حالاتك وتسجل الجلسات المنزلية</p>
+        </div>
+        <div class="portal-stats">
+            <div class="portal-stat"><div class="ps-num" id="portalTotalCases" style="color:#7b1fa2;">0</div><div class="ps-lbl">إجمالي الحالات</div></div>
+            <div class="portal-stat"><div class="ps-num" id="portalTotalSessions" style="color:#27ae60;">0</div><div class="ps-lbl">جلسات الشهر</div></div>
+            <div class="portal-stat"><div class="ps-num" id="portalEarnings" style="color:#c49a2a;">0 ج</div><div class="ps-lbl">مستحقاتك</div></div>
+        </div>
+        <div class="portal-cases">
+            <div class="portal-cases-header">
+                <h3><i class="fas fa-list" style="color:#7b1fa2;"></i> حالاتك النشطة</h3>
+                <span id="portalActiveCasesCount" style="background:#f3e5f5;color:#7b1fa2;padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:800;">0 حالة</span>
+            </div>
+            <div id="portalCasesList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD DOCTOR MODAL -->
+<div id="addDoctorModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3><i class="fas fa-stethoscope" style="color:#7b1fa2;"></i> إضافة دكتور جلسات منزلية</h3>
+        <span class="modal-label">اسم الدكتور</span>
+        <input type="text" id="hvDocName" class="modal-input" placeholder="د. أحمد محمد...">
+        <span class="modal-label">رقم التليفون (للواتساب)</span>
+        <input type="tel" id="hvDocPhone" class="modal-input" placeholder="01XXXXXXXXX">
+        <span class="modal-label">نسبة الدكتور من كل جلسة (%)</span>
+        <input type="number" id="hvDocPercent" class="modal-input" min="1" max="100" placeholder="مثال: 60">
+        <span class="modal-label" style="color:#999;font-size:0.75rem;">سيتم توليد كود سري تلقائياً للدكتور</span>
+        <div class="modal-footer">
+            <button class="btn-save" onclick="addHvDoctor()"><i class="fas fa-check"></i> إضافة وإنشاء الكود</button>
+            <button class="btn-gray" onclick="closeModal('addDoctorModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- ADD CASE MODAL -->
+<div id="addCaseModal" class="modal-overlay">
+    <div class="modal-box" style="width:520px;">
+        <h3><i class="fas fa-user-injured" style="color:#7b1fa2;"></i> إضافة حالة للدكتور: <span id="caseDocName" style="color:#7b1fa2;"></span></h3>
+        <span class="modal-label">نوع الحالة</span>
+        <select id="caseType" class="modal-input" onchange="toggleCaseType()">
+            <option value="cash">كاش</option>
+            <option value="company">شركة تأمين</option>
+        </select>
+        <span class="modal-label">اسم المريض</span>
+        <input type="text" id="casePatientName" class="modal-input" placeholder="الاسم الكامل...">
+        <span class="modal-label">رقم التليفون</span>
+        <input type="tel" id="casePhone" class="modal-input" placeholder="01XXXXXXXXX">
+        <span class="modal-label">العنوان / المنطقة</span>
+        <input type="text" id="caseAddress" class="modal-input" placeholder="مثال: المهندسين، ش أحمد عرابي...">
+        <span class="modal-label">التشخيص / الإصابة</span>
+        <input type="text" id="caseDiagnosis" class="modal-input" placeholder="مثال: ألم أسفل الظهر...">
+        <span class="modal-label">سعر الجلسة (ج.م)</span>
+        <input type="number" id="caseSessionPrice" class="modal-input" min="0" placeholder="مثال: 300" oninput="calcCaseDoc()">
+        <div id="companyFields" style="display:none;">
+            <span class="modal-label">اسم شركة التأمين</span>
+            <input type="text" id="caseCompany" class="modal-input" placeholder="مثال: مجموعة عثمان">
+            <span class="modal-label">عدد الجلسات الموافقة</span>
+            <input type="number" id="caseApprovedSessions" class="modal-input" min="1" placeholder="مثال: 12">
+            <span class="modal-label">نسبة تحمل الشركة (%)</span>
+            <input type="number" id="caseCompanyCoverage" class="modal-input" min="0" max="100" placeholder="مثال: 80" oninput="calcCaseDoc()">
+        </div>
+        <div id="caseDocShare" style="display:none; background:#f3e5f5; border:1px solid #e1bee7; border-radius:10px; padding:12px; margin-top:8px; font-weight:700; color:#7b1fa2; font-size:0.88rem;"></div>
+        <div class="modal-footer">
+            <button class="btn-save" onclick="addHvCase()"><i class="fas fa-check"></i> إضافة الحالة</button>
+            <button class="btn-gray" onclick="closeModal('addCaseModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- REGISTER SESSION MODAL (portal) -->
+<div id="registerSessionModal" class="modal-overlay" style="z-index:9100;">
+    <div class="modal-box">
+        <h3><i class="fas fa-calendar-check" style="color:#7b1fa2;"></i> تسجيل جلسة</h3>
+        <div id="regSessionInfo" style="background:#f3e5f5;border-radius:10px;padding:12px;margin-bottom:14px;font-weight:700;color:#7b1fa2;font-size:0.88rem;"></div>
+        <span class="modal-label">تاريخ الجلسة</span>
+        <input type="date" id="regSessionDate" class="modal-input">
+        <span class="modal-label">ملاحظات (اختياري)</span>
+        <input type="text" id="regSessionNotes" class="modal-input" placeholder="أي ملاحظات عن الجلسة...">
+        <div class="modal-footer">
+            <button class="btn-save" onclick="savePortalSession()"><i class="fas fa-check"></i> تسجيل الجلسة</button>
+            <button class="btn-gray" onclick="closeModal('registerSessionModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+    // تعطيل persistence تماماً عشان يشتغل من file:// وكمان من سيرفر
+        // تأكيد الاتصال بعد 3 ثواني
+        setTimeout(() => {
+            const st = document.getElementById('serverStatus');
+            if (st && st.innerHTML.includes('جاري')) {
+                st.innerHTML = '<i class="fas fa-check-circle"></i> متصل';
+            }
+        }, 3000);
+
+    let globalEmployees = [];
+    let userRole = '', userBranch = '', isCentralAdmin = false;
+    let activeEmpId = '', activeEmpData = null;
+
+    const roleData = {
+        consultant: { text: 'استشاري', icon: 'fa-user-md',      cls: 'role-consultant' },
+        specialist: { text: 'أخصائي',  icon: 'fa-stethoscope',  cls: 'role-specialist' },
+        intern:     { text: 'طبيب امتياز', icon: 'fa-user-graduate', cls: 'role-intern' },
+        rehab:      { text: 'كابتن تأهيل', icon: 'fa-running',   cls: 'role-rehab' },
+        secretary:  { text: 'سكرتاريا', icon: 'fa-keyboard',    cls: 'role-secretary' },
+        worker:     { text: 'عمال/خدمات', icon: 'fa-broom',     cls: 'role-worker' }
+    };
+
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-times-circle'}" style="color:${type==='success'?'#27ae60':'#e74c3c'};"></i> ${msg}`;
+        c.appendChild(t);
+        setTimeout(() => t.classList.add('show'), 80);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+    }
+
+    window.onload = function() {
+        userRole   = localStorage.getItem('userRole')   || 'owner';
+        userBranch = localStorage.getItem('userBranch') || 'المهندسين';
+        if (userRole === 'reception') { window.location.href = 'reservations.html'; return; }
+        isCentralAdmin = (userRole === 'owner' || userBranch === 'الإدارة المركزية');
+
+        document.getElementById('headerUserInfo').innerText = `أهلاً: ${localStorage.getItem('userName')||'مستخدم'} | ${userBranch}`;
+
+        let fb = document.getElementById('filterBranch');
+        let eb = document.getElementById('empBranch');
+        if (!isCentralAdmin) {
+            fb.value = userBranch; fb.disabled = true;
+            eb.value = userBranch; eb.disabled = true;
+        }
+
+        fetchEmployees();
+        initHrMonthFilter();
+    };
+
+    // ===== MONTH FILTER =====
+    let hrSelectedMonth = '';
+
+    function initHrMonthFilter() {
+        const sel = document.getElementById('hrMonthFilter');
+        const now = new Date();
+        let opts = '';
+        for (let i = -6; i <= 3; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+            const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+            const lbl = d.toLocaleDateString('ar-EG', {month:'long', year:'numeric'});
+            opts += `<option value="${val}" ${i===0?'selected':''}>${lbl}</option>`;
+        }
+        sel.innerHTML = opts;
+        hrSelectedMonth = sel.value;
+        updateHrMonthLabel();
+    }
+
+    function onHrMonthChange() {
+        hrSelectedMonth = document.getElementById('hrMonthFilter').value;
+        updateHrMonthLabel();
+        renderTable();
+    }
+
+    function setHrCurrentMonth() {
+        const now = new Date();
+        hrSelectedMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        document.getElementById('hrMonthFilter').value = hrSelectedMonth;
+        updateHrMonthLabel();
+        renderTable();
+    }
+
+    function shiftHrMonth(dir) {
+        const [y,m] = hrSelectedMonth.split('-').map(Number);
+        const d = new Date(y, m-1+dir, 1);
+        hrSelectedMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        document.getElementById('hrMonthFilter').value = hrSelectedMonth;
+        updateHrMonthLabel();
+        renderTable();
+    }
+
+    function updateHrMonthLabel() {
+        const [y,m] = hrSelectedMonth.split('-').map(Number);
+        const lbl = new Date(y,m-1,1).toLocaleDateString('ar-EG',{month:'long',year:'numeric'});
+        document.getElementById('hrMonthLabel').innerText = lbl;
+    }
+
+    // تحقق هل البيانات بتاعت الشهر ده ولا نصفر
+    function getMonthData(emp) {
+        // الغياب والبونص بيتحفظوا مع الشهر
+        // لو الشهر المحدد مش الشهر الحالي، نشوف لو فيه سجل للشهر ده
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        if (hrSelectedMonth === currentMonth) {
+            return { absence: parseInt(emp.absenceDays)||0, bonus: parseFloat(emp.bonus)||0 };
+        }
+        // للشهور السابقة نشوف في monthlyRecords
+        const records = emp.monthlyRecords || {};
+        const record = records[hrSelectedMonth] || {};
+        return { absence: parseInt(record.absenceDays)||0, bonus: parseFloat(record.bonus)||0 };
+    }
+
+    function fetchEmployees() {
+        db.collection("employees").orderBy("createdAt", "desc").onSnapshot(snap => {
+            globalEmployees = [];
+            snap.forEach(doc => { let d = doc.data(); d.id = doc.id; globalEmployees.push(d); });
+            renderTable();
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-circle" style="color:#27ae60;font-size:0.6rem;"></i> متصل';
+        }, err => {
+            console.error(err);
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i> خطأ في الاتصال';
+        });
+    }
+
+    function renderTable() {
+        let filterB = document.getElementById('filterBranch').value;
+        let filterR = document.getElementById('filterRole').value;
+        let search  = document.getElementById('empSearch').value.toLowerCase();
+        let tbody   = document.getElementById('empTableBody');
+        tbody.innerHTML = '';
+
+        let totalSalary = 0, totalDeduct = 0, totalBonus = 0, count = 0;
+
+        let filtered = globalEmployees.filter(e => {
+            let branch = e.branch || 'المهندسين';
+            if (!isCentralAdmin && branch !== userBranch) return false;
+            if (filterB !== 'all' && branch !== filterB) return false;
+            if (filterR !== 'all' && e.role !== filterR) return false;
+            if (search && !e.name.toLowerCase().includes(search)) return false;
+            return true;
+        });
+
+        filtered.forEach(emp => {
+            count++;
+            let role    = roleData[emp.role] || roleData['worker'];
+            let salary  = parseFloat(emp.salary) || 0;
+            let workDays = parseInt(emp.workDays) || 5;
+
+            // بيانات الشهر المحدد (بتتصفر تلقائياً لو شهر تاني)
+            let monthData = getMonthData(emp);
+            let absence = monthData.absence;
+            let bonus   = monthData.bonus;
+
+            // حساب الخصم: راتب يومي = راتب شهري / (workDays × 4.33 أسابيع)
+            let dailyRate  = salary / (workDays * 4.33);
+            let deduction  = Math.round(dailyRate * absence);
+            let netSalary  = salary - deduction + bonus;
+
+            totalSalary += salary;
+            totalDeduct += deduction;
+            totalBonus  += bonus;
+
+            let photo = emp.photo || '';
+            let docsJSON = encodeURIComponent(JSON.stringify(emp.docs || []));
+
+            tbody.innerHTML += `
+            <tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        ${photo ? `<img src="${photo}" class="emp-avatar" onclick="openImage('${photo}')">` : `<div class="emp-avatar" style="display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#d4af37;">${emp.name.charAt(0)}</div>`}
+                        <div>
+                            <div class="emp-name">${emp.name}</div>
+                            <div style="font-size:0.76rem;color:#999;">أيام عمل: ${workDays}/أسبوع</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span style="font-weight:700;color:#555;font-size:0.88rem;">${emp.branch||'-'}</span></td>
+                <td><span class="role-badge ${role.cls}"><i class="fas ${role.icon}"></i> ${role.text}</span></td>
+                <td><span class="salary-base">${salary.toLocaleString()} ج</span></td>
+                <td>
+                    ${deduction > 0 ? `<div class="salary-deduct"><i class="fas fa-minus-circle"></i> خصم: ${deduction.toLocaleString()} ج (${absence} أيام)</div>` : ''}
+                    ${bonus > 0 ? `<div class="salary-bonus"><i class="fas fa-plus-circle"></i> بونص: ${bonus.toLocaleString()} ج</div>` : ''}
+                    ${deduction === 0 && bonus === 0 ? '<span style="color:#bbb;font-size:0.8rem;">لا يوجد</span>' : ''}
+                </td>
+                <td><span class="salary-net">${netSalary.toLocaleString()} ج</span></td>
+                <td>
+                    <div style="display:flex;flex-direction:column;gap:5px;">
+                        <div style="display:flex;gap:5px;">
+                            <button class="btn-action btn-docs"    onclick="openDocs('${emp.name}','${docsJSON}')"><i class="fas fa-folder-open"></i></button>
+                            <button class="btn-action btn-absence" onclick="openAbsenceModal('${emp.id}')"><i class="fas fa-calendar-times"></i> غياب</button>
+                        </div>
+                        <div style="display:flex;gap:5px;">
+                            <button class="btn-action btn-bonus"  onclick="openBonusModal('${emp.id}')"><i class="fas fa-gift"></i> بونص</button>
+                            <button class="btn-action btn-settle" onclick="openSettleModal('${emp.id}')"><i class="fas fa-handshake"></i></button>
+                            <button class="btn-action btn-delete" onclick="deleteEmployee('${emp.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#bbb;"><i class="fas fa-users" style="font-size:2rem;display:block;margin-bottom:10px;color:#e0e0e0;"></i>لا يوجد موظفون</td></tr>`;
+        }
+
+        let netTotal = totalSalary - totalDeduct + totalBonus;
+        document.getElementById('sumCount').innerText     = count;
+        document.getElementById('sumSalaries').innerText  = totalSalary.toLocaleString() + ' ج';
+        document.getElementById('sumDeductions').innerText = totalDeduct.toLocaleString() + ' ج';
+        document.getElementById('sumNet').innerText       = netTotal.toLocaleString() + ' ج';
+    }
+
+    async function addEmployee() {
+        let name     = document.getElementById('empName').value.trim();
+        let salary   = parseFloat(document.getElementById('empSalary').value);
+        let workDays = parseInt(document.getElementById('empWorkDays').value) || 5;
+        if (!name || isNaN(salary)) return showToast("أكمل البيانات!", "error");
+
+        let btn = document.getElementById('addBtn');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        try {
+            let docsArr = [], photoB64 = '';
+            let docFiles = document.getElementById('empDocs').files;
+            for (let f of docFiles) {
+                let b64 = await readFileAsBase64(f); docsArr.push({ name: f.name, type: f.type, data: b64 });
+            }
+            let photoFile = document.getElementById('empPhoto').files[0];
+            if (photoFile) photoB64 = await resizeImage(photoFile);
+
+            await db.collection("employees").add({
+                name, salary, workDays,
+                role:   document.getElementById('empRole').value,
+                branch: document.getElementById('empBranch').value,
+                photo:  photoB64,
+                docs:   docsArr,
+                absenceDays: 0,
+                bonus: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            ['empName','empSalary','empWorkDays','empPhoto','empDocs'].forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('photoLbl').innerText = 'اختر';
+            document.getElementById('docLbl').innerText = 'إرفاق';
+            showToast(`تم إضافة ${name} ✅`);
+        } catch(e) { showToast("خطأ!", "error"); }
+        finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-check"></i> إضافة'; }
+    }
+
+    // ===== ABSENCE =====
+    function openAbsenceModal(empId) {
+        let emp = globalEmployees.find(e => e.id === empId);
+        if (!emp) return;
+        activeEmpId = empId; activeEmpData = emp;
+        document.getElementById('absEmpName').value = emp.name;
+        document.getElementById('absDays').value = emp.absenceDays || 0;
+        document.getElementById('absResult').style.display = 'none';
+        document.getElementById('absenceModal').classList.add('active');
+        calcAbsence();
+    }
+
+    function calcAbsence() {
+        if (!activeEmpData) return;
+        let days   = parseInt(document.getElementById('absDays').value) || 0;
+        let salary = parseFloat(activeEmpData.salary) || 0;
+        let workDays = parseInt(activeEmpData.workDays) || 5;
+        let daily  = salary / (workDays * 4.33);
+        let deduct = Math.round(daily * days);
+        let net    = salary - deduct + (parseFloat(activeEmpData.bonus)||0);
+        let res = document.getElementById('absResult');
+        res.style.display = 'block';
+        res.innerHTML = `
+            <div class="res-row"><span>الراتب الأساسي:</span><span style="color:#27ae60;font-weight:900;">${salary.toLocaleString()} ج</span></div>
+            <div class="res-row"><span>أجر اليوم الواحد:</span><span>${Math.round(daily).toLocaleString()} ج</span></div>
+            <div class="res-row"><span>خصم ${days} أيام:</span><span style="color:#e74c3c;font-weight:900;">- ${deduct.toLocaleString()} ج</span></div>
+            <div class="res-row res-total"><span>الصافي المستحق:</span><span>${net.toLocaleString()} ج</span></div>`;
+    }
+
+    async function saveAbsence() {
+        let days = parseInt(document.getElementById('absDays').value) || 0;
+        try {
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            // حفظ في السجل الشهري
+            let updateData = { absenceDays: days };
+            updateData[`monthlyRecords.${hrSelectedMonth}.absenceDays`] = days;
+            // لو الشهر الحالي، حدّث القيمة الرئيسية برضه
+            if (hrSelectedMonth === currentMonth) updateData.absenceDays = days;
+            await db.collection("employees").doc(activeEmpId).update(updateData);
+            closeModal('absenceModal');
+            showToast("تم حفظ الغياب ✅");
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    // ===== BONUS =====
+    function openBonusModal(empId) {
+        let emp = globalEmployees.find(e => e.id === empId);
+        if (!emp) return;
+        activeEmpId = empId; activeEmpData = emp;
+        document.getElementById('bonEmpName').value = emp.name;
+        document.getElementById('bonAmount').value = emp.bonus || 0;
+        document.getElementById('bonResult').style.display = 'none';
+        document.getElementById('bonusModal').classList.add('active');
+        calcBonus();
+    }
+
+    function calcBonus() {
+        if (!activeEmpData) return;
+        let amount = parseFloat(document.getElementById('bonAmount').value) || 0;
+        let type   = document.getElementById('bonType').value;
+        let salary = parseFloat(activeEmpData.salary) || 0;
+        let deduct = Math.round((salary / ((parseInt(activeEmpData.workDays)||5)*4.33)) * (parseInt(activeEmpData.absenceDays)||0));
+        let net    = salary - deduct + amount;
+        let typeTxt = { bonus: 'بونص', allowance: 'علاوة', overtime: 'أوفرتايم' }[type];
+        let res = document.getElementById('bonResult');
+        res.style.display = 'block';
+        res.innerHTML = `
+            <div class="res-row"><span>الراتب الأساسي:</span><span style="color:#27ae60;font-weight:900;">${salary.toLocaleString()} ج</span></div>
+            <div class="res-row"><span>${typeTxt}:</span><span style="color:#1565c0;font-weight:900;">+ ${amount.toLocaleString()} ج</span></div>
+            <div class="res-row res-total"><span>الصافي المستحق:</span><span>${net.toLocaleString()} ج</span></div>`;
+    }
+
+    async function saveBonus() {
+        let amount = parseFloat(document.getElementById('bonAmount').value) || 0;
+        try {
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            let updateData = {};
+            updateData[`monthlyRecords.${hrSelectedMonth}.bonus`] = amount;
+            if (hrSelectedMonth === currentMonth) updateData.bonus = amount;
+            await db.collection("employees").doc(activeEmpId).update(updateData);
+            closeModal('bonusModal');
+            showToast("تم إضافة البونص ✅");
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    // ===== SETTLEMENT =====
+    function openSettleModal(empId) {
+        let emp = globalEmployees.find(e => e.id === empId);
+        if (!emp) return;
+        activeEmpId = empId; activeEmpData = emp;
+        document.getElementById('setEmpName').value = emp.name;
+        document.getElementById('setLastDay').value = new Date().toISOString().split('T')[0];
+        document.getElementById('setResult').style.display = 'none';
+        document.getElementById('settleModal').classList.add('active');
+        calcSettlement();
+    }
+
+    function calcSettlement() {
+        if (!activeEmpData) return;
+        let lastDay  = new Date(document.getElementById('setLastDay').value);
+        let now      = new Date();
+        let monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        let daysWorked = Math.ceil((lastDay - monthStart) / (1000 * 60 * 60 * 24)) + 1;
+        let daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+        let salary   = parseFloat(activeEmpData.salary) || 0;
+        let partial  = Math.round(salary * daysWorked / daysInMonth);
+        let deduct   = Math.round((salary / ((parseInt(activeEmpData.workDays)||5)*4.33)) * (parseInt(activeEmpData.absenceDays)||0));
+        let bonus    = parseFloat(activeEmpData.bonus) || 0;
+        let net      = partial - deduct + bonus;
+        let res = document.getElementById('setResult');
+        res.style.display = 'block';
+        res.innerHTML = `
+            <div class="res-row"><span>أيام العمل هذا الشهر:</span><span style="font-weight:900;">${daysWorked} من ${daysInMonth} يوم</span></div>
+            <div class="res-row"><span>الراتب الكامل:</span><span>${salary.toLocaleString()} ج</span></div>
+            <div class="res-row"><span>المستحق بالأيام:</span><span style="color:#27ae60;font-weight:900;">${partial.toLocaleString()} ج</span></div>
+            ${deduct > 0 ? `<div class="res-row"><span>خصم الغياب:</span><span style="color:#e74c3c;">- ${deduct.toLocaleString()} ج</span></div>` : ''}
+            ${bonus > 0 ? `<div class="res-row"><span>البونص:</span><span style="color:#1565c0;">+ ${bonus.toLocaleString()} ج</span></div>` : ''}
+            <div class="res-row res-total"><span>💰 الصافي المستحق:</span><span>${net.toLocaleString()} ج</span></div>`;
+    }
+
+    // ===== DELETE =====
+    async function deleteEmployee(empId) {
+        if (!confirm("هل أنت متأكد من حذف الموظف نهائياً؟")) return;
+        try {
+            await db.collection("employees").doc(empId).delete();
+            showToast("تم الحذف.");
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    // ===== MODALS =====
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function openAddDoctorModal() {
+        // امسح الحقول
+        const n = document.getElementById('hvDocName'); if (n) n.value = '';
+        const p = document.getElementById('hvDocPhone'); if (p) p.value = '';
+        const pc = document.getElementById('hvDocPercent'); if (pc) pc.value = '';
+        document.getElementById('addDoctorModal').classList.add('active');
+    }
+    window.openAddDoctorModal = openAddDoctorModal;
+
+    // ===== DOCS/IMAGE =====
+    function openDocs(name, docsJSON) {
+        document.getElementById('docsEmpName').innerText = name;
+        let list = document.getElementById('docsListContainer'); list.innerHTML = '';
+        let docs = JSON.parse(decodeURIComponent(docsJSON));
+        if (docs && docs.length > 0) {
+            docs.forEach(d => {
+                let isPdf = d.type && d.type.includes('pdf');
+                let act   = isPdf ? `openPdf('${d.data}')` : `openImage('${d.data}')`;
+                list.innerHTML += `<div class="doc-item" onclick="${act}"><i class="fas ${isPdf?'fa-file-pdf':'fa-file-image'}"></i> ${d.name}<span class="doc-view-btn">عرض</span></div>`;
+            });
+        } else {
+            list.innerHTML = `<div style="text-align:center;padding:20px;color:#e74c3c;font-weight:700;"><i class="fas fa-times-circle" style="font-size:2rem;display:block;margin-bottom:10px;"></i>لا توجد مستندات</div>`;
+        }
+        document.getElementById('docsViewer').classList.add('active');
+    }
+    function closeDocs(e) { document.getElementById('docsViewer').classList.remove('active'); }
+    function openImage(src) { document.getElementById('enlargedPhoto').src = src; document.getElementById('imageViewer').classList.add('active'); }
+    function closeImage() { document.getElementById('imageViewer').classList.remove('active'); }
+    function openPdf(b64) { document.getElementById('pdfIframe').src = b64; document.getElementById('pdfViewer').classList.add('active'); }
+    function closePdf() { document.getElementById('pdfViewer').classList.remove('active'); document.getElementById('pdfIframe').src = ''; }
+
+    // ===== PRINT BY BRANCH =====
+    function printByBranch() {
+        let branches = [...new Set(globalEmployees.map(e => e.branch || 'المهندسين'))].sort();
+        let filterB  = document.getElementById('filterBranch').value;
+        if (filterB !== 'all') branches = branches.filter(b => b === filterB);
+
+        let printHTML = '';
+        branches.forEach(branch => {
+            let emps = globalEmployees.filter(e => (e.branch||'المهندسين') === branch);
+            if (!isCentralAdmin) emps = emps.filter(e => (e.branch||'المهندسين') === userBranch);
+            if (!emps.length) return;
+
+            let branchTotal = 0, branchNet = 0;
+            let rows = emps.map((emp, i) => {
+                let salary  = parseFloat(emp.salary)||0;
+                let workDays = parseInt(emp.workDays)||5;
+                let absence = parseInt(emp.absenceDays)||0;
+                let bonus   = parseFloat(emp.bonus)||0;
+                let daily   = salary / (workDays * 4.33);
+                let deduct  = Math.round(daily * absence);
+                let net     = salary - deduct + bonus;
+                branchTotal += salary; branchNet += net;
+                let role = roleData[emp.role]||roleData['worker'];
+                return `<tr>
+                    <td>${i+1}</td>
+                    <td style="font-weight:900;">${emp.name}</td>
+                    <td>${role.text}</td>
+                    <td style="color:#27ae60;font-weight:900;">${salary.toLocaleString()} ج</td>
+                    <td style="color:#e74c3c;">${deduct>0?'-'+deduct.toLocaleString()+' ج ('+absence+' أيام)':'-'}</td>
+                    <td style="color:#1565c0;">${bonus>0?'+'+bonus.toLocaleString()+' ج':'-'}</td>
+                    <td style="font-weight:900;font-size:1.05rem;">${net.toLocaleString()} ج</td>
+                </tr>`;
+            }).join('');
+
+            printHTML += `
+            <div class="branch-print-section">
+                <div class="branch-print-header">
+                    <h2><i class="fas fa-map-marker-alt"></i> فرع ${branch}</h2>
+                    <span style="color:rgba(255,255,255,0.7);font-size:0.85rem;">${new Date().toLocaleDateString('ar-EG')}</span>
+                </div>
+                <table>
+                    <thead><tr><th>م</th><th>الاسم</th><th>الوظيفة</th><th>الراتب الأساسي</th><th>الخصم</th><th>البونص</th><th>الصافي</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="branch-total">
+                    إجمالي الرواتب: ${branchTotal.toLocaleString()} ج &nbsp;|&nbsp; الصافي الكلي: <strong>${branchNet.toLocaleString()} ج</strong>
+                </div>
+            </div>`;
+        });
+
+        let printArea = document.getElementById('printArea');
+        printArea.innerHTML = printHTML;
+        printArea.style.display = 'block';
+        window.print();
+        setTimeout(() => { printArea.style.display = 'none'; }, 500);
+    }
+
+    // ===== FILE UTILS =====
+    function readFileAsBase64(file) {
+        return new Promise(res => { let r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
+    }
+    function resizeImage(file) {
+        return new Promise(res => {
+            let r = new FileReader();
+            r.onload = e => {
+                let img = new Image();
+                img.onload = () => {
+                    let c = document.getElementById('canvas'); let ctx = c.getContext('2d');
+                    c.width = 400; c.height = 400;
+                    let s = Math.min(img.width, img.height);
+                    ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, 400, 400);
+                    res(c.toDataURL('image/jpeg', 0.82));
+                };
+                img.src = e.target.result;
+            };
+            r.readAsDataURL(file);
+        });
+    }
+    // ===== HOME VISITS — DOCTOR PORTAL =====
+    let globalHvDoctors = [], globalHvCases = [], globalHvSessions = [];
+    let activeHvDocId = '', portalDocData = null, activeCaseId = '';
+
+    // تحقق من URL — لو في ?doc=XXXX يفتح بوابة الدكتور
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const docCode = params.get('doc');
+        if (docCode) {
+            showDoctorPortal(docCode);
+        }
+        fetchHvData();
+    });
+
+    function fetchHvData() {
+        db.collection("hv_doctors").onSnapshot(snap => {
+            globalHvDoctors = [];
+            snap.forEach(d => { let x = d.data(); x.id = d.id; globalHvDoctors.push(x); });
+            renderHvDoctors();
+        });
+        db.collection("hv_cases").onSnapshot(snap => {
+            globalHvCases = [];
+            snap.forEach(d => { let x = d.data(); x.id = d.id; globalHvCases.push(x); });
+            renderHvDoctors();
+        });
+        db.collection("hv_sessions").onSnapshot(snap => {
+            globalHvSessions = [];
+            snap.forEach(d => { let x = d.data(); x.id = d.id; globalHvSessions.push(x); });
+            renderHvDoctors();
+            // تحديث earnings لكل دكتور
+            updateDoctorEarnings();
+        });
+    }
+
+    function generateCode() {
+        return Math.floor(1000 + Math.random() * 9000).toString();
+    }
+
+    async function addHvDoctor() {
+        let name    = document.getElementById('hvDocName').value.trim();
+        let phone   = document.getElementById('hvDocPhone').value.trim();
+        let percent = parseFloat(document.getElementById('hvDocPercent').value);
+        if (!name || !phone || isNaN(percent)) return showToast("أكمل البيانات!", "error");
+        let code = generateCode();
+        try {
+            await db.collection("hv_doctors").add({ name, phone, percent, code, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            closeModal('addDoctorModal');
+            document.getElementById('hvDocName').value = '';
+            document.getElementById('hvDocPhone').value = '';
+            document.getElementById('hvDocPercent').value = '';
+            showToast(`تم إضافة د. ${name} — الكود: ${code} ✅`);
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    function renderHvDoctors() {
+        let container = document.getElementById('hvDoctorsList');
+        if (!globalHvDoctors.length) {
+            container.innerHTML = `<div style="text-align:center;padding:30px;color:#bbb;"><i class="fas fa-stethoscope" style="font-size:2rem;display:block;margin-bottom:10px;color:#e0e0e0;"></i><p style="font-weight:700;">لا يوجد دكاترة جلسات منزلية</p></div>`;
+            return;
+        }
+        container.innerHTML = globalHvDoctors.map(doc => {
+            let cases    = globalHvCases.filter(c => c.docId === doc.id && !c.isClosed);
+            let sessions = globalHvSessions.filter(s => s.docId === doc.id);
+            let now = new Date(); let monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            let monthSessions = sessions.filter(s => {
+                if (!s.date) return false;
+                return new Date(s.date) >= monthStart;
+            });
+            let earnings = monthSessions.reduce((sum, s) => sum + (s.docShare || 0), 0);
+            let link = `${window.location.href.split('?')[0]}?doc=${doc.code}`;
+
+            return `<div class="hv-doctor-card">
+                <div class="hv-doc-top">
+                    <div>
+                        <div class="hv-doc-name"><i class="fas fa-user-md" style="color:#7b1fa2;margin-left:5px;"></i> د. ${doc.name}</div>
+                        <div style="font-size:0.78rem;color:#999;margin-top:3px;">نسبته: <strong style="color:#7b1fa2;">${doc.percent}%</strong> | كوده: <strong style="letter-spacing:2px;">${doc.code}</strong></div>
+                    </div>
+                    <span class="hv-doc-code">${doc.code}</span>
+                </div>
+                <div class="hv-stats">
+                    <div class="hv-stat">حالات نشطة: <span>${cases.length}</span></div>
+                    <div class="hv-stat">جلسات الشهر: <span>${monthSessions.length}</span></div>
+                    <div class="hv-stat">مستحقاته: <span>${earnings.toLocaleString()} ج</span></div>
+                </div>
+                <div class="hv-actions">
+                    <button class="btn-hv-wa" onclick="sendDoctorLink('${doc.id}')">
+                        <i class="fab fa-whatsapp"></i> إرسال اللينك
+                    </button>
+                    <button class="btn-hv-cases" onclick="openAddCaseModal('${doc.id}')">
+                        <i class="fas fa-plus"></i> إضافة حالة
+                    </button>
+                    <button class="btn-hv-cases" onclick="viewDoctorCases('${doc.id}')" style="background:#f3e5f5;color:#7b1fa2;border-color:#e1bee7;">
+                        <i class="fas fa-list"></i> الحالات
+                    </button>
+                    <button class="btn-hv-delete" onclick="deleteHvDoctor('${doc.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+
+        // تحديث earnings في جدول الرواتب
+        updateDoctorEarnings();
+    }
+
+    function sendDoctorLink(docId) {
+        let doc = globalHvDoctors.find(d => d.id === docId);
+        if (!doc) return;
+        let link = `${window.location.href.split('?')[0]}?doc=${doc.code}`;
+        let msg = `أهلاً د. ${doc.name} 😊\n\nهذا رابط بوابتك الخاصة في نظام لايف سبورت:\n${link}\n\nكودك السري: ${doc.code}\n\nمن خلال الرابط تقدر تشوف حالاتك وتسجل الجلسات المنزلية.`;
+        let phone = doc.phone.trim();
+        if (phone.startsWith('0')) phone = '2' + phone;
+        else if (!phone.startsWith('20')) phone = '20' + phone;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function openAddCaseModal(docId) {
+        let doc = globalHvDoctors.find(d => d.id === docId);
+        if (!doc) return;
+        activeHvDocId = docId;
+        document.getElementById('caseDocName').innerText = `د. ${doc.name}`;
+        document.getElementById('caseType').value = 'cash';
+        document.getElementById('casePatientName').value = '';
+        document.getElementById('casePhone').value = '';
+        document.getElementById('caseAddress').value = '';
+        document.getElementById('caseDiagnosis').value = '';
+        document.getElementById('caseSessionPrice').value = '';
+        document.getElementById('caseDocShare').style.display = 'none';
+        toggleCaseType();
+        document.getElementById('addCaseModal').classList.add('active');
+    }
+
+    function toggleCaseType() {
+        let isComp = document.getElementById('caseType').value === 'company';
+        document.getElementById('companyFields').style.display = isComp ? 'block' : 'none';
+        calcCaseDoc();
+    }
+
+    function calcCaseDoc() {
+        let doc = globalHvDoctors.find(d => d.id === activeHvDocId);
+        if (!doc) return;
+        let price   = parseFloat(document.getElementById('caseSessionPrice').value) || 0;
+        let type    = document.getElementById('caseType').value;
+        let shareEl = document.getElementById('caseDocShare');
+        if (!price) { shareEl.style.display = 'none'; return; }
+        let docShare = Math.round(price * doc.percent / 100);
+        let coverage = parseFloat(document.getElementById('caseCompanyCoverage').value) || 0;
+        let compPay  = type === 'company' ? Math.round(price * coverage / 100) : 0;
+        shareEl.style.display = 'block';
+        shareEl.innerHTML = `<i class="fas fa-calculator"></i> نصيب الدكتور/جلسة: <strong>${docShare} ج</strong> (${doc.percent}% من ${price} ج)` +
+            (type === 'company' ? ` | الشركة تدفع: <strong>${compPay} ج</strong>` : '');
+    }
+
+    async function addHvCase() {
+        let doc = globalHvDoctors.find(d => d.id === activeHvDocId);
+        if (!doc) return;
+        let name    = document.getElementById('casePatientName').value.trim();
+        let phone   = document.getElementById('casePhone').value.trim();
+        let address = document.getElementById('caseAddress').value.trim();
+        let diag    = document.getElementById('caseDiagnosis').value.trim();
+        let price   = parseFloat(document.getElementById('caseSessionPrice').value);
+        let type    = document.getElementById('caseType').value;
+        if (!name || !price) return showToast("أكمل الاسم والسعر!", "error");
+        let caseData = { docId: activeHvDocId, docName: doc.name, patientName: name, phone, address, diagnosis: diag, sessionPrice: price, type, isClosed: false, sessionsCount: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+        if (type === 'company') {
+            caseData.company = document.getElementById('caseCompany').value;
+            caseData.approvedSessions = parseInt(document.getElementById('caseApprovedSessions').value) || 0;
+            caseData.companyCoverage  = parseFloat(document.getElementById('caseCompanyCoverage').value) || 0;
+        }
+        try {
+            await db.collection("hv_cases").add(caseData);
+            closeModal('addCaseModal');
+            showToast(`تم إضافة حالة ${name} للدكتور ${doc.name} ✅`);
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    async function deleteHvDoctor(docId) {
+        if (!confirm("هل أنت متأكد من حذف الدكتور وكل حالاته؟")) return;
+        try {
+            await db.collection("hv_doctors").doc(docId).delete();
+            showToast("تم الحذف.");
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    // تحديث earnings في جدول الرواتب الأساسي
+    function updateDoctorEarnings() {
+        let now = new Date(); let monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        globalEmployees.forEach(emp => {
+            let doc = globalHvDoctors.find(d => d.name === emp.name || emp.name.includes(d.name));
+            if (!doc) return;
+            let sessions = globalHvSessions.filter(s => s.docId === doc.id && new Date(s.date) >= monthStart);
+            let earnings = sessions.reduce((sum, s) => sum + (s.docShare || 0), 0);
+            if (earnings > 0) {
+                // الـ earnings تتضاف تلقائي في renderTable
+            }
+        });
+    }
+
+    // ===== DOCTOR PORTAL =====
+    async function showDoctorPortal(code) {
+        // إخفاء الواجهة الأساسية
+        document.querySelector('.header') && (document.querySelector('.header').style.display = 'none');
+        document.querySelector('.sidebar') && (document.querySelector('.sidebar').style.display = 'none');
+        document.querySelector('.main-content') && (document.querySelector('.main-content').style.display = 'none');
+        document.getElementById('doctorPortal').style.display = 'block';
+
+        // البحث عن الدكتور بالكود
+        let snap = await db.collection("hv_doctors").where("code", "==", code).get();
+        if (snap.empty) {
+            document.getElementById('doctorPortal').innerHTML = `<div style="text-align:center;padding:60px;"><i class="fas fa-times-circle" style="font-size:3rem;color:#e74c3c;display:block;margin-bottom:15px;"></i><h2 style="color:#0b132b;">كود غير صحيح!</h2><p style="color:#888;">تأكد من الرابط المرسل إليك.</p></div>`;
+            return;
+        }
+        let docDoc = snap.docs[0];
+        portalDocData = docDoc.data(); portalDocData.id = docDoc.id;
+
+        document.getElementById('portalDocName').innerText = `د. ${portalDocData.name}`;
+        document.getElementById('portalWelcomeName').innerText = portalDocData.name;
+
+        // جلب الحالات والجلسات
+        db.collection("hv_cases").where("docId", "==", portalDocData.id).onSnapshot(snap => {
+            globalHvCases = []; snap.forEach(d => { let x = d.data(); x.id = d.id; globalHvCases.push(x); });
+            renderPortal();
+        });
+        db.collection("hv_sessions").where("docId", "==", portalDocData.id).onSnapshot(snap => {
+            globalHvSessions = []; snap.forEach(d => { let x = d.data(); x.id = d.id; globalHvSessions.push(x); });
+            renderPortal();
+        });
+    }
+
+    function renderPortal() {
+        if (!portalDocData) return;
+        let cases = globalHvCases;
+        let now = new Date(); let monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        let monthSessions = globalHvSessions.filter(s => new Date(s.date) >= monthStart);
+        let earnings = monthSessions.reduce((sum, s) => sum + (s.docShare || 0), 0);
+
+        document.getElementById('portalTotalCases').innerText   = cases.length;
+        document.getElementById('portalTotalSessions').innerText = monthSessions.length;
+        document.getElementById('portalEarnings').innerText      = earnings.toLocaleString() + ' ج';
+        document.getElementById('portalActiveCasesCount').innerText = cases.filter(c => !c.isClosed).length + ' حالة';
+
+        let list = document.getElementById('portalCasesList');
+        if (!cases.length) {
+            list.innerHTML = `<div style="text-align:center;padding:25px;color:#bbb;"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:8px;"></i><p>لا توجد حالات بعد</p></div>`;
+            return;
+        }
+        list.innerHTML = cases.map(c => {
+            let caseSessions = globalHvSessions.filter(s => s.caseId === c.id);
+            let remaining = c.type === 'company' ? Math.max(0, (c.approvedSessions||0) - caseSessions.length) : null;
+            return `<div class="portal-case-item">
+                <div>
+                    <div class="pci-name">${c.patientName}</div>
+                    <div class="pci-info"><i class="fas fa-map-marker-alt" style="color:#d4af37;"></i> ${c.address||'-'} | ${c.diagnosis||'-'}</div>
+                    <div class="pci-info" style="margin-top:3px;">جلسات مسجلة: <strong style="color:#7b1fa2;">${caseSessions.length}</strong>${remaining!==null?' | متبقي: <strong>'+remaining+'</strong>':''}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                    <span class="pci-badge ${c.isClosed?'pci-closed':c.type==='cash'?'pci-cash':'pci-comp'}">${c.isClosed?'مغلقة':c.type==='cash'?'كاش':'شركة'}</span>
+                    ${!c.isClosed ? `<button class="btn-register-session" onclick="openRegisterSession('${c.id}')">تسجيل جلسة</button>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function openRegisterSession(caseId) {
+        let c = globalHvCases.find(x => x.id === caseId);
+        if (!c) return;
+        activeCaseId = caseId;
+        let doc = portalDocData;
+        let docShare = Math.round(c.sessionPrice * doc.percent / 100);
+        document.getElementById('regSessionInfo').innerHTML = `
+            <strong>${c.patientName}</strong> | ${c.sessionPrice} ج/جلسة | نصيبك: <strong>${docShare} ج</strong>`;
+        document.getElementById('regSessionDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('regSessionNotes').value = '';
+        document.getElementById('registerSessionModal').classList.add('active');
+    }
+
+    async function savePortalSession() {
+        let c = globalHvCases.find(x => x.id === activeCaseId);
+        if (!c || !portalDocData) return;
+        let date  = document.getElementById('regSessionDate').value;
+        let notes = document.getElementById('regSessionNotes').value;
+        if (!date) return showToast("اختر التاريخ!", "error");
+        let docShare = Math.round(c.sessionPrice * portalDocData.percent / 100);
+        try {
+            await db.collection("hv_sessions").add({
+                docId: portalDocData.id, docName: portalDocData.name,
+                caseId: activeCaseId, patientName: c.patientName,
+                sessionPrice: c.sessionPrice, docShare, date, notes,
+                type: c.type, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            await db.collection("hv_cases").doc(activeCaseId).update({ sessionsCount: (c.sessionsCount||0)+1 });
+            closeModal('registerSessionModal');
+            showToast(`تم تسجيل الجلسة ✅ نصيبك: ${docShare} ج`);
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    function viewDoctorCases(docId) {
+        let doc = globalHvDoctors.find(d => d.id === docId);
+        if (!doc) return;
+        let cases = globalHvCases.filter(c => c.docId === docId);
+        if (!cases.length) return showToast("لا توجد حالات لهذا الدكتور", "error");
+        let msg = `حالات د. ${doc.name}:\n\n` + cases.map((c, i) => `${i+1}. ${c.patientName} — ${c.type==='cash'?'كاش':'شركة'} — ${c.sessionPrice} ج/جلسة — ${c.isClosed?'مغلقة':'نشطة'}`).join('\n');
+        alert(msg);
+    }
+
+</script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+
+
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    </script>
+
+</body></html>

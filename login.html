@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <title>Life Sport - تسجيل الدخول</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0b132b, #1c1814); /* كحلي وبني غامق فخم */
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+        }
+        .login-box {
+            background-color: #fdfbf7; padding: 50px 40px; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); border-top: 4px solid #d4af37; 
+            text-align: center; width: 420px;
+        }
+        .login-box img { width: 140px; margin-bottom: 25px; }
+        .login-box h2 { color: #0b132b; margin-bottom: 25px; font-weight: 600; }
+        .input-group { margin-bottom: 20px; text-align: right; position: relative; }
+        .input-group label { display: block; color: #5c4d3c; margin-bottom: 8px; font-weight: bold; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px 15px; border: 1px solid #dcd1cb; border-radius: 8px;
+            font-size: 1rem; color: #0b132b; outline: none; transition: 0.3s;
+        }
+        #password { padding-left: 40px; }
+        .input-group input:focus, .input-group select:focus { border-color: #d4af37; box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
+        .toggle-eye { position: absolute; left: 15px; top: 40px; color: #5c4d3c; cursor: pointer; font-size: 1.1rem; }
+        .login-btn {
+            width: 100%; padding: 15px; background-color: #0b132b; color: #d4af37; 
+            border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .login-btn:disabled { background-color: #ccc; cursor: not-allowed; color: #666; }
+        .error-message { color: #e74c3c; font-size: 0.9rem; margin-top: 15px; display: none; font-weight: bold; }
+        
+        /* شكل التحميل (Loading) */
+        .loading-spinner { display: none; margin-top: 10px; color: #0b132b; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="logo.png" alt="لوجو المركز">
+        <h2 id="titleText">تسجيل الدخول</h2>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label>الفرع</label>
+                <select id="branchSelect" required>
+                    <option value="" disabled selected>اختر الفرع...</option>
+                    <option value="october">فرع أكتوبر</option>
+                    <option value="mohandessin">فرع المهندسين</option>
+                    <option value="haram">فرع الهرم</option>
+                    <option value="obour">فرع العبور</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="username" placeholder="أدخل اسمك هنا" required>
+            </div>
+            <div class="input-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="password" placeholder="********" required>
+                <i class="fas fa-eye toggle-eye" id="togglePassword"></i>
+            </div>
+            <button type="submit" class="login-btn" id="loginBtn">دخول للنظام</button>
+            <div class="loading-spinner" id="loader"><i class="fas fa-spinner fa-spin"></i> جاري التحقق...</div>
+            <div class="error-message" id="errorMsg">بيانات الدخول غير صحيحة!</div>
+        </form>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHjrZ4a3ZzgaL_bVY3MsKCsxAQwe3ESwnS3rYx1bDEyYyIGGaRiV7TLHzvzYGuMp7IKQ/exec";
+
+        // إظهار وإخفاء الباسورد
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // لوجيك الدخول والربط الحقيقي بالجافا سكريبت
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const branchVal = document.getElementById('branchSelect').value;
+            const userVal = document.getElementById('username').value.trim();
+            const passVal = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('errorMsg');
+            const loginBtn = document.getElementById('loginBtn');
+            const loader = document.getElementById('loader');
+
+            // إظهار اللودر وتعطيل الزرار
+            errorDiv.style.display = 'none';
+            loginBtn.disabled = true;
+            loader.style.display = 'block';
+
+            // إرسال البيانات للرابط بتاعك
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // مهم جداً عشان جوجل سكريبت
+                body: JSON.stringify({
+                    username: userVal,
+                    password: passVal,
+                    branch: branchVal
+                })
+            })
+            .then(() => {
+                // ملاحظة تقنية: جوجل سكريبت مع no-cors مابيرجعش رد مباشر، 
+                // بس إحنا هنفترض إن البيانات وصلت وهنخزن الاسم وننقل للصفحة
+                localStorage.setItem('userName', userVal);
+                localStorage.setItem('userBranch', branchVal);
+                window.location.href = "dashboard.html";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.innerText = "حدث خطأ في الاتصال!";
+                errorDiv.style.display = 'block';
+                loginBtn.disabled = false;
+                loader.style.display = 'none';
+            });
+        });
+    </script>
+    <script src="update-manager.js"></script>
+</body>
+</html>

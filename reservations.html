@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="demo-mode.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Life Sport - قائمة الحجوزات</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        let currentRole = localStorage.getItem('userRole');
+        if (currentRole === 'reception' || currentRole === 'receptionist') {
+            document.write('<style>.admin-only { display: none !important; }</style>');
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf0 100%); display: flex; overflow-x: hidden; color: #1c1e21; min-height: 100vh; }
+
+        /* ===== HEADER ===== */
+        .header { background: linear-gradient(135deg, #0b132b 0%, #1a2a5e 100%); height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 35px; border-bottom: 3px solid #d4af37; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .header-logo { display: flex; align-items: center; gap: 14px; }
+        .header-logo img { height: 42px; }
+        .header-title { color: white; font-size: 1.2rem; font-weight: 900; }
+        .header-title span { color: #d4af37; }
+        .server-status { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; border: 1px solid #27ae60; color: #27ae60; background: rgba(39,174,96,0.1); }
+        #branchInfo { color: #d4af37; font-weight: 800; background: rgba(212,175,55,0.12); padding: 7px 18px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.35); font-size: 0.88rem; margin-right: 12px; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar { background: linear-gradient(180deg, #0e1628, #1a1f36); width: 255px; height: 100vh; position: fixed; top: 72px; right: 0; padding-top: 22px; z-index: 900; border-left: 1px solid rgba(255,255,255,0.04); }
+        .sidebar a { display: flex; align-items: center; gap: 11px; color: #a3aed1; text-decoration: none; padding: 13px 22px; transition: 0.25s; font-size: 0.98rem; border-right: 3px solid transparent; margin-bottom: 3px; }
+        .sidebar a i { width: 18px; text-align: center; }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .sidebar a.active { background: rgba(212,175,55,0.1); border-right: 3px solid #d4af37; color: #d4af37; font-weight: 800; }
+
+        /* ===== MAIN ===== */
+        .main-content { margin-right: 255px; margin-top: 72px; padding: 22px; width: calc(100% - 255px); display: grid; grid-template-columns: 270px 1fr; gap: 18px; align-items: start; }
+
+        /* ===== ADD BOX ===== */
+        .add-reservation-box { background: white; padding: 18px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e8eaf0; position: sticky; top: 88px; max-height: calc(100vh - 110px); overflow-y: auto; align-self: start; }
+        .add-reservation-box::-webkit-scrollbar { width: 3px; }
+        .add-reservation-box::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+        .add-reservation-box h3 { color: #0b132b; margin-bottom: 14px; font-size: 1rem; font-weight: 900; border-bottom: 2px solid #f0f2f5; padding-bottom: 9px; display: flex; align-items: center; gap: 8px; }
+        .input-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .input-group label { font-size: 0.78rem; font-weight: 800; color: #555; }
+        .input-group input, .input-group select { padding: 8px 10px; border-radius: 8px; border: 1.5px solid #e0e4ea; outline: none; font-size: 0.88rem; font-family: 'Tajawal'; background: #f8f9fc; transition: 0.25s; color: #0b132b; }
+        .input-group input:focus, .input-group select:focus { border-color: #d4af37; background: white; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+        .doc-input-wrapper { display: flex; align-items: center; background: #f8f9fc; border: 1.5px solid #e0e4ea; border-radius: 8px; padding-right: 10px; transition: 0.25s; }
+        .doc-input-wrapper:focus-within { border-color: #d4af37; background: white; }
+        .doc-input-wrapper input { border: none !important; outline: none; background: transparent !important; box-shadow: none !important; }
+        .btn-add { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; border: none; padding: 10px; border-radius: 10px; font-size: 0.95rem; font-weight: 800; cursor: pointer; width: 100%; margin-top: 6px; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 7px; font-family: 'Tajawal'; }
+        .btn-add:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; }
+        .btn-add:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
+
+        /* ===== BOARD ===== */
+        .board-header { background: white; padding: 12px 18px; border-radius: 14px; border: 1px solid #e8eaf0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .board-header h2 { font-size: 1.1rem; font-weight: 900; color: #0b132b; }
+        .board-header select, .board-header input[type="date"] { padding: 7px 12px; border-radius: 9px; border: 1.5px solid #e0e4ea; font-family: 'Tajawal'; font-size: 0.88rem; outline: none; background: #f8f9fc; cursor: pointer; transition: 0.25s; }
+        .board-header select:focus, .board-header input[type="date"]:focus { border-color: #d4af37; }
+        .branch-filter:disabled { background: #e9ecef; cursor: not-allowed; color: #777; }
+
+        /* ===== HOUR BLOCK ===== */
+        .hour-block { background: white; border-radius: 14px; border: 1px solid #e8eaf0; overflow: hidden; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .hour-header { background: linear-gradient(135deg, #0b132b 0%, #1a2a5e 100%); color: white; padding: 10px 16px; }
+        .hour-header-row { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .hour-time { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 900; }
+        .cat-badge { padding: 3px 9px; border-radius: 6px; font-size: 0.72rem; font-weight: 900; color: white; margin-right: 4px; }
+        .cat-A { background: #e74c3c; } .cat-B { background: #f39c12; } .cat-C { background: #27ae60; }
+        .doc-badges-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
+        .doc-badge { background: rgba(255,255,255,0.12); padding: 3px 9px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; border: 1px solid rgba(212,175,55,0.3); color: #fff; }
+        .doc-count { color: #d4af37; font-weight: 900; }
+
+        /* ===== RESERVATION CARDS GRID ===== */
+        .reservations-grid { padding: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; background: #f8f9fc; }
+
+        /* ===== RES CARD - المحسّن ===== */
+        .res-card {
+            background: white;
+            padding: 12px 10px 10px;
+            border-radius: 12px;
+            border: 1px solid #e0e6ed;
+            border-top: 4px solid #27ae60;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            transition: 0.25s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .res-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+        .res-card.status-attended { opacity: 0.55; background: #f5f6f8; border-top-color: #bdc3c7; box-shadow: none; }
+        .res-card.status-attended:hover { transform: none; }
+
+        /* ألوان الكارت حسب الشركة */
+        .res-card.type-insu  { border-top-color: #1565c0; }
+        .res-card.type-cash  { border-top-color: #27ae60; }
+        .res-card.type-checkup { border-top-color: #8e44ad; }
+
+        .res-card-name { font-size: 0.9rem; font-weight: 900; color: #0b132b; margin-top: 4px; line-height: 1.2; word-break: break-word; }
+        .res-card-phone { font-size: 0.78rem; color: #888; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .res-card-phone i { color: #d4af37; font-size: 0.7rem; }
+        .res-card-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+        .badge-tag { padding: 2px 6px; border-radius: 5px; font-size: 0.65rem; font-weight: 800; }
+        .badge-comp { background: #e3f2fd; color: #1565c0; }
+        .badge-type { background: #fff8e1; color: #e65100; }
+        .badge-cat { background: #1a2a5e; color: white; }
+        .res-card-doctor { font-size: 0.75rem; font-weight: 800; color: #555; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+        .res-card-doctor i { color: #d4af37; }
+
+        /* ===== ACTION BUTTONS ===== */
+        .delete-res { position: absolute; top: 6px; left: 6px; color: #e74c3c; cursor: pointer; font-size: 0.8rem; background: #ffebee; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 5px; transition: 0.2s; border: none; outline: none; }
+        .delete-res:hover { background: #c0392b; color: white; }
+
+        .action-btns-bottom { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; padding-top: 7px; border-top: 1px dashed #eee; }
+        .btn-icon { flex: 1 1 45%; min-width: 62px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: none; cursor: pointer; transition: 0.2s; font-size: 0.78rem; color: white; gap: 3px; font-weight: 700; font-family: 'Tajawal'; }
+        .btn-icon span { font-size: 0.65rem; }
+
+        /* ألوان الأزرار */
+        .btn-confirm-wa  { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .btn-confirm-wa:hover  { background: linear-gradient(135deg, #d35400, #c0392b); transform: scale(1.05); }
+        .btn-late-wa     { background: linear-gradient(135deg, #25D366, #1ebd5a); }
+        .btn-late-wa:hover     { background: linear-gradient(135deg, #1ebd5a, #16a34a); transform: scale(1.05); }
+        .btn-attend      { background: linear-gradient(135deg, #1565c0, #2196f3); }
+        .btn-attend:hover      { background: linear-gradient(135deg, #0d47a1, #1565c0); transform: scale(1.05); }
+
+        /* attended badge */
+        .attended-badge { position: absolute; top: 6px; left: 6px; background: #27ae60; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+
+        /* empty */
+        .empty-hour { text-align: center; color: #ccc; width: 100%; grid-column: 1/-1; padding: 15px; font-size: 0.85rem; }
+
+        /* ===== TOAST ===== */
+        #toastContainer { position: fixed; bottom: 25px; left: 25px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast { background: #0b132b; color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 9px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); transform: translateX(-200%); transition: 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); border-right: 4px solid #d4af37; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-right-color: #27ae60; }
+        .toast.error   { border-right-color: #e74c3c; }
+    
+    @media print {
+        #ai-fab, #ai-box, #ls-lang-btn { display: none !important; }
+    }
+    </style>
+
+    <style>
+
+
+
+    </style>
+    <link rel="stylesheet" href="premium.css">
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        <div class="header-logo">
+        <img src="logo.png" alt="Logo" onerror="this.src='app-icon.png'">
+        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
+        <div id="branchInfo">جاري التحميل...</div>
+    </div>
+</header>
+
+<nav class="sidebar">
+    <a href="dashboard.html" class="admin-only"><i class="fas fa-chart-line"></i> لوحة القيادة</a>
+    <a href="reception.html"><i class="fas fa-user-plus"></i> الاستقبال</a>
+    <a href="reservations.html" class="active"><i class="fas fa-calendar-alt"></i> الأجندة والحجوزات</a>
+    <a href="patients.html" class="admin-only"><i class="fas fa-folder-open"></i> مراجعة ملفات المرضى</a>
+        <a href="admin_patients.html" class="admin-only"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</a>
+    <a href="ledger.html" class="admin-only"><i class="fas fa-file-invoice-dollar"></i> الحركة المالية اليومية</a>
+    <a href="reports.html"><i class="fas fa-phone-alt"></i> الكول سنتر والغياب</a>
+    <a href="hr.html" class="admin-only"><i class="fas fa-users-cog"></i> الكوادر والرواتب</a>
+    <a href="analytics.html" class="admin-only"><i class="fas fa-chart-pie"></i> التحليل الشهري</a>
+    <a href="support.html" class="admin-only"><i class="fas fa-shield-alt"></i> الدعم وسجل المراقبة</a>
+</nav>
+
+<main class="main-content">
+    <!-- صندوق إضافة حجز -->
+    <div class="add-reservation-box">
+        <!-- زرار التطوي - يظهر على الموبايل فقط -->
+        <button id="toggleAddFormBtn" onclick="toggleAddForm()">
+            <span><i class="fas fa-calendar-plus"></i> &nbsp;تسجيل حجز جديد</span>
+            <i id="toggleAddFormIcon" class="fas fa-chevron-up"></i>
+        </button>
+        <div id="addFormBody">
+        <h3 style="display:none;" class="desktop-form-title"><i class="fas fa-calendar-plus" style="color:#d4af37;"></i> تسجيل حجز جديد</h3>
+        <form id="addResForm">
+            <datalist id="registeredPatientsList"></datalist>
+            <div class="input-group">
+                <label>اسم المريض</label>
+                <input type="text" id="resPatientName" list="registeredPatientsList" required autocomplete="off">
+                <div id="reservationPatientSuggestions" style="display:none;position:relative;z-index:50;"></div>
+            </div>
+            <div class="input-group">
+                <label>رقم التليفون</label>
+                <input type="tel" id="resPhone" required>
+            </div>
+            <div class="input-group">
+                <label>الشركة / التأمين</label>
+                <input type="text" id="resCompany" list="compList">
+                <datalist id="compList">
+                    <option value="كاش"><option value="مجموعة عثمان"><option value="العدل"><option value="نيكست كير">
+                </datalist>
+            </div>
+            <div class="input-group">
+                <label>نوع الجلسة</label>
+                <select id="resSessionType">
+                    <option value="علاج طبيعي عادي">علاج طبيعي عادي</option>
+                    <option value="تأهيل">🏃 تأهيل</option>
+                    <option value="تأهيل بعد عملية">تأهيل بعد عملية</option>
+                    <option value="جلسة علاج طبيعي (عضو واحد)">جلسة علاج طبيعي (عضو واحد)</option>
+                    <option value="جلسة علاج طبيعي (عضوين)">جلسة علاج طبيعي (عضوين)</option>
+                    <option value="جلسة علاج طبيعي يدوي (عضو واحد)">جلسة علاج طبيعي يدوي (عضو واحد)</option>
+                    <option value="جلسة علاج طبيعي يدوي (عضوين)">جلسة علاج طبيعي يدوي (عضوين)</option>
+                    <option value="جلسة تصادمي (عضو واحد)">جلسة تصادمي (عضو واحد)</option>
+                    <option value="جلسة تصادمي (عضوين)">جلسة تصادمي (عضوين)</option>
+                    <option value="كشف طبيب">كشف طبيب</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>فئة الجلسة</label>
+                <select id="resCategory">
+                    <option value="" disabled selected>اختر الفئة...</option>
+                    <option value="A">فئة A</option>
+                    <option value="B">فئة B</option>
+                    <option value="C">فئة C</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>تاريخ الحجز</label>
+                <input type="date" id="resDateInput" required onchange="fillResTimeOptions()">
+            </div>
+            <div class="input-group">
+                <label>ميعاد الجلسة</label>
+                <select id="resTime" required>
+                    <option value="10:00 AM">10:00 صباحاً</option>
+                    <option value="11:00 AM">11:00 صباحاً</option>
+                    <option value="12:00 PM">12:00 ظهراً</option>
+                    <option value="01:00 PM">01:00 ظهراً</option>
+                    <option value="02:00 PM">02:00 ظهراً</option>
+                    <option value="03:00 PM">03:00 عصراً</option>
+                    <option value="04:00 PM">04:00 عصراً</option>
+                    <option value="05:00 PM">05:00 مساءً</option>
+                    <option value="06:00 PM">06:00 مساءً</option>
+                    <option value="07:00 PM">07:00 مساءً</option>
+                    <option value="08:00 PM">08:00 مساءً</option>
+                    <option value="09:00 PM">09:00 مساءً</option>
+                    <option value="10:00 PM">10:00 مساءً</option>
+                    <option value="11:00 PM">11:00 مساءً</option>
+                    <option value="12:00 AM">12:00 منتصف الليل</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>الطبيب المعالج</label>
+                <div class="doc-input-wrapper">
+                    <span style="font-weight:900; color:#d4af37; font-size:0.9rem;">د.</span>
+                    <input type="text" id="resDoctor">
+                </div>
+            </div>
+            <button type="submit" class="btn-add" id="btnSaveRes">
+                <i class="fas fa-check"></i> تأكيد الحجز
+            </button>
+        </form>
+        </div><!-- /addFormBody -->
+    </div>
+
+    <!-- لوحة الأجندة -->
+    <div class="board-container">
+        <div class="board-header">
+            <h2><i class="fas fa-calendar-alt" style="color:#d4af37;"></i> أجندة المركز</h2>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <select id="boardBranch" class="branch-filter" onchange="renderBoard()">
+                    <option value="all">كل الفروع</option>
+                    <option value="المهندسين">المهندسين</option>
+                    <option value="أكتوبر">أكتوبر</option>
+                    <option value="الهرم">الهرم</option>
+                    <option value="العبور">العبور</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="مستشفى الشروق">مستشفى الشروق</option>
+                    <option value="بني سويف">بني سويف</option>
+                </select>
+                <input type="date" id="boardDate" onchange="renderBoard()" style="padding:7px 12px; border-radius:9px; border:1.5px solid #e0e4ea; font-family:'Tajawal'; outline:none;">
+                <button onclick="printDayBookings()" style="background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; border:none; padding:8px 16px; border-radius:9px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.85rem;"><i class="fas fa-print"></i> طباعة حجوزات اليوم</button>
+                <button onclick="openDoctorSend()" style="background:linear-gradient(135deg,#25d366,#128c7e); color:white; border:none; padding:8px 16px; border-radius:9px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.85rem;"><i class="fab fa-whatsapp"></i> إرسال لدكتور</button>
+                <button onclick="sendHourlySummary()" style="background:linear-gradient(135deg,#1e8449,#27ae60); color:white; border:none; padding:8px 16px; border-radius:9px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.85rem;"><i class="fas fa-clock"></i> ملخص بالساعات</button>
+                <button onclick="showRehabCases()" style="background:linear-gradient(135deg,#8e44ad,#6a1b9a); color:white; border:none; padding:8px 16px; border-radius:9px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.85rem;"><i class="fas fa-person-walking"></i> حالات التأهيل</button>
+                <button onclick="openBulkReminder()" style="background:linear-gradient(135deg,#00897b,#00695c); color:white; border:none; padding:8px 16px; border-radius:9px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.85rem;"><i class="fas fa-bell"></i> تذكير جماعي</button>
+                <button onclick="openBookingSearch()" style="background:linear-gradient(135deg,#2980b9,#1f6390); color:white; border:none; padding:8px 16px; border-radius:9px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.85rem;"><i class="fas fa-search"></i> بحث عن مريض</button>
+            </div>
+        </div>
+
+        <!-- مودال حالات التأهيل -->
+        <div id="rehabModal" style="display:none; position:fixed; inset:0; background:rgba(11,19,43,0.85); z-index:99999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(6px);">
+            <div style="background:white; border-radius:18px; padding:26px; max-width:700px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; border-bottom:2px solid #8e44ad; padding-bottom:14px;">
+                    <h2 style="margin:0; color:#6a1b9a; font-size:1.3rem;"><i class="fas fa-person-walking"></i> حالات التأهيل المحجوزة اليوم</h2>
+                    <button onclick="document.getElementById('rehabModal').style.display='none'" style="background:#f0f0f0; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1.1rem;">✕</button>
+                </div>
+                <div id="rehabSummary" style="background:linear-gradient(135deg,#f3e5f5,#e1bee7); padding:14px 18px; border-radius:12px; margin-bottom:16px; font-weight:800; color:#6a1b9a;"></div>
+                <div id="rehabList"></div>
+            </div>
+        </div>
+        <div id="boardSummary" style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px;"></div>
+        <div id="doctorsBoard"></div>
+        <div class="timeline" id="timelineContainer"></div>
+    </div>
+</main>
+
+<!-- مودال تحذير حد الدكتور (3 حالات) -->
+<div id="docLimitOverlay" style="position:fixed; inset:0; background:rgba(11,19,43,0.85); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; z-index:5000; padding:20px;">
+    <div style="background:white; border-radius:22px; padding:32px 28px; max-width:440px; width:100%; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,0.4); border-top:5px solid #e67e22;">
+        <div style="width:72px; height:72px; background:linear-gradient(135deg,#fff3cd,#ffe8a1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; border:3px solid #e67e22;">
+            <i class="fas fa-user-clock" style="font-size:2rem; color:#e67e22;"></i>
+        </div>
+        <h3 style="color:#c0392b; font-size:1.3rem; font-weight:900; margin-bottom:12px;">⚠️ الدكتور مزحوم في الساعة دي</h3>
+        <p id="docLimitText" style="color:#444; font-size:0.92rem; font-weight:600; line-height:1.8; margin-bottom:22px; text-align:right;"></p>
+        <div style="display:flex; gap:12px;">
+            <button onclick="closeDocLimit(false)" style="flex:1; padding:13px; border:2px solid #e0e0e0; background:white; color:#666; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; font-family:'Tajawal';"><i class="fas fa-times"></i> لا، أغيّر</button>
+            <button onclick="closeDocLimit(true)" style="flex:1; padding:13px; border:none; background:linear-gradient(135deg,#e67e22,#d35400); color:white; border-radius:12px; font-size:1rem; font-weight:900; cursor:pointer; font-family:'Tajawal';"><i class="fas fa-check"></i> نعم، احجز برضه</button>
+        </div>
+    </div>
+</div>
+
+<!-- مودال تحذير الساعة كاملة (13 حجز) -->
+<div id="hourFullOverlay" style="position:fixed; inset:0; background:rgba(11,19,43,0.85); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; z-index:5000; padding:20px;">
+    <div style="background:white; border-radius:22px; padding:32px 28px; max-width:440px; width:100%; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,0.4); border-top:5px solid #c0392b;">
+        <div style="width:72px; height:72px; background:linear-gradient(135deg,#ffd5d5,#ffb3b3); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; border:3px solid #c0392b;">
+            <i class="fas fa-calendar-times" style="font-size:2rem; color:#c0392b;"></i>
+        </div>
+        <h3 style="color:#c0392b; font-size:1.3rem; font-weight:900; margin-bottom:12px;">🚫 الساعة دي مزحومة</h3>
+        <p id="hourFullText" style="color:#444; font-size:0.92rem; font-weight:600; line-height:1.8; margin-bottom:22px;"></p>
+        <div style="display:flex; gap:12px;">
+            <button onclick="closeHourFull(false)" style="flex:1; padding:13px; border:2px solid #e0e0e0; background:white; color:#666; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; font-family:'Tajawal';"><i class="fas fa-times"></i> لا، أغيّر الساعة</button>
+            <button onclick="closeHourFull(true)" style="flex:1; padding:13px; border:none; background:linear-gradient(135deg,#c0392b,#a93226); color:white; border-radius:12px; font-size:1rem; font-weight:900; cursor:pointer; font-family:'Tajawal';"><i class="fas fa-check"></i> احجز برضه</button>
+        </div>
+    </div>
+</div>
+
+<!-- مودال إرسال لدكتور -->
+<div id="doctorSendModal" style="display:none; position:fixed; inset:0; background:rgba(11,19,43,0.85); backdrop-filter:blur(8px); z-index:5000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; border-radius:18px; padding:26px; max-width:440px; width:100%;">
+        <h3 style="color:#0b132b; margin-bottom:16px;"><i class="fab fa-whatsapp" style="color:#25d366;"></i> إرسال حجوزات اليوم لدكتور</h3>
+        <p style="color:#888; font-size:0.88rem; margin-bottom:14px;">اختر الدكتور وهيتجمّع كل حالاته النهاردة في رسالة واتساب</p>
+        <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:6px;">اسم الدكتور</label>
+        <select id="doctorSendSelect" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; margin-bottom:14px;"></select>
+        <label style="font-weight:800; font-size:0.85rem; color:#555; display:block; margin-bottom:6px;">رقم واتساب الدكتور (اختياري)</label>
+        <input type="tel" id="doctorSendPhone" placeholder="01xxxxxxxxx" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; margin-bottom:18px;">
+        <div style="display:flex; gap:10px;">
+            <button onclick="sendDoctorBookings()" style="flex:1; background:linear-gradient(135deg,#25d366,#128c7e); color:white; border:none; padding:12px; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Tajawal';"><i class="fab fa-whatsapp"></i> إرسال</button>
+            <button onclick="document.getElementById('doctorSendModal').style.display='none'" style="background:#eee; color:#555; border:none; padding:12px 22px; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Tajawal';">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+    try { db.enablePersistence({synchronizeTabs:true}); } catch(e){}
+        // تأكيد الاتصال بعد 3 ثواني
+        setTimeout(() => {
+            const st = document.getElementById('serverStatus');
+            if (st && st.innerHTML.includes('جاري')) {
+                st.innerHTML = '<i class="fas fa-check-circle"></i> متصل';
+            }
+        }, 3000);
+
+    let globalBookings = [], globalPatients = [], userBranch = "المهندسين", isCentralAdmin = false;
+    let globalTransactions = [], globalReports = [];
+    // حمّل المصروفات والغياب للملخص
+    db.collection("daily_transactions").orderBy("timestamp","desc").limit(800).onSnapshot(s => { globalTransactions = []; s.forEach(d => { let x = d.data(); x.id = d.id; globalTransactions.push(x); }); });
+    db.collection("follow_up_reports").limit(600).onSnapshot(s => { globalReports = []; s.forEach(d => { let x = d.data(); x.id = d.id; globalReports.push(x); }); });
+    // ساعات العمل تتغيّر حسب اليوم:
+    // كل الأيام: من 10 صباحاً حتى 12 منتصف الليل.
+    const ALL_HOURS = ["10:00 AM","11:00 AM","12:00 PM","01:00 PM","02:00 PM","03:00 PM","04:00 PM","05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
+
+    function getWorkingHours(dateStr) {
+        return ALL_HOURS;
+    }
+
+    // متغير ديناميكي يتحدّث حسب اليوم المعروض
+    let workingHours = ALL_HOURS;
+
+    // ملء قائمة ساعات الحجز حسب التاريخ المختار
+    function fillResTimeOptions() {
+        const dateStr = document.getElementById('resDateInput').value;
+        const hours = getWorkingHours(dateStr);
+        const sel = document.getElementById('resTime');
+        if (!sel) return;
+        const prev = sel.value;
+        const label = (h) => {
+            const map = {
+                "10:00 AM":"10:00 صباحاً","11:00 AM":"11:00 صباحاً",
+                "12:00 PM":"12:00 ظهراً","01:00 PM":"01:00 ظهراً","02:00 PM":"02:00 ظهراً",
+                "03:00 PM":"03:00 عصراً","04:00 PM":"04:00 عصراً","05:00 PM":"05:00 مساءً",
+                "06:00 PM":"06:00 مساءً","07:00 PM":"07:00 مساءً","08:00 PM":"08:00 مساءً","09:00 PM":"09:00 مساءً","10:00 PM":"10:00 مساءً","11:00 PM":"11:00 مساءً","12:00 AM":"12:00 منتصف الليل"
+            };
+            return map[h] || h;
+        };
+        sel.innerHTML = hours.map(h => `<option value="${h}">${label(h)}</option>`).join('');
+        // حافظ على الاختيار السابق لو لسه موجود
+        if (prev && hours.includes(prev)) sel.value = prev;
+    }
+    window.fillResTimeOptions = fillResTimeOptions;
+
+    // ===== بحث عن مريض (مواعيد حجزه + تنبيه لو حاجز النهاردة) =====
+    function openBookingSearch() {
+        let modal = document.getElementById('bookingSearchModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'bookingSearchModal';
+            modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(11,19,43,0.85);backdrop-filter:blur(6px);z-index:99999;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;';
+            document.body.appendChild(modal);
+        }
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div style="background:white;border-radius:18px;padding:24px;max-width:520px;width:100%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h3 style="color:#2980b9;font-weight:900;margin:0;"><i class="fas fa-search"></i> بحث عن مريض</h3>
+                    <button onclick="document.getElementById('bookingSearchModal').style.display='none'" style="background:#f0f0f0;border:none;width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:1.1rem;">✕</button>
+                </div>
+                <input type="text" id="bookingSearchInput" placeholder="اكتب اسم المريض أو رقم التليفون..." oninput="runBookingSearch()" style="width:100%;padding:13px;border:2px solid #e0e4ea;border-radius:12px;font-family:'Tajawal';font-size:1rem;box-sizing:border-box;margin-bottom:16px;" autofocus>
+                <div id="bookingSearchResults" style="max-height:50vh;overflow-y:auto;"></div>
+            </div>`;
+        setTimeout(() => { const i = document.getElementById('bookingSearchInput'); if(i) i.focus(); }, 100);
+    }
+    window.openBookingSearch = openBookingSearch;
+
+    function runBookingSearch() {
+        const q = (document.getElementById('bookingSearchInput').value || '').trim().toLowerCase();
+        const box = document.getElementById('bookingSearchResults');
+        if (!q) { box.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">اكتب اسم أو رقم للبحث</p>'; return; }
+
+        const todayIso = new Date().toISOString().split('T')[0];
+        // دوّر في كل الحجوزات (مع مراعاة الفرع)
+        const matches = globalBookings.filter(b => {
+            if (!isCentralAdmin && b.branch !== userBranch) return false;
+            const name = (b.patientName||'').toLowerCase();
+            const phone = (b.phone||'').toLowerCase();
+            return name.includes(q) || phone.includes(q);
+        });
+
+        if (!matches.length) { box.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">مفيش نتايج</p>'; return; }
+
+        // جمّع حسب المريض
+        const byPatient = {};
+        matches.forEach(b => {
+            const key = b.patientName || '-';
+            if (!byPatient[key]) byPatient[key] = [];
+            byPatient[key].push(b);
+        });
+
+        let html = '';
+        Object.keys(byPatient).forEach(pName => {
+            const bookings = byPatient[pName].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+            const bookedToday = bookings.find(b => b.date === todayIso);
+            html += `<div style="border:1.5px solid #e8ecf1;border-radius:12px;padding:14px;margin-bottom:12px;">
+                <div style="font-weight:900;font-size:1.05rem;color:#0b132b;margin-bottom:2px;">${pName}</div>
+                <div style="color:#888;font-size:0.82rem;margin-bottom:8px;">📞 ${bookings[0].phone||'-'}</div>`;
+            if (bookedToday) {
+                html += `<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:10px;padding:10px;margin-bottom:8px;color:#856404;font-weight:800;font-size:0.88rem;">
+                    ⚠️ محجوز النهاردة الساعة ${bookedToday.time} — لو هتحجزله تاني هيبقى مكرر!
+                </div>`;
+            }
+            html += `<div style="font-size:0.85rem;color:#555;">`;
+            bookings.slice(0, 6).forEach(b => {
+                const isToday = b.date === todayIso;
+                const dateFmt = b.date ? b.date.split('-').reverse().join('/') : '-';
+                html += `<div style="padding:5px 0;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;">
+                    <span>${isToday ? '🔵 <strong>النهاردة</strong>' : '📅 '+dateFmt}</span>
+                    <span style="font-weight:700;">${b.time||'-'} ${b.doctor ? '— د. '+b.doctor : ''} <span style="color:${b.status==='حضر'?'#27ae60':'#e67e22'};">(${b.status||'منتظر'})</span></span>
+                </div>`;
+            });
+            html += `</div></div>`;
+        });
+        box.innerHTML = html;
+    }
+    window.runBookingSearch = runBookingSearch;
+
+    // ===== حالات التأهيل =====
+    function showRehabCases() {
+        const selDate = document.getElementById('boardDate').value;
+        // تأهيل عادي (مش "بعد عملية")
+        const rehab = globalBookings.filter(b =>
+            b.date === selDate &&
+            (b.sessionType||'') === 'تأهيل'
+        );
+        // تأهيل بعد عملية (منفصل)
+        const rehabPost = globalBookings.filter(b =>
+            b.date === selDate &&
+            (b.sessionType||'').includes('تأهيل بعد عملية')
+        );
+        const summary = document.getElementById('rehabSummary');
+        const list = document.getElementById('rehabList');
+        summary.innerHTML = `<i class="fas fa-person-walking"></i> تأهيل عادي: <span style="font-size:1.3rem;">${rehab.length}</span> &nbsp;|&nbsp; 🏥 تأهيل بعد عملية: <span style="font-size:1.3rem;">${rehabPost.length}</span>`;
+
+        const renderCard = (b, i, color) => {
+            const statusColor = b.status === 'حضر' ? '#27ae60' : (b.status === 'لم يحضر' ? '#e74c3c' : '#f39c12');
+            const statusIcon = b.status === 'حضر' ? '✅' : (b.status === 'لم يحضر' ? '❌' : '⏳');
+            return `<div style="display:flex;align-items:center;gap:14px;padding:14px;border:1px solid #eee;border-radius:12px;margin-bottom:10px;background:#faf8fc;border-right:4px solid ${color};">
+                <div style="width:38px;height:38px;background:linear-gradient(135deg,${color},${color}cc);color:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;">${i+1}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:900;color:#0b132b;font-size:1.05rem;">${b.patientName||'-'}</div>
+                    <div style="font-size:0.82rem;color:#888;margin-top:3px;"><i class="fas fa-clock"></i> ${b.time||'-'} &nbsp;|&nbsp; <i class="fas fa-user-md"></i> ${b.doctor||'-'} &nbsp;|&nbsp; ${b.sessionType||'تأهيل'}</div>
+                </div>
+                <div style="color:${statusColor};font-weight:800;font-size:0.9rem;">${statusIcon} ${b.status||'منتظر'}</div>
+            </div>`;
+        };
+
+        let html = '';
+        if (rehab.length) {
+            rehab.sort((a,b) => workingHours.indexOf(a.time) - workingHours.indexOf(b.time));
+            html += `<div style="font-weight:900;color:#8e44ad;margin:8px 0 12px;font-size:1.05rem;"><i class="fas fa-person-walking"></i> تأهيل عادي (${rehab.length})</div>`;
+            html += rehab.map((b,i) => renderCard(b, i, '#8e44ad')).join('');
+        }
+        if (rehabPost.length) {
+            rehabPost.sort((a,b) => workingHours.indexOf(a.time) - workingHours.indexOf(b.time));
+            html += `<div style="font-weight:900;color:#2980b9;margin:18px 0 12px;font-size:1.05rem;"><i class="fas fa-hospital"></i> تأهيل بعد عملية (${rehabPost.length})</div>`;
+            html += rehabPost.map((b,i) => renderCard(b, i, '#2980b9')).join('');
+        }
+        if (!html) {
+            html = '<div style="text-align:center;padding:40px;color:#bbb;"><i class="fas fa-inbox" style="font-size:2.5rem;display:block;margin-bottom:12px;"></i>لا توجد حالات تأهيل محجوزة اليوم</div>';
+        }
+        list.innerHTML = html;
+        document.getElementById('rehabModal').style.display = 'flex';
+    }
+    window.showRehabCases = showRehabCases;
+
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-times-circle'}" style="color:${type==='success'?'#27ae60':'#e74c3c'};"></i> ${msg}`;
+        c.appendChild(t);
+        setTimeout(() => t.classList.add('show'), 80);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 2500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let role = localStorage.getItem('userRole');
+        let name = localStorage.getItem('userName') || "مستخدم";
+        userBranch = localStorage.getItem('userBranch') || "المهندسين";
+        if (role === 'owner' || userBranch === 'الإدارة المركزية') isCentralAdmin = true;
+
+        document.getElementById('branchInfo').innerText = `أهلاً: ${name} - ${userBranch}`;
+        let bFilter = document.getElementById('boardBranch');
+        if (!isCentralAdmin) { bFilter.value = userBranch; bFilter.disabled = true; }
+        else bFilter.value = 'all';
+
+        let today = new Date().toISOString().split('T')[0];
+        document.getElementById('resDateInput').value = today;
+        document.getElementById('boardDate').value = today;
+        renderBoard(); // اعرض اللوحة فوراً (فاضية) عشان متبقاش الشاشة بيضا
+        fetchDataRealtime();
+        fetchPatientsForAutocomplete();
+    });
+
+    function fetchDataRealtime() {
+        db.collection("reservations").orderBy("createdAt","desc").limit(1200).onSnapshot(snap => {
+            globalBookings = [];
+            snap.forEach(doc => { let d = doc.data(); d.id = doc.id; if (isCentralAdmin || d.branch === userBranch) globalBookings.push(d); });
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem;"></i> متصل';
+            clearTimeout(window._boardTimer);
+            window._boardTimer = setTimeout(() => { try { renderBoard(); } catch(e){ console.warn(e); } }, 150);
+        }, err => {
+            // fallback لو فيه حجوزات قديمة من غير createdAt
+            db.collection("reservations").limit(1200).onSnapshot(snap => {
+                globalBookings = [];
+                snap.forEach(doc => { let d = doc.data(); d.id = doc.id; if (isCentralAdmin || d.branch === userBranch) globalBookings.push(d); });
+                document.getElementById('serverStatus').innerHTML = '<i class="fas fa-circle" style="font-size:0.6rem;"></i> متصل';
+                clearTimeout(window._boardTimer);
+                window._boardTimer = setTimeout(() => { try { renderBoard(); } catch(e){ console.warn(e); } }, 150);
+            });
+        });
+    }
+
+    function fetchPatientsForAutocomplete() {
+        let pts = [];
+        let process = (snap, type) => {
+            snap.forEach(doc => { let d = doc.data(); if (isCentralAdmin || d.branch === userBranch) { d.id = doc.id; d.dbType = type; pts.push(d); } });
+            globalPatients = pts;
+            document.getElementById('registeredPatientsList').innerHTML = [...new Set(pts.map(p => p.id))].map(n => `<option value="${n}">`).join('');
+        };
+        db.collection("patients_insu").limit(1200).onSnapshot(s => process(s, 'insu'));
+        db.collection("patients_cash").limit(1200).onSnapshot(s => process(s, 'cash'));
+    }
+
+    // ملء بيانات المريض + اقتراح أسماء فوري (الدatalist وحده لا يظهر جيداً في بعض الهواتف).
+    function applyReservationPatient(p) {
+        if (!p) return;
+        const nameInput = document.getElementById('resPatientName');
+        nameInput.value = p.id;
+        document.getElementById('reservationPatientSuggestions').style.display = 'none';
+        
+            if (p) {
+            document.getElementById('resPhone').value = p.phone || '';
+            document.getElementById('resCompany').value = p.comp || (p.dbType === 'cash' ? 'كاش' : '');
+            // الفئة
+            if (p.cat) document.getElementById('resCategory').value = p.cat;
+            // نوع الجلسة
+            const st = p.sessionType || p.type || '';
+            if (st) {
+                const sel = document.getElementById('resSessionType');
+                for (let opt of sel.options) { if (opt.value === st) { sel.value = st; break; } }
+            }
+            // الدكتور: هات آخر دكتور حجز معاه المريض بس (لو مفيش، سيبها فاضية نكتبها بإيدنا)
+            try {
+                const prevBookings = globalBookings
+                    .filter(b => b.patientName === p.id && b.doctor && b.doctor !== 'د. غير محدد')
+                    .sort((a,b) => {
+                        const ta = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : 0;
+                        const tb = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : 0;
+                        if (ta && tb) return tb - ta;
+                        return (b.date||'').localeCompare(a.date||'');
+                    });
+                if (prevBookings.length) {
+                    document.getElementById('resDoctor').value = prevBookings[0].doctor.replace(/^(د\.|د\s|دكتور\s)/, '');
+                } else {
+                    document.getElementById('resDoctor').value = '';
+                }
+            } catch(e) {
+                document.getElementById('resDoctor').value = '';
+            }
+            }
+    }
+
+    document.getElementById('resPatientName').oninput = function() {
+        const q = this.value.trim().toLowerCase();
+        const box = document.getElementById('reservationPatientSuggestions');
+        const exact = globalPatients.find(x => String(x.id||'').toLowerCase() === q);
+        if (exact) applyReservationPatient(exact);
+        if (q.length < 2) { box.style.display='none'; box.innerHTML=''; return; }
+        const matches = globalPatients.filter(p => String(p.id||'').toLowerCase().includes(q)).slice(0, 8);
+        if (!matches.length) { box.style.display='none'; box.innerHTML=''; return; }
+        box.innerHTML = `<div style="position:absolute;right:0;left:0;top:2px;background:white;border:1px solid #dce3ec;border-radius:10px;box-shadow:0 8px 22px rgba(11,19,43,.16);overflow:hidden;max-height:240px;overflow-y:auto;">${matches.map((p,i)=>`<button type="button" data-patient-index="${i}" style="display:block;width:100%;text-align:right;background:white;border:0;border-bottom:1px solid #eef1f5;padding:10px 12px;font-family:Tajawal;cursor:pointer;color:#0b132b;font-weight:800;"><span>${p.id}</span><small style="display:block;color:#7b8798;font-weight:600;margin-top:2px;">${p.phone||'-'} · ${p.comp||'كاش'}</small></button>`).join('')}</div>`;
+        box.style.display='block';
+        box.querySelectorAll('[data-patient-index]').forEach(btn => btn.onclick = () => applyReservationPatient(matches[parseInt(btn.dataset.patientIndex)]));
+    };
+    document.getElementById('resPatientName').addEventListener('blur', () => setTimeout(() => { const b=document.getElementById('reservationPatientSuggestions'); if(b) b.style.display='none'; }, 180));
+
+    // حفظ الحجز (إضافة أو تعديل)
+    document.getElementById('addResForm').onsubmit = async function(e) {
+        e.preventDefault();
+        let btn = document.getElementById('btnSaveRes');
+        let rawDoc = document.getElementById('resDoctor').value.trim().replace(/^(د\.|د\s|دكتور\s)/, '');
+        const selDate = document.getElementById('resDateInput').value;
+        const selTime = document.getElementById('resTime').value;
+        const selDoctorFull = rawDoc ? ("د. " + rawDoc) : "د. غير محدد";
+
+        // فحص الحدود قبل الحجز (للحجز الجديد فق]p)
+        if (!editingResId) {
+            // كل حجوزات نفس الساعة في نفس اليوم
+            const sameHourBookings = globalBookings.filter(b => b.date === selDate && b.time === selTime);
+            // عدّ حالات كل دكتور في الساعة دي
+            const doctorsThisHour = {};
+            sameHourBookings.filter(b => b.doctor && b.doctor !== 'د. غير محدد')
+                .forEach(b => { const dn = b.doctor.replace(/^(د\.|د\s|دكتور\s)/,'').trim(); doctorsThisHour[dn] = (doctorsThisHour[dn]||0)+1; });
+
+            // (أ) فحص حد الساعة الكلي: 13 حجز
+            if (sameHourBookings.length >= 13) {
+                const proceed = await showHourFullWarning(selTime, sameHourBookings.length);
+                if (!proceed) return;
+            }
+            // (ب) فحص حد الدكتور: 3 حالات
+            else if (rawDoc && (doctorsThisHour[rawDoc] || 0) >= 3) {
+                // دكاترة عندهم أقل من 3 في الساعة دي
+                const allDoctors = [...new Set(globalBookings.filter(b=>b.doctor && b.doctor!=='د. غير محدد').map(b=>b.doctor.replace(/^(د\.|د\s|دكتور\s)/,'').trim()))];
+                const freeDoctors = allDoctors.filter(d => (doctorsThisHour[d]||0) < 3 && d !== rawDoc)
+                    .sort((a,b) => (doctorsThisHour[a]||0) - (doctorsThisHour[b]||0));
+                const suggestion = freeDoctors.length
+                    ? `\n\n💡 دكاترة فاضيين الساعة ${selTime}:\n${freeDoctors.slice(0,4).map(d => `✅ د. ${d} (${doctorsThisHour[d]||0}/3 حالات)`).join('\n')}`
+                    : `\n\n⚠️ كل الدكاترة وصلوا 3 حالات في الساعة دي.`;
+                const proceed = await showDoctorLimitWarning(rawDoc, selTime, doctorsThisHour[rawDoc]||0, suggestion);
+                if (!proceed) return;
+            }
+        }
+
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+
+        // منع حجز نفس الاسم مرتين في نفس اليوم (منع تام)
+        const pNameCheck = document.getElementById('resPatientName').value.trim();
+        if (!editingResId && pNameCheck) {
+            const dupBooking = globalBookings.find(b =>
+                b.date === selDate &&
+                (b.patientName||'').trim() === pNameCheck
+            );
+            if (dupBooking) {
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> تأكيد الحجز';
+                showToast(`❌ "${pNameCheck}" محجوز بالفعل اليوم الساعة ${dupBooking.time} — مينفعش يتحجز مرتين`, 'error');
+                return;
+            }
+        }
+
+        let resData = {
+            patientName: document.getElementById('resPatientName').value,
+            phone: document.getElementById('resPhone').value,
+            company: document.getElementById('resCompany').value || "كاش",
+            sessionType: document.getElementById('resSessionType').value || "",
+            category: document.getElementById('resCategory').value || "",
+            date: selDate,
+            time: selTime,
+            doctor: selDoctorFull,
+            branch: userBranch
+        };
+        try {
+            if (editingResId) {
+                await db.collection("reservations").doc(editingResId).update(resData);
+                showToast(`تم تحديث حجز ${resData.patientName} ✅`);
+                editingResId = null;
+                btn.style.background = '';
+            } else {
+                resData.status = "منتظر";
+                resData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection("reservations").add(resData);
+                showToast(`تم تسجيل حجز ${resData.patientName} ✅`);
+            }
+            document.getElementById('addResForm').reset();
+            document.getElementById('resDateInput').value = document.getElementById('boardDate').value;
+        } catch(err) { showToast("خطأ أثناء الحفظ!", "error"); }
+        finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> تأكيد الحجز'; }
+    };
+
+    // مودال تحذير حd الدكتور
+    let _docLimitResolve = null;
+    function showDoctorLimitWarning(doctor, time, count, suggestion) {
+        return new Promise(resolve => {
+            _docLimitResolve = resolve;
+            document.getElementById('docLimitText').innerHTML =
+                `د. <b>${doctor}</b> عنده بالفعل <b style="color:#c0392b;">${count} حالات</b> في الساعة <b>${time}</b>.${suggestion.replace(/\n/g,'<br>')}`;
+            document.getElementById('docLimitOverlay').classList.add('active');
+        });
+    }
+    function closeDocLimit(proceed) {
+        document.getElementById('docLimitOverlay').classList.remove('active');
+        if (_docLimitResolve) { _docLimitResolve(proceed); _docLimitResolve = null; }
+    }
+
+    // مودال تحذير الساعة كاملة (13 حجز)
+    let _hourFullResolve = null;
+    function showHourFullWarning(time, count) {
+        return new Promise(resolve => {
+            _hourFullResolve = resolve;
+            document.getElementById('hourFullText').innerHTML =
+                `الساعة <b>${time}</b> فيها بالفعل <b style="color:#c0392b;">${count} حجز</b> (الحd الأقصى 13).<br>الساعة دي مزحومة جداً، يُفضّل تحجز في ساعة تانية.`;
+            document.getElementById('hourFullOverlay').classList.add('active');
+        });
+    }
+    function closeHourFull(proceed) {
+        document.getElementById('hourFullOverlay').classList.remove('active');
+        if (_hourFullResolve) { _hourFullResolve(proceed); _hourFullResolve = null; }
+    }
+
+    // ===== تذكير جماعي (يفتح واتساب رسالة ورا التانية) =====
+    let _bulkQueue = [];
+    let _bulkIndex = 0;
+    let _bulkType = 'confirm';
+
+    function openBulkReminder() {
+        const selDate = document.getElementById('boardDate').value;
+        const selBranch = document.getElementById('boardBranch').value;
+        const filtered = globalBookings.filter(b => b.date === selDate && (selBranch === 'all' || b.branch === selBranch) && b.status !== 'حضر' && b.phone);
+        if (!filtered.length) { showToast('لا يوجد حجوزات منتظرة اليوم', 'error'); return; }
+
+        let modal = document.getElementById('bulkReminderModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'bulkReminderModal';
+            modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(11,19,43,0.85);backdrop-filter:blur(6px);z-index:99999;align-items:center;justify-content:center;padding:20px;';
+            document.body.appendChild(modal);
+        }
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div style="background:white;border-radius:18px;padding:26px;max-width:460px;width:100%;text-align:center;">
+                <div style="font-size:2rem;">📱</div>
+                <h3 style="color:#00695c;font-weight:900;margin:10px 0;">تذكير جماعي بالواتساب</h3>
+                <p style="color:#888;font-size:0.88rem;margin-bottom:16px;">هيفتح رسالة واتساب لكل مريض على حدة (واتساب مش بيسمح بإرسال جماعي حقيقي، فهتدوس "التالي" بعد كل رسالة تبعتها)</p>
+                <div style="background:#f0f7f5;border-radius:12px;padding:14px;margin-bottom:18px;font-weight:800;color:#00695c;">عدد المرضى المنتظرين: ${filtered.length}</div>
+                <div style="display:flex;gap:10px;margin-bottom:12px;">
+                    <button onclick="startBulkReminder('confirm')" style="flex:1;background:linear-gradient(135deg,#f39c12,#e67e22);color:white;border:none;padding:13px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';">🔔 تذكير بالموعد</button>
+                    <button onclick="startBulkReminder('late')" style="flex:1;background:linear-gradient(135deg,#25D366,#1ebd5a);color:white;border:none;padding:13px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';">⏰ استفسار تأخر</button>
+                </div>
+                <button onclick="document.getElementById('bulkReminderModal').style.display='none'" style="background:#eee;color:#555;border:none;padding:11px 22px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';">إلغاء</button>
+            </div>`;
+        _bulkQueue = filtered;
+    }
+    window.openBulkReminder = openBulkReminder;
+
+    function startBulkReminder(type) {
+        _bulkType = type;
+        _bulkIndex = 0;
+        showNextBulkReminder();
+    }
+    window.startBulkReminder = startBulkReminder;
+
+    function showNextBulkReminder() {
+        const modal = document.getElementById('bulkReminderModal');
+        if (_bulkIndex >= _bulkQueue.length) {
+            modal.innerHTML = `<div style="background:white;border-radius:18px;padding:30px;text-align:center;max-width:340px;">
+                <div style="font-size:2.2rem;">✅</div>
+                <h3 style="color:#27ae60;margin:10px 0;">تم الانتهاء</h3>
+                <p style="color:#888;font-size:0.88rem;margin-bottom:18px;">اتبعتت الرسائل لكل المرضى المنتظرين</p>
+                <button onclick="document.getElementById('bulkReminderModal').style.display='none'" style="background:#0b132b;color:white;border:none;padding:12px 26px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';">إغلاق</button>
+            </div>`;
+            return;
+        }
+        const b = _bulkQueue[_bulkIndex];
+        modal.innerHTML = `
+            <div style="background:white;border-radius:18px;padding:26px;max-width:400px;width:100%;text-align:center;">
+                <div style="color:#888;font-size:0.8rem;margin-bottom:6px;">مريض ${_bulkIndex+1} من ${_bulkQueue.length}</div>
+                <div style="font-weight:900;font-size:1.2rem;color:#0b132b;margin-bottom:4px;">${b.patientName}</div>
+                <div style="color:#888;font-size:0.85rem;margin-bottom:18px;">📞 ${b.phone} — ⏰ ${b.time}</div>
+                <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:10px;margin-bottom:14px;font-size:0.78rem;color:#e65100;">
+                    ⚠️ عشان حسابك متتحظرش من واتساب، لازم تستنى شوية بين كل رسالة والتانية
+                </div>
+                <button id="btnBulkSend" onclick="sendBulkOne()" style="width:100%;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;padding:14px;border-radius:12px;font-weight:900;cursor:pointer;font-family:'Tajawal';font-size:1rem;margin-bottom:10px;"><i class="fab fa-whatsapp"></i> إرسال لهذا المريض</button>
+                <button onclick="skipBulkOne()" style="width:100%;background:#f0f0f0;color:#888;border:none;padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Tajawal';">تخطي هذا المريض</button>
+            </div>`;
+    }
+
+    let _bulkCooldown = false;
+    function sendBulkOne() {
+        if (_bulkCooldown) return;
+        const b = _bulkQueue[_bulkIndex];
+        if (_bulkType === 'confirm') sendConfirmWhatsApp(b.phone, b.patientName, b.time, b.doctor);
+        else sendLateWhatsApp(b.phone, b.patientName, b.time, b.doctor);
+        _bulkIndex++;
+        _bulkCooldown = true;
+        // عطّل الزرار وابدأ عدّاد انتظار (يقلل خطر الحظر من واتساب)
+        const btn = document.getElementById('btnBulkSend');
+        let secondsLeft = 20;
+        if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            const tick = setInterval(() => {
+                secondsLeft--;
+                if (btn) btn.innerHTML = `<i class="fas fa-clock"></i> استنى ${secondsLeft} ثانية...`;
+                if (secondsLeft <= 0) { clearInterval(tick); }
+            }, 1000);
+        }
+        setTimeout(() => {
+            _bulkCooldown = false;
+            showNextBulkReminder();
+        }, 20000);
+    }
+    window.sendBulkOne = sendBulkOne;
+
+    function skipBulkOne() {
+        _bulkIndex++;
+        showNextBulkReminder();
+    }
+    window.skipBulkOne = skipBulkOne;
+
+    // مسح الحجز
+    async function deleteReservation(docId) {
+        if (confirm("هل أنت متأكد من إلغاء هذا الحجز؟")) {
+            try {
+                // اعرف بيانات الحجز قبل ما يتمسح
+                const resBooking = globalBookings.find(b => b.id === docId);
+                await db.collection("reservations").doc(docId).delete();
+                // امسح أي تقرير غياب/كول سنتر مرتبط بنفس المريض ونفس اليوم
+                if (resBooking && resBooking.patientName) {
+                    try {
+                        const absSnap = await db.collection('follow_up_reports')
+                            .where('patientName','==', resBooking.patientName).get();
+                        const batch = db.batch();
+                        let removed = 0;
+                        absSnap.forEach(d => {
+                            const r = d.data();
+                            // امسح لو نفس التاريخ (الحجز أو اليوم)
+                            if (r.date === resBooking.date || r.bookingDate === resBooking.date) {
+                                batch.delete(d.ref); removed++;
+                            }
+                        });
+                        if (removed > 0) await batch.commit();
+                    } catch(e) { console.warn('clear absence:', e); }
+                }
+                showToast("تم إلغاء الحجز وحذفه من الكول سنتر والغياب.");
+            } catch(e) { showToast("خطأ!", "error"); }
+        }
+    }
+
+    // تسجيل الحضور مباشرة من الأجندة
+    async function markAttended(docId, patientName) {
+        try {
+            await db.collection("reservations").doc(docId).update({ status: "حضر" });
+            showToast(`✅ تم تسجيل حضور ${patientName}`);
+        } catch(e) { showToast("خطأ!", "error"); }
+    }
+
+    // تنسيق رقم الهاتف
+    function formatPhone(phone) {
+        let p = (phone || '').trim();
+        if (p.startsWith("0")) return "2" + p;
+        if (!p.startsWith("20")) return "20" + p;
+        return p;
+    }
+
+    // ===== رسائل واتساب المحسّنة =====
+
+    // الرسائل القابلة للتعديل من السابورت
+    let CUSTOM_MSGS = {};
+    db.collection("settings").doc("system_settings").onSnapshot(doc => {
+        if (doc.exists) CUSTOM_MSGS = doc.data();
+    });
+    function buildMsg(template, name, time, doctor) {
+        return (template || '')
+            .replace(/\{الاسم\}/g, name || '')
+            .replace(/\{الساعة\}/g, time || '')
+            .replace(/\{الدكتور\}/g, doctor || '');
+    }
+
+    // رسالة تذكير بالموعد
+    function sendConfirmWhatsApp(phone, name, time, doctor) {
+        if (!phone) return showToast("لا يوجد رقم هاتف!", "error");
+        let msg = buildMsg(CUSTOM_MSGS.msgConfirm || `أهلاً وسهلاً أستاذ/ة {الاسم} 😊\n\nنود تذكيركم بموعد جلستكم اليوم في مركز لايف سبورت:\n🕐 الساعة: {الساعة}\n👨‍⚕️ مع: {الدكتور}\n\nننتظر تشريفكم وجودكم في الميعاد.\nنتمنى لحضرتكم دوام الصحة والعافية 🌿`, name, time, doctor);
+        window.open(`https://wa.me/${formatPhone(phone)}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // رسالة استفسار عن التأخر
+    function sendLateWhatsApp(phone, name, time, doctor) {
+        if (!phone) return showToast("لا يوجد رقم هاتف!", "error");
+        let msg = buildMsg(CUSTOM_MSGS.msgLate || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} مع {الدكتور} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`, name, time, doctor);
+        window.open(`https://wa.me/${formatPhone(phone)}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // ===== رسالة تأكيد الحجز الشاملة (بتفاصيل الحجز + تعليمات المركز) =====
+    function sendBookingConfirmation(phone, name, time, doctor, branch, date) {
+        if (!phone) return showToast("لا يوجد رقم هاتف!", "error");
+        // اسم اليوم من التاريخ
+        let dayName = '';
+        if (date) {
+            const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+            const d = new Date(date);
+            if (!isNaN(d.getTime())) dayName = days[d.getDay()];
+        }
+        let msg;
+        // لو فيه رسالة متعدّلة من السابورت، استخدمها
+        if (CUSTOM_MSGS.msgBookingConfirm) {
+            msg = CUSTOM_MSGS.msgBookingConfirm
+                .replace(/\{الاسم\}/g, name || '')
+                .replace(/\{الساعة\}/g, time || '')
+                .replace(/\{الدكتور\}/g, (doctor && doctor !== '-') ? doctor : 'الطبيب المختص')
+                .replace(/\{الفرع\}/g, branch || '-')
+                .replace(/\{اليوم\}/g, dayName || '-');
+        } else {
+            const L = '━━━━━━━━━━━━';
+            msg = `🌿 *مركز Life Sport للعلاج الطبيعي* 🌿\n\n`;
+            msg += `أهلاً وسهلاً أستاذ/ة *${name}* 😊\n`;
+            msg += `تم تأكيد حجز جلستكم بنجاح ✅\n`;
+            msg += `${L}\n`;
+            msg += `📋 *تفاصيل الحجز:*\n`;
+            if (branch) msg += `🏥 الفرع: *${branch}*\n`;
+            if (dayName) msg += `📅 اليوم: *${dayName}*\n`;
+            msg += `🕐 الساعة: *${time}*\n`;
+            if (doctor && doctor !== '-') msg += `👨‍⚕️ مع: *${doctor}*\n`;
+            msg += `${L}\n`;
+            msg += `📌 *لحجز الجلسات يرجى مراعاة:*\n\n`;
+            msg += `🍀 قبل كل موعد بـ 24 ساعة سيصلك رسالة لتأكيد أو إلغاء الحجز\n\n`;
+            msg += `🍀 التأخير أكتر من 15 دقيقة سيتم إلغاء حجز الجلسة وتأجيلها لميعاد آخر، مراعاةً لعدم حدوث تأخير مع المرضى التاليين لحضرتك\n\n`;
+            msg += `🍀 مراجعة المركز في حالة التأخير للتأكد من استقبال حضرتك (حسب جدول الحجز لدينا) أو حجز موعد آخر\n\n`;
+            msg += `🍀 في حالة تأكيد الموعد وعدم الحضور سيتم احتساب الجلسة من رصيد جلساتك\n\n`;
+            msg += `🍀 عدم اصطحاب الأطفال لراحة جميع المرضى\n\n`;
+            msg += `🍀 أثناء الجلسة لا يسمح بالمرافقين\n\n`;
+            msg += `🍀 في حالة صعوبة حركة المريض يرجى وجود مرافقين لتسهيل الدخول والخروج للجلسة، مع تواجدهم بصالة الانتظار حتى انتهاء الجلسة\n\n`;
+            msg += `🍀 أثناء الجلسة بملابس مريحة وفضفاضة\n\n`;
+            msg += `🍀 جميع العاملين طبيبات ومساعدين\n\n`;
+            msg += `🍀 التواصل والحجز مع الاستقبال فقط\n`;
+            msg += `${L}\n`;
+            msg += `🤍 نتمنى لحضرتك دوام الصحة والعافية\n`;
+            msg += `_إدارة مركز Life Sport_`;
+        }
+        window.open(`https://wa.me/${formatPhone(phone)}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+    window.sendBookingConfirmation = sendBookingConfirmation;
+
+    // ===== تأكيد/إلغاء تأكيد الحجز في السيستم (يدوي) =====
+    async function toggleConfirmBooking(bookingId, currentlyConfirmed) {
+        const newState = !currentlyConfirmed;
+        try {
+            await db.collection("reservations").doc(bookingId).update({ confirmed: newState });
+            showToast(newState ? '✅ تم تأكيد الحجز في السيستم' : 'تم إلغاء تأكيد الحجز');
+            // الأجندة بتتحدّث تلقائياً من onSnapshot
+        } catch(e) {
+            console.error(e);
+            showToast('حصل خطأ، حاول تاني', 'error');
+        }
+    }
+    window.toggleConfirmBooking = toggleConfirmBooking;
+
+    // ===== تعديل الحجز =====
+    let editingResId = null;
+    function editReservation(docId) {
+        const res = globalBookings.find(r => r.id === docId);
+        if (!res) { showToast("الحجز غير موجود", "error"); return; }
+        editingResId = docId;
+        // املأ الفورم ببيانات الحجز
+        document.getElementById('resPatientName').value = res.patientName || '';
+        document.getElementById('resPhone').value = res.phone || '';
+        if (document.getElementById('resCompany')) document.getElementById('resCompany').value = res.company || '';
+        if (document.getElementById('resSessionType')) document.getElementById('resSessionType').value = res.sessionType || '';
+        if (document.getElementById('resCategory')) document.getElementById('resCategory').value = res.category || '';
+        document.getElementById('resDateInput').value = res.date || '';
+        document.getElementById('resTime').value = res.time || '';
+        document.getElementById('resDoctor').value = (res.doctor || '').replace('د. ','');
+        // غيّر الزرار لـ"تحديث"
+        const btn = document.getElementById('btnSaveRes');
+        btn.innerHTML = '<i class="fas fa-save"></i> تحديث الحجز';
+        btn.style.background = 'linear-gradient(135deg,#e67e22,#d35400)';
+        // اعمل سكرول للفورم
+        document.getElementById('addResForm').scrollIntoView({ behavior:'smooth', block:'center' });
+        showToast("عدّل البيانات واضغط تحديث");
+    }
+
+    // ===== رندر اللوحة =====
+    function renderBoard() {
+        let selDate   = document.getElementById('boardDate').value;
+        let selBranch = document.getElementById('boardBranch').value;
+        let container = document.getElementById('timelineContainer');
+        container.innerHTML = '';
+
+        // حدّث ساعات العمل حسب اليوم المعروض
+        workingHours = getWorkingHours(selDate);
+
+        let filtered = globalBookings.filter(b => b.date === selDate && (selBranch === 'all' || b.branch === selBranch));
+
+        // شريp الإحصائيات العلوي
+        const sumBox = document.getElementById('boardSummary');
+        if (sumBox) {
+            const att = filtered.filter(b=>b.status==='حضر').length;
+            const wait = filtered.length - att;
+            const insuC = filtered.filter(b=>!(b.company||'').includes('كاش') && b.company).length;
+            const cashC = filtered.filter(b=>(b.company||'').includes('كاش')||!b.company).length;
+            const card = (icon,label,val,color) => `<div style="flex:1; min-width:130px; background:white; border-radius:14px; padding:14px 18px; box-shadow:0 3px 12px rgba(11,19,43,0.07); border-right:4px solid ${color}; display:flex; align-items:center; gap:12px;"><div style="width:42px; height:42px; border-radius:11px; background:${color}1a; display:flex; align-items:center; justify-content:center; color:${color}; font-size:1.2rem;"><i class="fas ${icon}"></i></div><div><div style="font-size:1.5rem; font-weight:900; color:#0b132b; line-height:1;">${val}</div><div style="font-size:0.78rem; color:#888; font-weight:700; margin-top:3px;">${label}</div></div></div>`;
+            sumBox.innerHTML =
+                card('fa-calendar-check','إجمالي الحجوزات',filtered.length,'#0b132b') +
+                card('fa-check-circle','حضروا',att,'#27ae60') +
+                card('fa-clock','في الانتظار',wait,'#e67e22') +
+                card('fa-hospital','تأمين',insuC,'#2980b9') +
+                card('fa-money-bill','كاش',cashC,'#9b59b6');
+        }
+
+        // ===== قسم الدكاترة + الساعات الفاضية =====
+        const docBox = document.getElementById('doctorsBoard');
+        if (docBox) {
+            // عدّ حالات كل دكتور
+            const docLoad = {};
+            filtered.forEach(b => {
+                const dn = (b.doctor || '').trim();
+                if (!dn || dn === '-') return;
+                docLoad[dn] = (docLoad[dn] || 0) + 1;
+            });
+            const docArr = Object.entries(docLoad).sort((a,b) => b[1] - a[1]);
+
+            // الساعات الفاضية (أقل من 13 حجز) والمزدحمة — مع العدد
+            let hoursData = workingHours.map(h => {
+                const cnt = filtered.filter(b => b.time === h).length;
+                return { hour: h, count: cnt, full: cnt >= 13 };
+            });
+
+            // تسمية عربية مختصرة للساعة
+            const hLabel = (h) => {
+                const map = {"10:00 AM":"10ص","11:00 AM":"11ص","12:00 PM":"12م","01:00 PM":"1","02:00 PM":"2","03:00 PM":"3","04:00 PM":"4","05:00 PM":"5","06:00 PM":"6","07:00 PM":"7","08:00 PM":"8","09:00 PM":"9","10:00 PM":"10","11:00 PM":"11","12:00 AM":"12ل"};
+                return map[h] || h;
+            };
+
+            let docsHtml = docArr.length ? docArr.map(([name, cnt]) => {
+                const color = cnt >= 3 ? '#e74c3c' : (cnt === 2 ? '#e67e22' : '#27ae60');
+                return `<span class="doc-load-chip" style="background:${color}15;color:${color};padding:6px 14px;border-radius:20px;font-weight:800;font-size:0.85rem;border:1px solid ${color}40;">👨‍⚕️ ${name}: <b>${cnt}</b> ${cnt>=3?'(مزدحم)':''}</span>`;
+            }).join('') : '<span style="color:#aaa;">لا يوجد دكاترة محجوزين بعد</span>';
+
+            // أيقونات الساعات الصغيرة
+            let hoursHtml = hoursData.map(d => {
+                let bg, brd, txt, icon;
+                if (d.full) { bg='#ffebee'; brd='#ef9a9a'; txt='#c62828'; icon='🔴'; }
+                else if (d.count === 0) { bg='#e8f5e9'; brd='#a5d6a7'; txt='#2e7d32'; icon='🟢'; }
+                else if (d.count < 7) { bg='#e8f5e9'; brd='#a5d6a7'; txt='#2e7d32'; icon='🟢'; }
+                else { bg='#fff8e1'; brd='#ffe082'; txt='#e65100'; icon='🟡'; }
+                return `<div class="hour-chip" style="background:${bg};border:1.5px solid ${brd};color:${txt};border-radius:12px;padding:8px 10px;text-align:center;min-width:54px;">
+                    <div style="font-size:1.1rem;line-height:1;">${icon}</div>
+                    <div style="font-weight:900;font-size:0.95rem;margin-top:3px;">${hLabel(d.hour)}</div>
+                    <div style="font-size:0.7rem;opacity:0.85;margin-top:2px;">${d.full ? 'ممتلئ' : d.count + ' حجز'}</div>
+                </div>`;
+            }).join('');
+
+            docBox.innerHTML = `
+                <div style="background:white;border-radius:14px;padding:16px 20px;box-shadow:0 3px 12px rgba(11,19,43,0.07);margin-bottom:14px;" class="print-doctors-load">
+                    <div style="font-weight:900;color:#0b132b;font-size:0.95rem;margin-bottom:12px;"><i class="fas fa-user-md" style="color:#d4af37;"></i> أحمال الدكاترة اليوم (${docArr.length} دكتور)</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;">${docsHtml}</div>
+                </div>
+                <div style="background:white;border-radius:14px;padding:16px 20px;box-shadow:0 3px 12px rgba(11,19,43,0.07);margin-bottom:14px;" class="print-free-hours">
+                    <div style="font-weight:900;color:#0b132b;font-size:0.95rem;margin-bottom:12px;"><i class="fas fa-clock" style="color:#27ae60;"></i> مواعيد الحجز المتاحة (🟢 فاضي / 🟡 متوسط / 🔴 ممتلئ)</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;">${hoursHtml}</div>
+                </div>`;
+        }
+
+        // رقّم حجوزات اليوم بالترتيب (بالساعة) — يتجدد كل يوم من 1
+        const sortedForNumber = [...filtered].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+        const bookingNumbers = {};
+        sortedForNumber.forEach((b, i) => { bookingNumbers[b.id] = i + 1; });
+
+        workingHours.forEach(hour => {
+            let hourBookings = filtered.filter(b => b.time === hour);
+            let catLoad = { A: 0, B: 0, C: 0 };
+            let doctorsLoad = {};
+            hourBookings.forEach(b => {
+                if (catLoad[b.category] !== undefined) catLoad[b.category]++;
+                let dn = b.doctor || "غير محدد";
+                doctorsLoad[dn] = (doctorsLoad[dn] || 0) + 1;
+            });
+
+            let docBadgesHtml = Object.keys(doctorsLoad).map(doc =>
+                `<div class="doc-badge">${doc} <span class="doc-count">(${doctorsLoad[doc]})</span></div>`
+            ).join('');
+
+            let cardsHtml = hourBookings.length > 0 ? hourBookings.map(b => {
+                let isAttended = b.status === 'حضر';
+                let isConfirmed = b.confirmed === true;
+                let isCheckup  = b.sessionType === 'كشف طبيب';
+                let isCash     = (b.company || '').toLowerCase().includes('كاش') || b.company === '';
+                let cardClass  = isAttended ? 'status-attended' : (isCheckup ? 'type-checkup' : (isCash ? 'type-cash' : 'type-insu'));
+
+                return `
+                <div class="res-card ${cardClass}" ${isConfirmed ? 'style="border-top-color:#27ae60 !important;"' : ''}>
+                    ${isAttended
+                        ? `<div class="attended-badge"><i class="fas fa-check"></i></div>`
+                        : `<button class="delete-res" onclick="deleteReservation('${b.id}')" title="إلغاء الحجز"><i class="fas fa-times"></i></button>`
+                    }
+                    ${isConfirmed && !isAttended ? `<div style="position:absolute;top:6px;left:6px;background:#27ae60;color:white;border-radius:20px;padding:2px 8px;font-size:0.62rem;font-weight:900;">✅ مؤكد</div>` : ''}
+
+                    <div class="res-card-name"><span style="background:#0b132b;color:#d4af37;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;margin-left:5px;">${bookingNumbers[b.id]||''}</span>${b.patientName}</div>
+                    <div class="res-card-phone"><i class="fas fa-phone"></i> ${b.phone || '-'}</div>
+
+                    <div class="res-card-tags">
+                        <span class="badge-tag badge-comp">${b.company || 'كاش'}</span>
+                        <span class="badge-tag badge-type">${b.sessionType}</span>
+                        <span class="badge-tag badge-cat">فئة ${b.category}</span>
+                    </div>
+
+                    <div class="res-card-doctor"><i class="fas fa-user-md"></i> ${b.doctor}</div>
+
+                    ${!isAttended ? `
+                    <div class="action-btns-bottom">
+                        <button class="btn-icon" style="background:${isConfirmed ? 'linear-gradient(135deg,#95a5a6,#7f8c8d)' : 'linear-gradient(135deg,#27ae60,#1e8449)'};color:white;" onclick="toggleConfirmBooking('${b.id}', ${isConfirmed})" title="${isConfirmed ? 'إلغاء التأكيد' : 'تأكيد الحجز في السيستم'}">
+                            <i class="fas fa-${isConfirmed ? 'times-circle' : 'check-circle'}"></i><span>${isConfirmed ? 'ألغِ التأكيد' : 'أكّد'}</span>
+                        </button>
+                        <button class="btn-icon" style="background:linear-gradient(135deg,#25D366,#128C7E);color:white;" onclick="sendBookingConfirmation('${b.phone}','${b.patientName.replace(/'/g,"\\'")}','${b.time}','${b.doctor}','${b.branch||''}','${b.date||''}')" title="رسالة تأكيد الحجز">
+                            <i class="fab fa-whatsapp"></i><span>رسالة تأكيد</span>
+                        </button>
+                        <button class="btn-icon btn-confirm-wa" onclick="sendConfirmWhatsApp('${b.phone}','${b.patientName}','${b.time}','${b.doctor}')" title="تذكير بالموعد">
+                            <i class="far fa-bell"></i><span>تذكير</span>
+                        </button>
+                        <button class="btn-icon btn-late-wa" onclick="sendLateWhatsApp('${b.phone}','${b.patientName}','${b.time}','${b.doctor}')" title="استفسار تأخر">
+                            <i class="fab fa-whatsapp"></i><span>تأخر؟</span>
+                        </button>
+                        <button class="btn-icon" style="background:linear-gradient(135deg,#e67e22,#d35400);color:white;" onclick="editReservation('${b.id}')" title="تعديل الحجز">
+                            <i class="fas fa-edit"></i><span>تعديل</span>
+                        </button>
+                    </div>` : ''}
+                </div>`;
+            }).join('') : `<div class="empty-hour"><i class="fas fa-calendar-times" style="display:block;font-size:1.5rem;margin-bottom:5px;color:#ddd;"></i>لا يوجد حجوزات</div>`;
+
+            container.innerHTML += `
+            <div class="hour-block">
+                <div class="hour-header">
+                    <div class="hour-header-row">
+                        <div class="hour-time">
+                            <i class="far fa-clock"></i> ${hour}
+                            ${catLoad.A > 0 ? `<span class="cat-badge cat-A">${catLoad.A} فئة A</span>` : ''}
+                            ${catLoad.B > 0 ? `<span class="cat-badge cat-B">${catLoad.B} فئة B</span>` : ''}
+                            ${catLoad.C > 0 ? `<span class="cat-badge cat-C">${catLoad.C} فئة C</span>` : ''}
+                        </div>
+                        <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">${hourBookings.length > 0 ? hourBookings.length + ' حجز' : ''}</div>
+                    </div>
+                    ${docBadgesHtml ? `<div class="doc-badges-row">${docBadgesHtml}</div>` : ''}
+                </div>
+                <div class="reservations-grid">${cardsHtml}</div>
+            </div>`;
+        });
+    }
+
+    // ===== طباعة حجوزات اليوم PDF =====
+    function printDayBookings() {
+        const selDate = document.getElementById('boardDate').value;
+        const selBranch = document.getElementById('boardBranch').value;
+        const dateFmt = selDate.split('-').reverse().join('/');
+        const branchLabel = selBranch === 'all' ? 'كل الفروع' : selBranch;
+        let filtered = globalBookings.filter(b => b.date === selDate && (selBranch === 'all' || b.branch === selBranch));
+        // رتّب بالساعة
+        filtered.sort((a,b) => (a.time||'').localeCompare(b.time||''));
+
+        // جمّع بالساعة بشكل timeline (زي الأجندة)
+        let timelineHtml = '';
+        let num = 0;
+        workingHours.forEach(hour => {
+            const hb = filtered.filter(b => b.time === hour);
+            if (!hb.length) return;
+            let cards = '';
+            hb.forEach(b => {
+                num++;
+                const isAttended = b.status === 'حضر';
+                const isCheckup = (b.sessionType||'') === 'كشف طبيب';
+                const isCash = (b.company||'').includes('كاش') || !b.company;
+                // لون الكارت حسب النوع
+                let accent = isAttended ? '#27ae60' : (isCheckup ? '#9b59b6' : (isCash ? '#e67e22' : '#2980b9'));
+                let typeLabel = isCheckup ? 'كشف' : (isCash ? 'كاش' : (b.company||'تأمين'));
+                cards += `<div style="background:white;border-radius:12px;border-right:5px solid ${accent};padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);position:relative;">
+                    <div style="position:absolute;top:10px;left:10px;background:#0b132b;color:#d4af37;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:900;">${num}</div>
+                    <div style="font-weight:900;font-size:14px;margin-bottom:5px;">${b.patientName||'-'}</div>
+                    <div style="font-size:11px;color:#666;line-height:1.7;">
+                        <div>📞 ${b.phone||'-'}</div>
+                        ${b.doctor?`<div>🩺 د. ${b.doctor}</div>`:''}
+                        <div><span style="background:${accent}18;color:${accent};padding:1px 8px;border-radius:8px;font-weight:700;">${typeLabel}</span> ${b.sessionType&&!isCheckup?'· '+b.sessionType:''}</div>
+                        ${isAttended?'<div style="color:#27ae60;font-weight:800;">✓ حضر</div>':''}
+                    </div>
+                </div>`;
+            });
+            timelineHtml += `<div style="display:flex;gap:14px;margin-bottom:14px;align-items:stretch;">
+                <div style="flex:0 0 90px;background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#d4af37;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;padding:10px;">
+                    <div style="font-size:18px;">${hour}</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;">${hb.length} حجز</div>
+                </div>
+                <div style="flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">${cards}</div>
+            </div>`;
+        });
+        if (!timelineHtml) { showToast('لا توجد حجوزات في هذا اليوم', 'error'); return; }
+
+        const win = window.open('', '_blank');
+        win.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>حجوزات ${dateFmt}</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+            * { margin:0; padding:0; box-sizing:border-box; }
+            body { font-family:'Tajawal',sans-serif; padding:28px; color:#0b132b; background:#f4f6fa; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            .head { display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; border-radius:16px; padding:20px 26px; margin-bottom:8px; }
+            .head .t { font-size:23px; font-weight:900; }
+            .head .t span { color:#d4af37; }
+            .head .s { color:rgba(255,255,255,0.8); font-size:14px; margin-top:4px; }
+            .head .logo { width:58px; height:58px; background:white; border-radius:12px; padding:4px; object-fit:contain; }
+            .gold-bar { height:4px; background:linear-gradient(90deg,#d4af37,#f4d03f); border-radius:2px; margin-bottom:18px; }
+            .summary { display:flex; gap:12px; margin-top:18px; }
+            .sm { flex:1; text-align:center; background:white; border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+            .sm .n { font-size:1.8rem; font-weight:900; color:#0b132b; }
+            .sm .l { font-size:12px; color:#888; }
+            .foot { text-align:center; margin-top:18px; color:#aaa; font-size:12px; }
+            @media print { button { display:none; } body { background:white; } }
+        
+        /* ===== موبايل: الصفحة كاملة + قائمة منزلقة ===== */
+        .mobile-menu-btn { display: none; }
+
+        /* ===== زرار تطوي فورم الإضافة على الموبايل ===== */
+        #toggleAddFormBtn { display: none; }
+
+        @media (max-width: 900px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; background: rgba(212,175,55,0.2); border: 1px solid #d4af37; color: #d4af37; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+            .sidebar { transform: translateX(100%); transition: transform 0.3s ease; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            /* تحويل الـ grid لعمود واحد */
+            .main-content { margin-right: 0 !important; width: 100% !important; padding: 16px 14px !important; display: flex !important; flex-direction: column !important; gap: 12px !important; }
+            /* فورم الإضافة: مش sticky + قابل للتطوي */
+            .add-reservation-box { position: static !important; max-height: none !important; overflow: visible !important; }
+            #addFormBody { transition: max-height 0.3s ease, opacity 0.3s ease; overflow: hidden; }
+            #addFormBody.collapsed { max-height: 0 !important; opacity: 0; padding: 0; }
+            #toggleAddFormBtn { display: flex !important; width: 100%; background: linear-gradient(135deg,#0b132b,#1a2a5e); color: #d4af37; border: none; padding: 10px 16px; border-radius: 10px; font-size: 0.92rem; font-weight: 900; cursor: pointer; align-items: center; justify-content: space-between; margin-bottom: 8px; font-family: 'Tajawal'; }
+            .header { padding: 0 16px !important; }
+            .header-title { font-size: 1rem !important; letter-spacing: 1px !important; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; top: 72px; }
+            .sidebar-overlay.active { display: block; }
+            table { font-size: 0.8rem !important; }
+            /* تحسين الأجندة على الموبايل */
+            .board-wrap, .board-scroll { overflow-x: auto !important; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+            .board-table td, .board-table th { min-width: 90px !important; font-size: 0.72rem !important; padding: 5px 4px !important; }
+            .board-cell, .slot { min-height: 42px !important; }
+            /* الأزرار في الهيدر تلتف بشكل مرتب */
+            .board-toolbar, .head-actions { flex-wrap: wrap !important; gap: 7px !important; }
+            .board-toolbar button, .head-actions button { font-size: 0.78rem !important; padding: 7px 11px !important; }
+            /* الحجوزات على الموبايل بالطول: كارت كامل وواضح لكل حالة. */
+            .reservations-grid { grid-template-columns: 1fr !important; padding:10px !important; gap:9px !important; }
+            .res-card { min-width: 0; padding:13px 12px 11px !important; }
+            .res-card-name { font-size:1.04rem !important; line-height:1.45; }
+            .res-card-phone { direction:ltr; justify-content:flex-end; white-space:nowrap; font-size:0.9rem; font-weight:800; color:#455a64; }
+            .res-card-tags { gap:5px; }
+            .action-btns-bottom { gap:6px; }
+            .btn-icon { min-height:32px; flex:1 1 30%; }
+            .board-header { align-items:flex-start; gap:10px; flex-direction:column; }
+            .board-header > div { width:100%; }
+        }
+        @media (max-width: 600px) {
+            .header-title { font-size: 0.85rem !important; }
+            .main-content { padding: 12px 10px !important; }
+            .board-table td, .board-table th { min-width: 78px !important; font-size: 0.68rem !important; }
+            .booking-chip, .res-chip { padding: 3px 5px !important; border-radius: 6px !important; font-size: 0.66rem !important; line-height: 1.25 !important; }
+            .reservations-grid { grid-template-columns:1fr !important; }
+            .res-card-phone { font-size:0.9rem; }
+        }
+
+    </style>
+
+</head><body>
+            <div class="head">
+                <div><div class="t">LIFE <span>SPORT</span> — أجندة الحجوزات</div><div class="s">${branchLabel} — ${dateFmt}</div></div>
+                <img class="logo" src="logo.png" onerror="this.style.display='none'">
+            </div>
+            <div class="gold-bar"></div>
+            ${(function(){
+                // ملخص الساعات + الدكاترة في الطباعة
+                const hLabel = (h) => { const m={"12:00 PM":"12م","01:00 PM":"1","02:00 PM":"2","03:00 PM":"3","04:00 PM":"4","05:00 PM":"5","06:00 PM":"6","07:00 PM":"7","08:00 PM":"8","09:00 PM":"9","10:00 PM":"10","11:00 PM":"11"}; return m[h]||h; };
+                let hoursChips = workingHours.map(h => {
+                    const cnt = filtered.filter(b => b.time === h).length;
+                    const full = cnt >= 13;
+                    const bg = full ? '#ffebee' : (cnt < 7 ? '#e8f5e9' : '#fff8e1');
+                    const tc = full ? '#c62828' : (cnt < 7 ? '#2e7d32' : '#e65100');
+                    const ic = full ? '🔴' : (cnt < 7 ? '🟢' : '🟡');
+                    return `<span style="background:${bg};color:${tc};border:1px solid ${tc}55;border-radius:10px;padding:5px 10px;font-weight:800;font-size:12px;margin:3px;display:inline-block;">${ic} ${hLabel(h)}: ${full?'ممتلئ':cnt}</span>`;
+                }).join('');
+                const docLoad = {};
+                filtered.forEach(b => { const dn=(b.doctor||'').trim(); if(dn&&dn!=='-') docLoad[dn]=(docLoad[dn]||0)+1; });
+                let docChips = Object.entries(docLoad).sort((a,b)=>b[1]-a[1]).map(([n,c])=>{
+                    const col = c>=3?'#e74c3c':(c===2?'#e67e22':'#27ae60');
+                    return `<span style="background:${col}15;color:${col};border:1px solid ${col}44;border-radius:10px;padding:5px 10px;font-weight:800;font-size:12px;margin:3px;display:inline-block;">👨‍⚕️ ${n}: ${c}</span>`;
+                }).join('') || '<span style="color:#aaa;font-size:12px;">-</span>';
+                return `<div style="background:white;border-radius:12px;padding:14px 18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-weight:900;font-size:13px;color:#0b132b;margin-bottom:8px;">⏰ مواعيد الحجز المتاحة</div>
+                    <div>${hoursChips}</div>
+                    <div style="font-weight:900;font-size:13px;color:#0b132b;margin:12px 0 8px;">👨‍⚕️ أحمال الدكاترة</div>
+                    <div>${docChips}</div>
+                </div>`;
+            })()}
+            ${timelineHtml}
+            <div class="summary">
+                <div class="sm"><div class="n">${filtered.length}</div><div class="l">إجمالي الحجوزات</div></div>
+                <div class="sm"><div class="n" style="color:#27ae60;">${filtered.filter(b=>b.status==='حضر').length}</div><div class="l">حضروا</div></div>
+                <div class="sm"><div class="n" style="color:#e67e22;">${filtered.filter(b=>b.status!=='حضر').length}</div><div class="l">منتظر</div></div>
+            </div>
+            <div class="foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>
+            <div style="text-align:center;margin-top:20px;"><button onclick="window.print()" style="background:#0b132b;color:white;border:none;padding:12px 36px;border-radius:10px;font-size:15px;cursor:pointer;font-family:Tajawal;">🖨️ طباعة / PDF</button></div>
+        </body></html>`);
+        win.document.close();
+    }
+
+    // ===== إرسال حجوزات دكتور =====
+    // ===== ملخص الحجوزات بالساعات (واتساب) =====
+    function sendHourlySummary() {
+        const selDate = document.getElementById('boardDate').value;
+        const selBranch = document.getElementById('boardBranch').value;
+        const dateFmt = selDate.split('-').reverse().join('/');
+        const branchLabel = selBranch === 'all' ? 'كل الفروع' : selBranch;
+        let filtered = globalBookings.filter(b => b.date === selDate && (selBranch === 'all' || b.branch === selBranch));
+        if (!filtered.length) { showToast('لا توجد حجوزات في هذا اليوم', 'error'); return; }
+
+        // اسم اليوم بالعربي
+        const dayNames = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+        const dayName = dayNames[new Date(selDate).getDay()] || '';
+
+        let msg = `✨ *أهلاً وسهلاً د. قاسم وشركاه* ✨\n`;
+        msg += `🌿 _نتمنى لحضراتكم يوماً موفقاً_\n`;
+        msg += `╔═══════════════╗\n`;
+        msg += `🏥 *مركز لايف سبورت للعلاج الطبيعي*\n`;
+        msg += `📋 *كشف حجوزات اليوم*\n`;
+        msg += `╚═══════════════╝\n`;
+        msg += `📍 الفرع: *${branchLabel}*\n`;
+        msg += `📅 ${dayName} — ${dateFmt}\n`;
+        msg += `━━━━━━━━━━━━━━━\n`;
+
+        let totalNum = 0;
+        workingHours.forEach(hour => {
+            const hb = filtered.filter(b => b.time === hour);
+            if (!hb.length) return;
+            // أيقونة حسب ازدحام الساعة
+            const loadIcon = hb.length >= 10 ? '🔴' : (hb.length >= 6 ? '🟠' : '🟢');
+            msg += `\n${loadIcon} *━━ الساعة ${hour} ━━*\n`;
+            msg += `👥 عدد الحالات: *${hb.length}*\n\n`;
+            hb.forEach(b => {
+                totalNum++;
+                const isCheckup = (b.sessionType||'') === 'كشف طبيب';
+                const isCash = (b.company||'').includes('كاش') || !b.company;
+                // أيقونة النوع
+                const typeIcon = isCheckup ? '🩺' : (isCash ? '💵' : '🏥');
+                const statusIcon = b.status === 'حضر' ? '✅' : '⏳';
+                const comp = isCheckup ? 'كشف طبيب' : (b.company || 'كاش');
+                msg += `${statusIcon} *${totalNum}.* ${b.patientName}\n`;
+                msg += `      ${typeIcon} ${comp}`;
+                if (b.category) msg += ` | 📊 فئة ${b.category}`;
+                msg += `\n`;
+                if (b.doctor && b.doctor !== 'د. غير محدد') msg += `      👨‍⚕️ ${b.doctor}\n`;
+                if (b.phone) msg += `      📞 ${b.phone}\n`;
+                msg += `\n`;
+            });
+            msg += `───────────────\n`;
+        });
+
+        const attended = filtered.filter(b=>b.status==='حضر').length;
+        const waiting = filtered.length - attended;
+        msg += `\n📊 *ملخص اليوم*\n`;
+        msg += `━━━━━━━━━━━━━━━\n`;
+        msg += `📋 إجمالي الحجوزات: *${filtered.length}*\n`;
+        msg += `✅ حضروا: *${attended}*\n`;
+        msg += `⏳ في الانتظار: *${waiting}*\n`;
+        msg += `━━━━━━━━━━━━━━━\n`;
+
+        // المصروفات (لو فيه globalTransactions في الصفحة)
+        try {
+            if (typeof globalTransactions !== 'undefined' && globalTransactions.length) {
+                const dmy = dateFmt;
+                const todayExp = globalTransactions.filter(t => t.date === dmy && (selBranch==='all' || (t.branch||'')===selBranch));
+                if (todayExp.length) {
+                    msg += `\n💸 *المصروفات*\n`;
+                    let totalExp = 0;
+                    todayExp.forEach(t => {
+                        const amt = parseFloat(t.amount||0); totalExp += amt;
+                        msg += `▫️ ${t.reason||'مصروف'}: *${amt} ج*\n`;
+                    });
+                    msg += `📌 الإجمالي: *${totalExp.toLocaleString()} ج*\n`;
+                    msg += `━━━━━━━━━━━━━━━\n`;
+                }
+            }
+        } catch(e){}
+
+        // الغياب
+        try {
+            if (typeof globalReports !== 'undefined' && globalReports.length) {
+                const dmy = dateFmt;
+                const todayAbs = globalReports.filter(r => r.date === dmy && (selBranch==='all' || (r.branch||'')===selBranch));
+                if (todayAbs.length) {
+                    msg += `\n🚫 *الغياب اليوم* (${todayAbs.length})\n`;
+                    todayAbs.forEach(r => { msg += `▫️ ${r.patientName}: ${r.reason||'-'}\n`; });
+                    msg += `━━━━━━━━━━━━━━━\n`;
+                }
+            }
+        } catch(e){}
+
+        msg += `\n🌿 _نظام Life Sport للعلاج الطبيعي_\n`;
+        msg += `_مع تحيات إدارة المركز_ 🤍`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function openDoctorSend() {
+        const selDate = document.getElementById('boardDate').value;
+        const selBranch = document.getElementById('boardBranch').value;
+        let filtered = globalBookings.filter(b => b.date === selDate && (selBranch === 'all' || b.branch === selBranch));
+        // اجمع أسماء الدكاترة
+        const doctors = [...new Set(filtered.map(b => b.doctor).filter(d => d && d !== 'غير محدد'))];
+        const sel = document.getElementById('doctorSendSelect');
+        if (!doctors.length) { showToast('لا يوجد دكاترة في حجوزات اليوم', 'error'); return; }
+        sel.innerHTML = doctors.map(d => `<option value="${d}">${d}</option>`).join('');
+        document.getElementById('doctorSendPhone').value = '';
+        document.getElementById('doctorSendModal').style.display = 'flex';
+    }
+
+    function sendDoctorBookings() {
+        const doctor = document.getElementById('doctorSendSelect').value;
+        const phone = document.getElementById('doctorSendPhone').value.trim();
+        const selDate = document.getElementById('boardDate').value;
+        const selBranch = document.getElementById('boardBranch').value;
+        const dateFmt = selDate.split('-').reverse().join('/');
+        let docBookings = globalBookings.filter(b => b.date === selDate && b.doctor === doctor && (selBranch === 'all' || b.branch === selBranch));
+        docBookings.sort((a,b) => (a.time||'').localeCompare(b.time||''));
+        if (!docBookings.length) { showToast('لا توجد حجوزات لهذا الدكتور', 'error'); return; }
+
+        const L = '─────────────';
+        let msg = `🩺 *حالات د. ${doctor}*\n📅 ${dateFmt}\n${L}\n`;
+        docBookings.forEach((b,i) => {
+            msg += `${i+1}. ⏰ ${b.time} — *${b.patientName}*\n`;
+            msg += `   ${b.company||'كاش'} | ${b.sessionType||'-'}${b.category?' | فئة '+b.category:''}\n`;
+        });
+        msg += `${L}\nإجمالي: ${docBookings.length} حالة\n_نظام Life Sport_`;
+
+        let waUrl;
+        if (phone) {
+            let wp = phone.replace(/\D/g,'');
+            if (wp.startsWith('0')) wp = '2'+wp;
+            else if (!wp.startsWith('20')) wp = '20'+wp;
+            waUrl = `https://wa.me/${wp}?text=${encodeURIComponent(msg)}`;
+        } else {
+            waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        }
+        window.open(waUrl, '_blank');
+        document.getElementById('doctorSendModal').style.display = 'none';
+    }
+</script>
+    <script src="translations.js"></script>
+    <script src="assistant.js"></script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+
+
+
+
+<!-- زرار النسخ الاحتياطي العائم (للأدمن فقط) -->
+<script>
+(function(){
+    try {
+        var role = (localStorage.getItem('userRole')||'').toLowerCase();
+        var br = localStorage.getItem('userBranch')||'';
+        var isAdmin = (role==='owner'||role==='admin'||br==='الإدارة المركزية');
+        if (!isAdmin) return;
+        if (typeof db === 'undefined') return;
+
+        function addBackupBtn(){
+            if (document.getElementById('floatBackupBtn')) return;
+            var btn = document.createElement('button');
+            btn.id = 'floatBackupBtn';
+            btn.title = 'نسخة احتياطية فورية';
+            btn.innerHTML = '<i class="fas fa-shield-halved"></i>';
+            btn.style.cssText = 'position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 6px 20px rgba(39,174,96,0.4);z-index:4000;display:flex;align-items:center;justify-content:center;transition:0.3s;';
+            btn.onmouseover = function(){ this.style.transform='scale(1.1)'; };
+            btn.onmouseout = function(){ this.style.transform='scale(1)'; };
+            btn.onclick = doBackup;
+            document.body.appendChild(btn);
+
+            // تذكير: لو عدّى 7 أيام من آخر نسخة
+            try {
+                var last = localStorage.getItem('lastBackupDate');
+                if (last) {
+                    var lastDay = new Date(parseInt(last)).toDateString();
+                    var today = new Date().toDateString();
+                    var days = Math.floor((Date.now() - parseInt(last)) / (1000*60*60*24));
+                    if (lastDay !== today) showBackupReminder(days);
+                } else {
+                    showBackupReminder(null);
+                }
+            } catch(e){}
+        }
+
+        function showBackupReminder(days){
+            if (document.getElementById('backupReminder')) return;
+            var bar = document.createElement('div');
+            bar.id = 'backupReminder';
+            bar.style.cssText = 'position:fixed;bottom:90px;left:24px;background:white;border:2px solid #d4af37;border-radius:14px;padding:14px 18px;max-width:280px;box-shadow:0 8px 30px rgba(0,0,0,0.18);z-index:4000;font-family:Tajawal;';
+            var msg = days ? ('<span>آخر نسخة احتياطية من</span> '+days+' <span>يوم</span>') : '<span>لسه معملتش نسخة احتياطية</span>';
+            bar.innerHTML = '<div style="display:flex;align-items:start;gap:10px;"><i class="fas fa-triangle-exclamation" style="color:#e67e22;font-size:1.2rem;margin-top:2px;"></i><div><div style="font-weight:800;color:#0b132b;font-size:0.9rem;margin-bottom:4px;">'+msg+'</div><div style="font-size:0.8rem;color:#888;margin-bottom:8px;">احفظ بياناتك دلوقتي بضغطة</div><button onclick="window._doBackup()" style="background:#27ae60;color:white;border:none;padding:7px 16px;border-radius:8px;font-weight:800;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">نسخة دلوقتي</button> <button onclick="document.getElementById(\'backupReminder\').remove()" style="background:#f0f0f0;color:#888;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:0.82rem;">بعدين</button></div></div>';
+            document.body.appendChild(bar);
+        }
+
+        async function doBackup(){
+            var btn = document.getElementById('floatBackupBtn');
+            var old = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                var collections = ['patients_insu','patients_cash','daily_ledger','daily_transactions','reservations','employees','users','hv_doctors','hv_cases','hv_sessions','follow_up_reports','audit_logs','settings'];
+                var backup = { _meta: { date: new Date().toISOString(), version:'full' } };
+                for (var i=0;i<collections.length;i++){
+                    var col = collections[i];
+                    var snap = await db.collection(col).get();
+                    backup[col] = [];
+                    snap.forEach(function(doc){ backup[col].push(Object.assign({_id:doc.id}, doc.data())); });
+                }
+                var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                localStorage.setItem('lastBackupDate', Date.now().toString());
+                var rem = document.getElementById('backupReminder'); if(rem) rem.remove();
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+            } catch(e){
+                console.error(e);
+                btn.innerHTML = '<i class="fas fa-xmark"></i>';
+                setTimeout(function(){ btn.innerHTML = old; }, 2000);
+                alert('حصل خطأ أثناء النسخ الاحتياطي');
+            }
+        }
+        window._doBackup = doBackup;
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(addBackupBtn, 1500); });
+        else setTimeout(addBackupBtn, 1500);
+    } catch(e){ console.warn('backup btn:', e); }
+})();
+
+    // ===== تنبيه الحجوزات القادمة (كل 5 دقائق) =====
+    let _lastNotified = {};
+    function checkUpcomingBookings() {
+        try {
+            const now = new Date();
+            const todayISO = now.toISOString().split('T')[0];
+            // الحجوزات النهاردة اللي لسه منتظرة
+            const todayBookings = globalBookings.filter(b => b.date === todayISO && b.status !== 'حضر');
+            if (!todayBookings.length) return;
+
+            // حوّل وقت كل حجز لساعة فعلية وقارن
+            let upcoming = [];
+            todayBookings.forEach(b => {
+                if (!b.time) return;
+                // b.time زي "02:00 PM"
+                const m = b.time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+                if (!m) return;
+                let hh = parseInt(m[1]); const mm = parseInt(m[2]); const ap = m[3].toUpperCase();
+                if (ap === 'PM' && hh !== 12) hh += 12;
+                if (ap === 'AM' && hh === 12) hh = 0;
+                const bookTime = new Date(now); bookTime.setHours(hh, mm, 0, 0);
+                const diffMin = Math.round((bookTime - now) / 60000);
+                // خلال الـ 30 دقيقة الجاية
+                if (diffMin >= 0 && diffMin <= 30 && !_lastNotified[b.id]) {
+                    upcoming.push({ ...b, diffMin });
+                    _lastNotified[b.id] = true;
+                }
+            });
+
+            if (upcoming.length) {
+                upcoming.forEach(b => {
+                    showBookingAlert(b);
+                });
+            }
+        } catch(e) { console.warn('booking check:', e); }
+    }
+
+    function showBookingAlert(b) {
+        // إشعb, ار المتصفح لو متاح
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('🔔 موعد قريب — Life Sport', {
+                body: `${b.patientName} الساعة ${b.time} (خلال ${b.diffMin} دقيقة)\nمع ${b.doctor||'-'}`,
+                icon: 'logo.png'
+            });
+        }
+        // تنبيه داخل الصفحة
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;bottom:20px;left:20px;background:linear-gradient(135deg,#0b132b,#1a2a5e);color:white;padding:16px 22px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.3);z-index:9999;border-right:4px solid #d4af37;max-width:320px;animation:lsFadeUp 0.4s ease;';
+        toast.innerHTML = `<div style="font-weight:900;color:#d4af37;margin-bottom:5px;">🔔 موعد قريب</div><div style="font-size:0.9rem;"><b>${b.patientName}</b> الساعة <b>${b.time}</b></div><div style="font-size:0.82rem;color:rgba(255,255,255,0.8);margin-top:3px;">خلال ${b.diffMin} دقيقة — ${b.doctor||''}</div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = '0.5s'; setTimeout(()=>toast.remove(), 500); }, 8000);
+    }
+
+    // اطلب إذن الإشعارات مرة واحدة
+    if ('Notification' in window && Notification.permission === 'default') {
+        setTimeout(() => { try { Notification.requestPermission(); } catch(e){} }, 3000);
+    }
+    // افحص كل 5 دقائق + أول مرة بعد 10 ثواني
+    setTimeout(checkUpcomingBookings, 10000);
+    setInterval(checkUpcomingBookings, 5 * 60 * 1000);
+
+    // ===== تذكير بالساعات الفاضية =====
+    function remindFreeHours() {
+        const selDate = document.getElementById('boardDate').value;
+        const selBranch = document.getElementById('boardBranch') ? document.getElementById('boardBranch').value : 'all';
+        // بس للنهاردة
+        const todayISO = new Date().toISOString().split('T')[0];
+        if (selDate !== todayISO) return;
+
+        const hours = getWorkingHours(selDate);
+        const todayBookings = globalBookings.filter(b => b.date === selDate && (selBranch === 'all' || b.branch === selBranch));
+        // عُد الحجوزات لكل ساعة
+        const hourCount = {};
+        hours.forEach(h => hourCount[h] = 0);
+        todayBookings.forEach(b => { if (hourCount[b.time] !== undefined) hourCount[b.time]++; });
+
+        // الساعات الفاضية (أقل من 13)
+        const freeHours = hours.filter(h => hourCount[h] < 13);
+        if (!freeHours.length) return;
+
+        // الأقل ازدحاماً
+        let minHour = freeHours[0], minCount = hourCount[freeHours[0]];
+        freeHours.forEach(h => { if (hourCount[h] < minCount) { minCount = hourCount[h]; minHour = h; } });
+
+        const arLabel = (h) => {
+            const map = {"12:00 PM":"12 ظهراً","01:00 PM":"1","02:00 PM":"2","03:00 PM":"3","04:00 PM":"4","05:00 PM":"5","06:00 PM":"6","07:00 PM":"7","08:00 PM":"8","09:00 PM":"9","10:00 PM":"10","11:00 PM":"11"};
+            return map[h] || h;
+        };
+
+        // رسالة في نص الشاشة
+        showCenterReminder(minHour, minCount, freeHours.length, arLabel);
+    }
+
+    function showCenterReminder(minHour, minCount, freeCount, arLabel) {
+        // امسح القديمة
+        const old = document.getElementById('centerReminder');
+        if (old) old.remove();
+
+        const div = document.createElement('div');
+        div.id = 'centerReminder';
+        // رسالة صغيرة على جنب (أسفل اليمين) — مش في نص الشاشة
+        div.style.cssText = 'position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#0b132b,#1a2a5e);color:white;padding:14px 18px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.3);z-index:9000;border-right:4px solid #d4af37;max-width:260px;animation:slideInRight 0.4s ease;font-size:0.88rem;';
+        div.innerHTML = `
+            <div style="display:flex;align-items:start;gap:10px;">
+                <div style="font-size:1.4rem;">⏰</div>
+                <div style="flex:1;">
+                    <div style="font-weight:900;color:#d4af37;font-size:0.85rem;margin-bottom:3px;">أنسب ساعة للحجز</div>
+                    <div style="font-weight:900;font-size:1.1rem;">الساعة ${arLabel(minHour)}</div>
+                    <div style="font-size:0.75rem;color:#a3aed1;margin-top:2px;">${minCount} حجز بس · ${freeCount} ساعة فاضية</div>
+                </div>
+                <button onclick="document.getElementById('centerReminder').remove()" style="background:rgba(255,255,255,0.15);color:white;border:none;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.8rem;line-height:1;flex-shrink:0;">✕</button>
+            </div>
+        `;
+        document.body.appendChild(div);
+
+        // امسحها تلقائي بعد 8 ثواني
+        setTimeout(() => { const r = document.getElementById('centerReminder'); if (r) r.remove(); }, 8000);
+    }
+
+    // أضف animation
+    (function(){
+        const st = document.createElement('style');
+        st.textContent = '@keyframes slideInRight { from { opacity:0; transform:translateX(120%); } to { opacity:1; transform:translateX(0); } }';
+        document.head.appendChild(st);
+    })();
+
+    // ذكّر كل 15 دقيقة + أول مرة بعد 20 ثانية
+    setTimeout(remindFreeHours, 20000);
+    setInterval(remindFreeHours, 15 * 60 * 1000);
+
+    // زرار قائمة الموبايل
+    function toggleMobileMenu() {
+        const sb = document.querySelector('.sidebar');
+        let ov = document.querySelector('.sidebar-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'sidebar-overlay';
+            ov.onclick = toggleMobileMenu;
+            document.body.appendChild(ov);
+        }
+        sb.classList.toggle('mobile-open');
+        ov.classList.toggle('active');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    // ===== تطوي/فتح فورم الحجز على الموبايل =====
+    function toggleAddForm() {
+        const body = document.getElementById('addFormBody');
+        const icon = document.getElementById('toggleAddFormIcon');
+        if (!body) return;
+        body.classList.toggle('collapsed');
+        if (icon) icon.className = body.classList.contains('collapsed')
+            ? 'fas fa-chevron-down'
+            : 'fas fa-chevron-up';
+    }
+    window.toggleAddForm = toggleAddForm;
+
+    </script>
+    <style id="reservations-mobile-final">
+    @media screen and (max-width: 900px) {
+        body { display:block !important; overflow-x:hidden !important; }
+        .sidebar { transform:translateX(100%) !important; }
+        .sidebar.mobile-open { transform:translateX(0) !important; }
+        .main-content { display:block !important; margin:58px 0 0 !important; width:100% !important; max-width:100vw !important; padding:10px !important; }
+        .add-reservation-box, .board-container { width:100% !important; min-width:0 !important; max-width:100% !important; margin:0 0 12px !important; }
+        .add-reservation-box { position:static !important; overflow:visible !important; }
+        #addFormBody:not(.collapsed) { overflow:visible !important; }
+        .reservations-grid { grid-template-columns:repeat(3,minmax(0,1fr)) !important; width:100% !important; gap:5px !important; }
+        .res-card { width:100% !important; min-width:0 !important; padding:6px !important; }
+        /* رقم الحجز كان يستهلك مساحة الاسم داخل 3 كروت؛ نخفيه على الهاتف كي يظهر الاسم كاملاً. */
+        .res-card-name > span { display:none !important; }
+        .res-card-name { font-size:.8rem !important; line-height:1.3 !important; white-space:normal !important; word-break:normal !important; overflow-wrap:anywhere !important; min-height:2.1em; }
+        .res-card-phone { font-size:.68rem !important; }
+        .board-header { flex-direction:column !important; align-items:stretch !important; }
+        .board-header > div { width:100% !important; }
+    }
+    </style>
+    <script>
+    // يفرض تخطيط الهاتف حتى إذا كان المتصفح مضبوطاً على "عرض سطح المكتب".
+    (function(){
+        if (!window.screen || Math.min(screen.width, screen.height) > 900 || navigator.maxTouchPoints < 1) return;
+        document.documentElement.classList.add('ls-phone');
+        const style=document.createElement('style');
+        style.textContent=`
+            html.ls-phone body{display:block!important;overflow-x:hidden!important}
+            html.ls-phone .sidebar{transform:translateX(100%)!important}
+            html.ls-phone .sidebar.mobile-open{transform:translateX(0)!important}
+            html.ls-phone .main-content{display:block!important;margin:58px 0 0!important;width:100%!important;max-width:100vw!important;padding:10px!important}
+            html.ls-phone .add-reservation-box,html.ls-phone .board-container{width:100%!important;min-width:0!important;max-width:100%!important;margin:0 0 12px!important}
+            html.ls-phone .add-reservation-box{position:static!important;overflow:visible!important}
+            html.ls-phone #addFormBody:not(.collapsed){overflow:visible!important}
+            html.ls-phone .reservations-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important;gap:5px!important}
+            html.ls-phone .res-card{width:100%!important;min-width:0!important;padding:6px!important}
+            html.ls-phone .res-card-name>span{display:none!important} html.ls-phone .res-card-name{font-size:.8rem!important;line-height:1.3!important;white-space:normal!important;word-break:normal!important;overflow-wrap:anywhere!important;min-height:2.1em} html.ls-phone .res-card-phone{font-size:.68rem!important}
+            html.ls-phone .board-header{flex-direction:column!important;align-items:stretch!important}
+            html.ls-phone .board-header>div{width:100%!important}`;
+        document.head.appendChild(style);
+    })();
+    </script>
+</body>
+</html>
