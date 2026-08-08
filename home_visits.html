@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Life Sport - الجلسات المنزلية</title>
+    <title>Obsidian System - الجلسات المنزلية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
@@ -179,6 +179,7 @@
     
     </style>
     <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 <canvas id="canvas" style="display:none;"></canvas>
@@ -193,8 +194,8 @@
 <!-- ===== PORTAL ===== -->
 <div id="portalMode">
     <div class="portal-header">
-        <img src="logo.png" style="height:36px;" onerror="this.style.display='none'">
-        <div><h1>LIFE SPORT — بوابة الدكتور</h1><span id="portalDocLabel"></span></div>
+        <img src="obsidian-system-logo.jpeg" style="height:36px;" onerror="this.style.display='none'">
+        <div><h1>Obsidian System — بوابة الدكتور</h1><span id="portalDocLabel"></span></div>
     </div>
     <div class="portal-body">
         <div class="portal-welcome">
@@ -215,8 +216,8 @@
     <header class="header">
         <div style="display:flex;align-items:center;gap:14px;">
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
-            <img src="logo.png" style="height:44px;" onerror="this.style.display='none'">
-            <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+            <img src="obsidian-system-logo.jpeg" style="height:44px;" onerror="this.style.display='none'">
+            <div class="header-title">Obsidian System</div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
             <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i></div>
@@ -271,7 +272,7 @@
             <div class="sum-card"><div class="sc-lbl">الدكاترة</div><div class="sc-val" style="color:#7b1fa2;" id="sumDocs">0</div></div>
             <div class="sum-card"><div class="sc-lbl">الحالات النشطة</div><div class="sc-val" style="color:#1565c0;" id="sumCases">0</div></div>
             <div class="sum-card"><div class="sc-lbl">جلسات الشهر</div><div class="sc-val" style="color:#27ae60;" id="sumSessions">0</div></div>
-            <div class="sum-card"><div class="sc-lbl">إجمالي المستحقات</div><div class="sc-val" style="color:#c49a2a;" id="sumEarnings">0 ج</div></div>
+            <div class="sum-card"><div class="sc-lbl">إجمالي المستحقات</div><div class="sc-val" style="color:#a9b0b8;" id="sumEarnings">0 ج</div></div>
         </div>
 
         <!-- DOCTORS GRID -->
@@ -403,7 +404,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script>
-const FB = { apiKey:"AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain:"life-sport-system-hossamzahran.firebaseapp.com", projectId:"life-sport-system-hossamzahran", storageBucket:"life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId:"797045013311", appId:"1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+const FB = { apiKey:"AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o", authDomain:"alan-b68e7.firebaseapp.com", projectId:"alan-b68e7", storageBucket:"alan-b68e7.firebasestorage.app", messagingSenderId:"838354978223", appId:"1:838354978223:web:440ba90b7191bc97f45b5a" };
 firebase.initializeApp(FB);
 const db = firebase.firestore();
     try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
@@ -639,9 +640,9 @@ function openFollowCard(caseId) {
         </div>
         <div id="fcPrintable">
             <div class="fc-card-head">
-                <img src="logo.png" onerror="this.style.display='none'" class="fc-logo">
+                <img src="obsidian-system-logo.jpeg" onerror="this.style.display='none'" class="fc-logo">
                 <div class="fc-center">
-                    <div class="fc-title">LIFE SPORT — العلاج الطبيعي</div>
+                    <div class="fc-title">Obsidian System — العلاج الطبيعي</div>
                     <div class="fc-sub">كرت متابعة الجلسات المنزلية</div>
                 </div>
             </div>
@@ -658,7 +659,7 @@ function openFollowCard(caseId) {
                 <div class="fc-stat"><div class="fc-stat-num" style="color:#0b132b;">${totalBoxes}</div><div class="fc-stat-lbl">الإجمالي</div></div>
             </div>
             <div class="fc-grid">${boxesHtml}</div>
-            <div class="fc-foot">Life Sport System — ${new Date().toLocaleDateString('ar-EG')}</div>
+            <div class="fc-foot">Obsidian System — ${new Date().toLocaleDateString('ar-EG')}</div>
         </div>
         <div style="display:flex;gap:10px;margin-top:16px;">
             <button onclick="printFollowCard()" style="flex:1;background:linear-gradient(135deg,#27ae60,#1e8449);color:white;border:none;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;font-family:'Tajawal';font-size:0.95rem;"><i class="fas fa-print"></i> طباعة / PDF</button>
@@ -721,8 +722,8 @@ function printFollowCard() {
 
 </head><body>
         <div class="head">
-            <img src="logo.png" onerror="this.style.display='none'">
-            <div><div class="t">LIFE SPORT — العلاج الطبيعي</div><div class="s">كرت متابعة الجلسات المنزلية</div></div>
+            <img src="obsidian-system-logo.jpeg" onerror="this.style.display='none'">
+            <div><div class="t">Obsidian System — العلاج الطبيعي</div><div class="s">كرت متابعة الجلسات المنزلية</div></div>
         </div>
         <div class="info">
             <div><span>👤 المريض:</span> <b>${c.patientName}</b></div>
@@ -738,7 +739,7 @@ function printFollowCard() {
             <div class="stat"><div class="n">${totalBoxes}</div><div class="l">الإجمالي</div></div>
         </div>
         <div class="grid">${boxesHtml.replace(/fc-box fc-done/g,'box done').replace(/fc-box fc-empty/g,'box empty').replace(/fc-num/g,'num').replace(/fc-date/g,'dt').replace(/fc-check/g,'ck').replace(/fc-dash/g,'dt')}</div>
-        <div class="foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>
+        <div class="foot">Obsidian System — ${new Date().toLocaleString('ar-EG')}</div>
         <div style="text-align:center;margin-top:24px;"><button onclick="window.print()" style="background:#9c27b0;color:white;border:none;padding:13px 38px;border-radius:10px;font-size:15px;cursor:pointer;font-family:'Tajawal';">🖨️ طباعة / حفظ PDF</button></div>
     </body></html>`);
     win.document.close();
@@ -773,7 +774,7 @@ function renderCasesTable() {
             <td><span class="badge ${c.type==='cash'?'badge-cash':'badge-comp'}">${c.type==='cash'?'كاش':'شركة'}</span></td>
             <td style="font-weight:900;color:#27ae60;">${c.sessionPrice} ج</td>
             <td style="font-weight:900;">${mSess.length}</td>
-            <td style="font-weight:900;color:#c49a2a;">${earn.toLocaleString()} ج</td>
+            <td style="font-weight:900;color:#a9b0b8;">${earn.toLocaleString()} ج</td>
             <td>
                 ${docs_.length>0 ? `<div style="display:flex;gap:4px;flex-wrap:wrap;">${docs_.slice(0,3).map(d=>`<img src="${d.data}" class="case-doc-thumb" onclick="openImg('${d.data}')" title="${d.name}">`).join('')}${docs_.length>3?`<div style="width:40px;height:40px;border-radius:8px;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-weight:800;color:#777;font-size:0.75rem;">+${docs_.length-3}</div>`:''}</div>` : '<span style="color:#ccc;font-size:0.78rem;">لا يوجد</span>'}
             </td>
@@ -821,7 +822,7 @@ async function delDoc(id) {
 function sendLink(docId) {
     const doc=docs.find(d=>d.id===docId); if(!doc) return;
     const link = `${window.location.href.split('?')[0]}?doc=${doc.code}`;
-    const msg  = `أهلاً د. ${doc.name} 😊\n\nرابط بوابتك في نظام لايف سبورت:\n${link}\n\nكودك السري: *${doc.code}*\n\nافتح الرابط وهتلاقي حالاتك وتقدر تسجل جلساتك.`;
+    const msg  = `أهلاً د. ${doc.name} 😊\n\nرابط بوابتك في نظام Obsidian System:\n${link}\n\nكودك السري: *${doc.code}*\n\nافتح الرابط وهتلاقي حالاتك وتقدر تسجل جلساتك.`;
     let phone = doc.phone.trim();
     if (phone.startsWith('0')) phone='2'+phone;
     else if (!phone.startsWith('20')) phone='20'+phone;
@@ -1264,7 +1265,7 @@ function printHomeVisits() {
                 var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
                 var a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.download = 'ObsidianSystem_Backup_'+new Date().toISOString().split('T')[0]+'.json';
                 a.click();
                 URL.revokeObjectURL(a.href);
                 localStorage.setItem('lastBackupDate', Date.now().toString());

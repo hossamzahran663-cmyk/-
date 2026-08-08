@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Life Sport - الحركة المالية اليومية</title>
+    <title>Obsidian System - الحركة المالية اليومية</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="premium.css">
@@ -32,7 +32,7 @@
         .custom-modal input { width: 100%; padding: 14px; border: 2px solid #e8e8e8; border-radius: 12px; text-align: center; font-size: 2rem; letter-spacing: 10px; outline: none; margin-bottom: 20px; transition: 0.3s; color: #0b132b; font-family: 'Tajawal'; }
         .custom-modal input:focus { border-color: #d4af37; box-shadow: 0 0 0 4px rgba(212,175,55,0.12); }
         .btn-confirm { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Tajawal'; font-size: 1.05rem; padding: 14px; width: 100%; }
-        .btn-confirm:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; }
+        .btn-confirm:hover { background: linear-gradient(135deg, #d4af37, #a9b0b8); color: #0b132b; }
 
         /* ===== HEADER ===== */
         .header { background: linear-gradient(135deg, #0b132b 0%, #1a2a5e 100%); height: 72px; width: 100%; position: fixed; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 35px; border-bottom: 2px solid rgba(212,175,55,0.4); z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
@@ -72,7 +72,7 @@
         .summary-mini .s-val { font-size: 1.25rem; font-weight: 900; }
         .s-val.green { color: #2e7d32; } .s-val.red { color: #c62828; } .s-val.blue { color: #1565c0; }
         .date-card { background: white; padding: 16px 22px; border-radius: 16px; display: flex; align-items: center; gap: 14px; border: 1px solid #e8eaf0; box-shadow: 0 3px 15px rgba(0,0,0,0.05); justify-content: flex-end; }
-        .date-card .day-pill { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; padding: 8px 16px; border-radius: 30px; font-weight: 900; font-size: 0.9rem; white-space: nowrap; box-shadow: 0 3px 10px rgba(212,175,55,0.3); }
+        .date-card .day-pill { background: linear-gradient(135deg, #d4af37, #a9b0b8); color: #0b132b; padding: 8px 16px; border-radius: 30px; font-weight: 900; font-size: 0.9rem; white-space: nowrap; box-shadow: 0 3px 10px rgba(212,175,55,0.3); }
         .date-card .date-input-wrap { display: flex; flex-direction: column; align-items: flex-end; }
         .date-card .date-input-wrap label { font-size: 0.72rem; color: #aaa; font-weight: 700; margin-bottom: 4px; }
         .date-card input[type="date"] { border: none; background: transparent; font-weight: 800; font-size: 1rem; color: #0b132b; cursor: pointer; outline: none; font-family: 'Tajawal'; }
@@ -516,6 +516,7 @@
 
 
     </style>
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 
@@ -524,7 +525,7 @@
 <div id="customModalOverlay" class="active auth-overlay-unified">
     <div class="custom-modal auth-box-unified">
         <button type="button" class="auth-close" onclick="window.location.href='dashboard.html'" aria-label="إغلاق والعودة للوحة القيادة"><i class="fas fa-times"></i></button>
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
         <h2>بوابة الإدارة والأمان</h2>
         <p style="color:#777; margin-bottom:20px; font-weight:bold;">يرجى إدخال رمز التحقق الخاص بالحركة المالية اليومية</p>
         <input type="password" id="ledgerPinInput" placeholder="****" onkeydown="if(event.key==='Enter') verifyLedgerPin()">
@@ -535,8 +536,8 @@
 <header class="header">
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
         <div class="header-logo">
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
+        <div class="header-title">Obsidian System</div>
     </div>
     <div class="header-right">
         <div id="serverStatus" class="server-status connecting"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
@@ -636,7 +637,7 @@
         <div class="print-page-header insu-header" style="display:none;">
             <div class="ph-right">
                 <div>
-                    <div class="ph-title">🏥 LIFE SPORT SYSTEM &nbsp;|&nbsp; يومية شركات التأمين</div>
+                    <div class="ph-title">🏥 Obsidian System &nbsp;|&nbsp; يومية شركات التأمين</div>
                     <div class="ph-subtitle" id="pi_subtitle">-</div>
                 </div>
             </div>
@@ -681,7 +682,7 @@
         <div class="print-page-header cash-header" style="display:none;">
             <div class="ph-right">
                 <div>
-                    <div class="ph-title">💰 LIFE SPORT SYSTEM &nbsp;|&nbsp; يومية الكاش</div>
+                    <div class="ph-title">💰 Obsidian System &nbsp;|&nbsp; يومية الكاش</div>
                     <div class="ph-subtitle" id="pc_subtitle">-</div>
                 </div>
             </div>
@@ -726,7 +727,7 @@
         <div class="print-page-header exp-header" style="display:none;">
             <div class="ph-right">
                 <div>
-                    <div class="ph-title">📤 LIFE SPORT SYSTEM &nbsp;|&nbsp; مصروفات اليوم</div>
+                    <div class="ph-title">📤 Obsidian System &nbsp;|&nbsp; مصروفات اليوم</div>
                     <div class="ph-subtitle" id="pe_subtitle">-</div>
                 </div>
             </div>
@@ -768,12 +769,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script>
     const firebaseConfig = {
-        apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY",
-        authDomain: "life-sport-system-hossamzahran.firebaseapp.com",
-        projectId: "life-sport-system-hossamzahran",
-        storageBucket: "life-sport-system-hossamzahran.firebasestorage.app",
-        messagingSenderId: "797045013311",
-        appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a"
+        apiKey: "AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o",
+        authDomain: "alan-b68e7.firebaseapp.com",
+        projectId: "alan-b68e7",
+        storageBucket: "alan-b68e7.firebasestorage.app",
+        messagingSenderId: "838354978223",
+        appId: "1:838354978223:web:440ba90b7191bc97f45b5a"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -825,8 +826,8 @@
         setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3200);
     }
 
-    let LEDGER_PASS = '1234'; // الافتراضي، يتحدّث من الإعدادات
-    let DELETE_PASS = '999';
+    let LEDGER_PASS = ''; // الافتراضي، يتحدّث من الإعدادات
+    let DELETE_PASS = '';
     // اقرأ الباسوردات فوراً (get) + متابعة أي تغيير (snapshot)
     db.collection("settings").doc("system_settings").get().then(doc => {
         if (doc.exists) {
@@ -1082,7 +1083,7 @@
         const net = displayCash + totalInsu + totalInstapay - totalExp;
 
         // اصنع الرسالة
-        let msg = `*🏥 LIFE SPORT — ملخص اليومية*\n`;
+        let msg = `*🏥 Obsidian System — ملخص اليومية*\n`;
         msg += `━━━━━━━━━━━━━━\n`;
         msg += `📍 *الفرع:* ${branchLabel}\n`;
         msg += `📅 *اليوم:* ${dayName} ${dateFormatted}\n`;
@@ -1096,7 +1097,7 @@
         msg += `━━━━━━━━━━━━━━\n`;
         msg += `✅ *صافي اليوم:* ${net.toLocaleString()} ج\n`;
         msg += `━━━━━━━━━━━━━━\n`;
-        msg += `_تم الإرسال من نظام Life Sport_`;
+        msg += `_تم الإرسال من نظام Obsidian System_`;
 
         // افتح واتساب
         const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -1241,7 +1242,7 @@
 
 </head><body>
             <div class="head">
-                <h1>🏥 LIFE SPORT SYSTEM</h1>
+                <h1>🏥 Obsidian System</h1>
                 <p>ملخص اليومية المالية</p>
             </div>
             <div class="row"><b>📍 الفرع</b><span>${branchLabel}</span></div>
@@ -1254,7 +1255,7 @@
                 <div class="lbl">صافي اليوم (كاش + تحمل - مصروفات)</div>
                 <div class="val">${net.toLocaleString()} ج.م</div>
             </div>
-            <div class="foot">تم الإنشاء من نظام Life Sport — ${new Date().toLocaleString('ar-EG')}</div>
+            <div class="foot">تم الإنشاء من نظام Obsidian System — ${new Date().toLocaleString('ar-EG')}</div>
             <div style="text-align:center;margin-top:30px;">
                 <button onclick="window.print()" style="background:#0b132b;color:white;border:none;padding:14px 40px;border-radius:10px;font-size:16px;cursor:pointer;font-family:'Tajawal';">🖨️ طباعة / حفظ PDF</button>
             </div>
@@ -2246,7 +2247,7 @@
                 var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
                 var a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.download = 'ObsidianSystem_Backup_'+new Date().toISOString().split('T')[0]+'.json';
                 a.click();
                 URL.revokeObjectURL(a.href);
                 localStorage.setItem('lastBackupDate', Date.now().toString());

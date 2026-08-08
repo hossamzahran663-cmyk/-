@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Life Sport - الاستقبال الشامل</title>
+    <title>Obsidian System - الاستقبال الشامل</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="app-icon.png">
+    <link rel="apple-touch-icon" href="obsidian-system-logo.jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="premium.css">
     
@@ -23,7 +23,7 @@
             --navy: #0b132b;
             --navy2: #1a2a5e;
             --gold: #d4af37;
-            --gold2: #c49a2a;
+            --gold2: #a9b0b8;
             --bg: #f0f3f8;
             --white: #ffffff;
             --border: #e4e9f2;
@@ -299,7 +299,7 @@
                 flex-shrink: 0 !important;
             }
             .pc-program-title {
-                background: linear-gradient(135deg, #d4af37, #c49a2a) !important;
+                background: linear-gradient(135deg, #d4af37, #a9b0b8) !important;
                 color: #0b132b !important;
                 font-size: 13px !important;
                 font-weight: 900 !important;
@@ -461,6 +461,7 @@
 
 
 
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 
@@ -489,7 +490,7 @@
                 <p>PATIENT FOLLOW-UP CARD</p>
             </div>
             <div class="pc-logo-side">
-                <h1>LIFE SPORT</h1>
+                <h1>Obsidian System</h1>
                 <p>CLINIC &amp; REHABILITATION</p>
             </div>
         </div>
@@ -634,7 +635,7 @@
 
     <header class="header">
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
-        <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.src='app-icon.png'"><div style="color:white; font-size: 1.2rem; font-weight:bold;">LIFE SPORT <span style="color:#d4af37">SYSTEM</span></div></div>
+        <div class="header-logo"><img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.src='obsidian-system-logo.jpeg'"><div style="color:white; font-size: 1.2rem; font-weight:bold;">Obsidian System</div></div>
         <div style="display:flex; align-items:center;">
             <!-- فلتر الفرع للأدمن فقط -->
             <div id="adminBranchWrap">
@@ -940,7 +941,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+        const firebaseConfig = { apiKey: "AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o", authDomain: "alan-b68e7.firebaseapp.com", projectId: "alan-b68e7", storageBucket: "alan-b68e7.firebasestorage.app", messagingSenderId: "838354978223", appId: "1:838354978223:web:440ba90b7191bc97f45b5a" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
     try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
@@ -1743,7 +1744,7 @@
             <div style="background:white;border-radius:18px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.1);border:1px solid #eee;">
                 <div style="background:linear-gradient(135deg,#0b132b,#1a2a5e);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
                     <div>
-                        <div style="color:white;font-size:1.3rem;font-weight:900;">LIFE <span style="color:#d4af37;">SPORT</span></div>
+                        <div style="color:white;font-size:1.3rem;font-weight:900;">Obsidian System</div>
                         <div style="color:rgba(255,255,255,0.7);font-size:0.85rem;">كارت متابعة الجلسات</div>
                     </div>
                     <button onclick="printPatientCard('${type}')" style="background:#d4af37;color:#0b132b;border:none;padding:9px 18px;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Tajawal';"><i class="fas fa-print"></i> طباعة</button>
@@ -2166,7 +2167,7 @@
 
             let msg = `\n`;
             msg += `╭${D}╮\n`;
-            msg += `│  🏥 *LIFE SPORT*  │\n`;
+            msg += `│  🏥 *Obsidian System*  │\n`;
             msg += `│  *التقرير اليومي الشامل*  │\n`;
             msg += `╰${D}╯\n\n`;
             msg += `🌟 *أهلاً د. قاسم وشركاه،*\n`;
@@ -2245,7 +2246,7 @@
             // ====== ختام ======
             msg += `📊 _نتمنى أن يساهم هذا الملخص في متابعة الأداء واتخاذ أفضل القرارات._\n`;
             msg += `_مع أطيب تمنياتنا بيوم ناجح._\n`;
-            msg += `🌿 _نظام لايف سبورت للعلاج الطبيعي_\n`;
+            msg += `🌿 _نظام Obsidian System للعلاج الطبيعي_\n`;
             msg += `_تم إعداد التقرير تلقائياً_ 🤍`;
 
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
@@ -2364,7 +2365,7 @@
                 var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
                 var a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.download = 'ObsidianSystem_Backup_'+new Date().toISOString().split('T')[0]+'.json';
                 a.click();
                 URL.revokeObjectURL(a.href);
                 localStorage.setItem('lastBackupDate', Date.now().toString());

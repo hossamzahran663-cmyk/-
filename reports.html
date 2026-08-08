@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Life Sport - الكول سنتر والغياب الذكي</title>
+    <title>Obsidian System - الكول سنتر والغياب الذكي</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>
@@ -89,7 +89,7 @@
         .btn-call { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; text-decoration: none; }
         .btn-call:hover { background: #1565c0; color: white; transform: translateY(-1px); }
         .btn-done { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; }
-        .btn-done:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; transform: translateY(-1px); }
+        .btn-done:hover { background: linear-gradient(135deg, #d4af37, #a9b0b8); color: #0b132b; transform: translateY(-1px); }
 
         /* MODAL */
         .reason-modal { position: fixed; inset: 0; background: rgba(11,19,43,0.88); display: flex; align-items: center; justify-content: center; z-index: 5000; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(8px); }
@@ -103,7 +103,7 @@
         .modal-btns { display: flex; gap: 10px; }
         .modal-btns button { flex: 1; padding: 11px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; font-family: 'Tajawal'; transition: 0.25s; }
         .modal-btn-save { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; }
-        .modal-btn-save:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; }
+        .modal-btn-save:hover { background: linear-gradient(135deg, #d4af37, #a9b0b8); color: #0b132b; }
         .modal-btn-cancel { background: #f0f2f5; color: #666; }
         .modal-btn-cancel:hover { background: #e0e4ea; }
 
@@ -160,6 +160,7 @@
 
 
     <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 
@@ -195,8 +196,8 @@
 <header class="header">
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
         <div class="header-logo">
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
+        <div class="header-title">Obsidian System</div>
     </div>
     <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
 </header>
@@ -290,7 +291,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+    const firebaseConfig = { apiKey: "AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o", authDomain: "alan-b68e7.firebaseapp.com", projectId: "alan-b68e7", storageBucket: "alan-b68e7.firebasestorage.app", messagingSenderId: "838354978223", appId: "1:838354978223:web:440ba90b7191bc97f45b5a" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
@@ -467,7 +468,7 @@
         if (_missedCooldown) return;
         const list = window._missedList || [];
         const b = list[_missedBulkIndex];
-        const waMsg = (CUSTOM_MSGS.msgLate || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, b.patientName||'').replace(/\{الساعة\}/g, b.time||'').replace(/\{الدكتور\}/g, b.doctor||'');
+        const waMsg = (CUSTOM_MSGS.msgLate || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم Obsidian System للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, b.patientName||'').replace(/\{الساعة\}/g, b.time||'').replace(/\{الدكتور\}/g, b.doctor||'');
         window.open(`https://wa.me/${formatPhone(b.phone)}?text=${encodeURIComponent(waMsg)}`, '_blank');
         _missedBulkIndex++;
         _missedCooldown = true;
@@ -527,7 +528,7 @@
             countMissed++;
             if (b.phone) window._missedList.push(b);
 
-            let waMsg = (CUSTOM_MSGS.msgLate || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, b.patientName||'').replace(/\{الساعة\}/g, b.time||'').replace(/\{الدكتور\}/g, b.doctor||'');
+            let waMsg = (CUSTOM_MSGS.msgLate || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم Obsidian System للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, b.patientName||'').replace(/\{الساعة\}/g, b.time||'').replace(/\{الدكتور\}/g, b.doctor||'');
 
             missedContainer.innerHTML += `
             <div class="ticket-card">
@@ -587,7 +588,7 @@
 
             countStopped++;
             let daysColor = diffDays >= 14 ? 'red' : (diffDays >= 7 ? 'orange' : 'purple');
-            let waMsg = (CUSTOM_MSGS.msgAbsent || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nلاحظنا انقطاع حضرتك عن جلسات العلاج.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, p.id||'');
+            let waMsg = (CUSTOM_MSGS.msgAbsent || `أهلاً أستاذ/ة {الاسم} 🌿\nمعكم Obsidian System للعلاج الطبيعي.\nلاحظنا انقطاع حضرتك عن جلسات العلاج.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟`).replace(/\{الاسم\}/g, p.id||'');
 
             stoppedContainer.innerHTML += `
             <div class="ticket-card purple">
@@ -785,7 +786,7 @@
                 var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
                 var a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.download = 'ObsidianSystem_Backup_'+new Date().toISOString().split('T')[0]+'.json';
                 a.click();
                 URL.revokeObjectURL(a.href);
                 localStorage.setItem('lastBackupDate', Date.now().toString());

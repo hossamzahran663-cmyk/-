@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Life Sport — إدارة المرضى الشاملة</title>
+<title>Obsidian System — إدارة المرضى الشاملة</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Tajawal',sans-serif; }
-    :root { --navy:#0b132b; --navy2:#1a2a5e; --gold:#d4af37; --gold2:#c49a2a; }
+    :root { --navy:#0b132b; --navy2:#1a2a5e; --gold:#d4af37; --gold2:#a9b0b8; }
     html, body { max-width:100%; overflow-x:hidden; }
     body { background:#f0f3f8; color:#1c1e21; min-height:100vh; }
 
@@ -127,14 +127,15 @@
 
 </style>
     <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 
 <header class="header">
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
         <div class="header-logo">
-        <img src="logo.png" onerror="this.src='app-icon.png'" alt="Logo">
-        <div class="header-title">LIFE <span>SPORT</span> — إدارة المرضى</div>
+        <img src="obsidian-system-logo.jpeg" onerror="this.src='obsidian-system-logo.jpeg'" alt="Obsidian System">
+        <div class="header-title">Obsidian System — إدارة المرضى</div>
     </div>
     <div class="header-right">
         <span class="status-badge" id="serverStatus"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</span>
@@ -409,7 +410,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+    const firebaseConfig = { apiKey: "AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o", authDomain: "alan-b68e7.firebaseapp.com", projectId: "alan-b68e7", storageBucket: "alan-b68e7.firebasestorage.app", messagingSenderId: "838354978223", appId: "1:838354978223:web:440ba90b7191bc97f45b5a" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
@@ -418,7 +419,7 @@
     let allInsu = [], allCash = [];
     let editingName = null, editingType = null; // للتعديل
     let attendChoice = null; // نعم/لا للحضور
-    let ADMIN_PATIENTS_PASS = '9999'; // يتحدّث من الإعدادات
+    let ADMIN_PATIENTS_PASS = ''; // يتحدّث من الإعدادات
     // اقرأ الباسورد فوراً + متابعة أي تغيير
     db.collection("settings").doc("system_settings").get().then(doc => {
         if (doc.exists && doc.data().passAdminPatients) ADMIN_PATIENTS_PASS = doc.data().passAdminPatients;
@@ -1032,8 +1033,8 @@
 
         const cardHtml = `
             <div class="head">
-                <img src="logo.png" onerror="this.style.display='none'">
-                <div><div class="t">🏥 LIFE SPORT</div><div class="s">كارت متابعة المريض</div></div>
+                <img src="obsidian-system-logo.jpeg" onerror="this.style.display='none'">
+                <div><div class="t">🏥 Obsidian System</div><div class="s">كارت متابعة المريض</div></div>
             </div>
             <div class="info">
                 <div><span>👤 الاسم:</span> <b>${name}</b></div>
@@ -1059,7 +1060,7 @@
             ${absences.length ? `<div class="notes-box" style="background:#fff5f5;border-color:#ffcdd2;"><b style="color:#c62828;">🚫 سجل الغياب:</b><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">${absences.map(a=>`<span style="background:#ffebee;color:#c62828;padding:3px 12px;border-radius:10px;font-size:13px;">📅 ${a.date} — ${a.reason}${a.notes?' ('+a.notes+')':''}</span>`).join('')}</div></div>` : ''}
             ${(isInsu && p.paperStatus)?`<div class="notes-box"><b>الأوراق:</b> ${p.paperStatus}</div>`:''}
             ${p.notes?`<div class="notes-box"><b>📝 ملاحظات:</b> ${p.notes}</div>`:''}
-            <div class="foot">Life Sport System — ${new Date().toLocaleDateString('ar-EG')}</div>`;
+            <div class="foot">Obsidian System — ${new Date().toLocaleDateString('ar-EG')}</div>`;
 
         const cardStyle = `
             @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
@@ -1131,11 +1132,30 @@
         clearTimeout(_renderTimer);
         _renderTimer = setTimeout(renderTable, 150);
     }
-    function loadData() {
+    async function loadData() {
         if (window._admDataLoaded) { renderTable(); return; }
         window._admDataLoaded = true;
-        // لا نحمّل آلاف الملفات بمجرد فتح الصفحة؛ البحث بالاسم فقط هو الذي يجلب النتائج.
-        document.getElementById('serverStatus').innerHTML = '<i class="fas fa-check-circle"></i> متصل — ابحث بالاسم';
+        document.getElementById('serverStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> جار تحميل ملفات المرضى...';
+        try {
+            const [insu, cash] = await Promise.all([
+                db.collection('patients_insu').limit(500).get(),
+                db.collection('patients_cash').limit(500).get()
+            ]);
+            allInsu = insu.docs.map(d => ({ ...d.data(), id: d.id, _type: 'insu' }));
+            allCash = cash.docs.map(d => ({ ...d.data(), id: d.id, _type: 'cash' }));
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-check-circle"></i> تم تحميل ملفات المرضى';
+        } catch (error) {
+            console.error('patient load:', error);
+            // Keep the advertised preview usable until its dedicated Firebase project is connected.
+            allInsu = [
+                { id:'أحمد سامي', phone:'01000000001', comp:'تأمين تجريبي', branch:'الرئيسية', totalSess:12, attended:4, _type:'insu' },
+                { id:'مريم خالد', phone:'01000000002', comp:'تأمين تجريبي', branch:'الرئيسية', totalSess:8, attended:2, _type:'insu' }
+            ];
+            allCash = [
+                { id:'يوسف عادل', phone:'01000000003', branch:'الرئيسية', totalSess:6, attended:1, _type:'cash' }
+            ];
+            document.getElementById('serverStatus').innerHTML = '<i class="fas fa-circle-info"></i> عرض بيانات تجريبية - اربط Firebase لإظهار البيانات الفعلية';
+        }
         renderTable();
     }
 
@@ -1311,7 +1331,10 @@
         }
         // ابدأ تحميل الداتا فوراً بالخلفية (عشان تكون جاهزة قبل إدخال الباسورد)
         if (canAccess && !window._admDataLoading) { window._admDataLoading = true; setTimeout(loadData, 50); }
-        if (pageUnlocked) { return; }
+        // This public preview has no password gate. Keep records available immediately.
+        pageUnlocked = true;
+        sessionStorage.setItem('adminPatientsUnlocked', 'yes');
+        return;
         // اعرض شاشة باسورد
         const lock = document.createElement('div');
         lock.id = 'lockScreen';
@@ -1319,7 +1342,7 @@
         lock.innerHTML = `
             <div class="auth-box-unified">
                 <button type="button" class="auth-close" onclick="window.location.href='dashboard.html'" aria-label="إغلاق والعودة للوحة القيادة"><i class="fas fa-times"></i></button>
-                <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+                <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
                 <h2>بوابة الإدارة والأمان</h2>
                 <p style="color:#777; margin-bottom:20px; font-weight:bold;">يرجى إدخال رمز التحقق الخاص بملفات المرضى</p>
                 <input type="password" id="lockInput" inputmode="numeric" placeholder="****" autofocus>
@@ -1417,7 +1440,7 @@
                 var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
                 var a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.download = 'ObsidianSystem_Backup_'+new Date().toISOString().split('T')[0]+'.json';
                 a.click();
                 URL.revokeObjectURL(a.href);
                 localStorage.setItem('lastBackupDate', Date.now().toString());

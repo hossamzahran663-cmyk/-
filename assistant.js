@@ -1,4 +1,4 @@
-// ===== LIFE SPORT — المساعد الذكي =====
+// ===== Obsidian System — المساعد الذكي =====
 // بيقرأ بيانات Firebase ويرد على الأسئلة + دعم الصوت
 
 (function() {
@@ -60,14 +60,14 @@
         let branch = branches.find(b => q.includes(normalize(b)));
 
         // ===== معلومات الإدارة (ثابتة) =====
-        if ((q.includes('مدير') || q.includes('اداره') || q.includes('مسءول') || q.includes('مسئول') || q.includes('مين في') || q.includes('مين ال')) && (q.includes('مركز') || q.includes('لايف') || q.includes('سبورت') || q.includes('اداره'))) {
-            return `🏢 <b>إدارة مركز Life Sport:</b><br>━━━━━━━━━━━<br>• الإدارة: <b>مدام هبة</b><br>• الطبيب المسؤول: <b>دكتور قاسم</b><br>• محاسب الفروع: <b>كابتن ياسين</b>`;
+        if ((q.includes('مدير') || q.includes('اداره') || q.includes('مسءول') || q.includes('مسئول') || q.includes('مين في') || q.includes('مين ال')) && (q.includes('مركز') || q.includes('اوبسيديان') || q.includes('obsidian') || q.includes('اداره'))) {
+            return `🏢 <b>إدارة Obsidian System:</b><br>━━━━━━━━━━━<br>• الإدارة: <b>مدام هبة</b><br>• الطبيب المسؤول: <b>دكتور قاسم</b><br>• محاسب الفروع: <b>كابتن ياسين</b>`;
         }
 
         // ===== تحيات =====
         if (/^(مرحبا|اهلا|هاي|hi|hello|السلام|صباح|مساء|ازيك|عامل ايه|اخبارك|هلا|hey)/.test(q)) {
-            const userName = localStorage.getItem('userName') || 'Hossam Zahran';
-            return `أهلاً <b>${userName}</b> 👋<br>إزيك؟ أنا مساعدك في نظام لايف سبورت.<br>اسألني عن أي حاجة: اليومية، مريض، دكتور، حجوزات، فلوس... 😊`;
+            const userName = localStorage.getItem('userName') || 'مستخدم';
+            return `أهلاً <b>${userName}</b> 👋<br>إزيك؟ أنا مساعدك في نظام Obsidian System.<br>اسألني عن أي حاجة: اليومية، مريض، دكتور، حجوزات، فلوس... 😊`;
         }
 
         // ===== ملخص شامل / كل حاجة =====
@@ -472,7 +472,7 @@
         box.innerHTML = `
             <div style="background:linear-gradient(135deg,#7b1fa2,#9c27b0);color:white;padding:16px 18px;display:flex;align-items:center;gap:10px;">
                 <div style="width:38px;height:38px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;"><i class="fas fa-robot"></i></div>
-                <div style="flex:1;"><div style="font-weight:900;font-size:0.98rem;">مساعد لايف سبورت</div><div style="font-size:0.72rem;opacity:0.8;">اسألني عن أي حاجة في النظام</div></div>
+                <div style="flex:1;"><div style="font-weight:900;font-size:0.98rem;">مساعد Obsidian System</div><div style="font-size:0.72rem;opacity:0.8;">اسألني عن أي حاجة في النظام</div></div>
                 <button id="ai-voice-toggle" title="تشغيل/إيقاف الصوت" style="background:rgba(255,255,255,0.2);border:none;color:white;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:0.95rem;margin-left:4px;"><i class="fas fa-volume-up"></i></button>
                 <button onclick="document.getElementById('ai-box').style.display='none'" style="background:rgba(255,255,255,0.15);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;">✕</button>
             </div>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Life Sport - التحليل الشهري</title>
+    <title>Obsidian System - التحليل الشهري</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -42,7 +42,7 @@
         .pin-input { width:100%; padding:14px; border:2px solid #e0e4ea; border-radius:12px; text-align:center; font-size:1.8rem; letter-spacing:8px; outline:none; margin-bottom:16px; transition:0.22s; font-family:'Tajawal'; }
         .pin-input:focus { border-color:#d4af37; box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
         .btn-unlock { width:100%; padding:13px; background:linear-gradient(135deg,#0b132b,#1a2a5e); color:#d4af37; border:none; border-radius:12px; font-size:1rem; font-weight:900; cursor:pointer; font-family:'Tajawal'; transition:0.28s; }
-        .btn-unlock:hover { background:linear-gradient(135deg,#d4af37,#c49a2a); color:#0b132b; }
+        .btn-unlock:hover { background:linear-gradient(135deg,#d4af37,#a9b0b8); color:#0b132b; }
 
         /* TOP BAR */
         .top-bar { background:white; padding:14px 22px; border-radius:16px; border:1px solid #e4e9f0; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 12px rgba(0,0,0,0.05); flex-wrap:wrap; gap:12px; }
@@ -181,6 +181,7 @@
 
 
     <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 
@@ -190,7 +191,7 @@
 <div class="pin-overlay auth-overlay-unified" id="pinOverlay">
     <div class="pin-box auth-box-unified">
         <button type="button" class="auth-close" onclick="window.location.href='dashboard.html'" aria-label="إغلاق والعودة للوحة القيادة"><i class="fas fa-times"></i></button>
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
         <h2>بوابة الإدارة والأمان</h2>
         <p style="color:#777; margin-bottom:20px; font-weight:bold;">يرجى إدخال رمز التحقق الخاص بالتحليل الشهري</p>
         <input type="password" id="pinInput" placeholder="****" maxlength="6"
@@ -202,8 +203,8 @@
 <header class="header">
     <div style="display:flex;align-items:center;gap:14px;">
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
-        <img src="logo.png" style="height:44px;" onerror="this.style.display='none'">
-        <div class="header-title">LIFE SPORT <span>ANALYTICS</span></div>
+        <img src="obsidian-system-logo.jpeg" style="height:44px;" onerror="this.style.display='none'">
+        <div class="header-title">Obsidian System <span>ANALYTICS</span></div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">
         <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
@@ -228,7 +229,7 @@
 
     <!-- PRINT HEADER -->
     <div class="print-header" id="printHeader">
-        <h2><i class="fas fa-chart-pie"></i> تقرير التحليل المالي الشهري — LIFE SPORT</h2>
+        <h2><i class="fas fa-chart-pie"></i> تقرير التحليل المالي الشهري — Obsidian System</h2>
         <p id="printSubtitle">...</p>
     </div>
 
@@ -321,7 +322,7 @@
             <div style="font-size:0.7rem;color:#e74c3c;margin-top:6px;cursor:pointer;">👁️ عرض كل المصروفات</div>
         </div>
         <div class="kpi-card" style="--c:#0b132b;">
-            <div class="kc-icon" style="background:linear-gradient(135deg,#d4af37,#c49a2a);"><i class="fas fa-calculator" style="color:#0b132b;"></i></div>
+            <div class="kc-icon" style="background:linear-gradient(135deg,#d4af37,#a9b0b8);"><i class="fas fa-calculator" style="color:#0b132b;"></i></div>
             <div class="kc-lbl">الإجمالي الصافي</div>
             <div class="kc-val" id="sumTotalNet">0 <span class="kc-unit">ج</span></div>
             <div style="font-size:0.7rem;color:#0b132b;margin-top:6px;">(كاش+تحمل+انستا-مصروفات)</div>
@@ -474,7 +475,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script>
-const FB = { apiKey:"AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain:"life-sport-system-hossamzahran.firebaseapp.com", projectId:"life-sport-system-hossamzahran", storageBucket:"life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId:"797045013311", appId:"1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+const FB = { apiKey:"AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o", authDomain:"alan-b68e7.firebaseapp.com", projectId:"alan-b68e7", storageBucket:"alan-b68e7.firebasestorage.app", messagingSenderId:"838354978223", appId:"1:838354978223:web:440ba90b7191bc97f45b5a" };
 firebase.initializeApp(FB);
 const db = firebase.firestore();
     try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
@@ -500,7 +501,7 @@ function toast(msg, type='success') {
 }
 
 // PASSWORD
-let ANALYTICS_PASS = '9999';
+let ANALYTICS_PASS = '';
 db.collection("settings").doc("system_settings").get().then(doc => {
     if (doc.exists && doc.data().passAnalytics) ANALYTICS_PASS = doc.data().passAnalytics;
 }).catch(()=>{});
@@ -988,7 +989,7 @@ function sendDoctorWhatsApp(docName) {
     const L = '━━━━━━━━━━━━━━━';
 
     let msg = `✨ *أهلاً وسهلاً د. ${docName}* ✨\n`;
-    msg += `🌿 _تحية طيبة من مركز لايف سبورت_\n`;
+    msg += `🌿 _تحية طيبة من Obsidian System_\n`;
     msg += `${L}\n`;
     msg += `📋 *كشف الحالات المحوّلة من حضرتك*\n`;
     msg += `📍 ${branchTxt} — ${monthTxt}\n`;
@@ -1007,7 +1008,7 @@ function sendDoctorWhatsApp(docName) {
     });
     msg += `${L}\n`;
     msg += `🙏 *شكراً لثقتكم وتعاونكم*\n`;
-    msg += `🌿 _مركز لايف سبورت للعلاج الطبيعي_`;
+    msg += `🌿 _Obsidian System للعلاج الطبيعي_`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 }
@@ -1040,7 +1041,7 @@ function printDoctorCases(docName) {
     </style></head><body>
         <div class="head">
             <div><h1>👨‍⚕️ كشف حالات د. ${docName}</h1><div class="sub">${branchTxt} — ${monthTxt}</div></div>
-            <img src="logo.png" style="height:50px;" onerror="this.style.display='none'">
+            <img src="obsidian-system-logo.jpeg" style="height:50px;" onerror="this.style.display='none'">
         </div>
         <div class="stats">
             <div class="st"><div class="n" style="color:#e65100;">${data.todayCount}</div><div class="l">حالات اليوم</div></div>
@@ -1051,7 +1052,7 @@ function printDoctorCases(docName) {
             <thead><tr><th>#</th><th>اسم المريض</th><th>التشخيص</th><th>الجلسات</th><th>الفرع</th><th>المدفوع</th></tr></thead>
             <tbody>${rows}</tbody>
         </table>
-        <div class="foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>
+        <div class="foot">Obsidian System — ${new Date().toLocaleString('ar-EG')}</div>
         <div class="no-print" style="text-align:center;margin-top:18px;"><button onclick="window.print()" style="background:#0b132b;color:#d4af37;border:none;padding:12px 36px;border-radius:10px;font-size:15px;cursor:pointer;font-family:Tajawal;font-weight:bold;">🖨️ طباعة / PDF</button></div>
     </body></html>`;
 
@@ -1111,7 +1112,7 @@ function printInstapay() {
     </style></head><body>
         <div class="head">
             <div><h1>📱 كشف حركة الإنستاباي</h1><div class="sub">${branchTxt} — ${monthTxt}</div></div>
-            <img src="logo.png" style="height:50px;" onerror="this.style.display='none'">
+            <img src="obsidian-system-logo.jpeg" style="height:50px;" onerror="this.style.display='none'">
         </div>
         <div class="summary">
             <div class="sm"><div class="n" style="color:#2e7d32;">${totalIn.toLocaleString()} ج</div><div class="l">إجمالي الداخل</div></div>
@@ -1122,7 +1123,7 @@ function printInstapay() {
             <thead><tr><th>#</th><th>الاسم / البيان</th><th>المبلغ</th><th>النوع</th><th>التاريخ</th><th>الفرع</th></tr></thead>
             <tbody>${rows}</tbody>
         </table>
-        <div class="foot">Life Sport System — ${new Date().toLocaleString('ar-EG')}</div>
+        <div class="foot">Obsidian System — ${new Date().toLocaleString('ar-EG')}</div>
         <div style="text-align:center;margin-top:18px;"><button onclick="window.print()" style="background:#6a1b9a;color:white;border:none;padding:12px 36px;border-radius:10px;font-size:15px;cursor:pointer;font-family:Tajawal;">🖨️ طباعة / PDF</button></div>
     </body></html>`);
     win.document.close();
@@ -1240,7 +1241,7 @@ function printInstapay() {
                 var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
                 var a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.download = 'ObsidianSystem_Backup_'+new Date().toISOString().split('T')[0]+'.json';
                 a.click();
                 URL.revokeObjectURL(a.href);
                 localStorage.setItem('lastBackupDate', Date.now().toString());

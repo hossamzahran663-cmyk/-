@@ -1,0 +1,41 @@
+:root {
+  --obsidian-black: #0d0e10;
+  --obsidian-charcoal: #1c1f24;
+  --obsidian-silver: #d8dbe0;
+}
+
+/* Brand frame only. Page-specific layouts and status colors remain intact. */
+.header {
+  background: linear-gradient(90deg, var(--obsidian-black), var(--obsidian-charcoal)) !important;
+  border-bottom-color: #8e959f !important;
+}
+
+.sidebar {
+  background: var(--obsidian-black) !important;
+  border-left-color: #30343a !important;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: #25292f !important;
+  border-right-color: var(--obsidian-silver) !important;
+}
+
+.header-title,
+.header-logo .header-title {
+  color: var(--obsidian-silver) !important;
+}
+
+.header-logo img,
+.branding img,
+.login-box img {
+  object-fit: contain;
+}
+
+/* The public preview intentionally has no authentication overlays. */
+#pinOverlay,
+#authOverlay,
+#customModalOverlay,
+.auth-overlay-unified {
+  display: none !important;
+}

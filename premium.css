@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   LIFE SPORT — الديزاين الفخم الاحترافي (Premium Navy + Gold)
+   Obsidian System — الديزاين الفخم الاحترافي (Premium Navy + Gold)
    طبقة تجميلية تتطبّق فوق كل الصفحات من غير ما تبوّظ أي وظيفة
    ═══════════════════════════════════════════════════════ */
 
@@ -435,7 +435,7 @@ h1, h2, h3 { letter-spacing: 0.3px; }
     .grid-kpi .kpi-value, .kpi-grid .kpi-value, .stats-grid .stat-value,
     .financial-grid .amount { font-size: 1.12rem !important; }
 
-    /* بوابات الحماية: نفس بطاقة Life Sport البيضاء في كل شاشة محمية. */
+    /* بوابات الحماية: نفس بطاقة Obsidian System البيضاء في كل شاشة محمية. */
     .auth-overlay-unified, .pin-overlay, #customModalOverlay.active {
         padding: 18px !important;
         align-items: center !important;

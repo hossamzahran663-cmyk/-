@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Life Sport - الكوادر والرواتب</title>
+    <title>Obsidian System - الكوادر والرواتب</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -46,12 +46,12 @@
         .sc-val.green  { color: #27ae60; }
         .sc-val.red    { color: #e74c3c; }
         .sc-val.blue   { color: #1565c0; }
-        .sc-val.gold   { color: #c49a2a; }
+        .sc-val.gold   { color: #a9b0b8; }
         .summary-card .sc-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; float: left; }
         .ic-green  { background: linear-gradient(135deg, #27ae60, #1e8449); }
         .ic-red    { background: linear-gradient(135deg, #e74c3c, #c0392b); }
         .ic-blue   { background: linear-gradient(135deg, #2196f3, #1565c0); }
-        .ic-gold   { background: linear-gradient(135deg, #d4af37, #c49a2a); }
+        .ic-gold   { background: linear-gradient(135deg, #d4af37, #a9b0b8); }
 
         /* FILTERS */
         .filters-bar { background: white; padding: 16px 20px; border-radius: 14px; border: 1px solid #e4e9f0; margin-bottom: 18px; display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
@@ -73,7 +73,7 @@
         .file-wrap:hover { background: #eef3ff; border-color: #d4af37; }
         .file-wrap input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
         .btn-add { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; border: none; padding: 11px 22px; border-radius: 11px; font-size: 0.95rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.28s; font-family: 'Tajawal'; white-space: nowrap; }
-        .btn-add:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; transform: translateY(-1px); }
+        .btn-add:hover { background: linear-gradient(135deg, #d4af37, #a9b0b8); color: #0b132b; transform: translateY(-1px); }
         .btn-add:disabled { background: #ddd !important; color: #999 !important; cursor: not-allowed; transform: none; }
 
         /* TABLE CONTAINER */
@@ -130,7 +130,7 @@
         .modal-footer { display: flex; gap: 10px; margin-top: 16px; }
         .modal-footer button { flex: 1; padding: 11px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; font-family: 'Tajawal'; transition: 0.25s; }
         .btn-save { background: linear-gradient(135deg, #0b132b, #1a2a5e); color: #d4af37; }
-        .btn-save:hover { background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; }
+        .btn-save:hover { background: linear-gradient(135deg, #d4af37, #a9b0b8); color: #0b132b; }
         .btn-gray { background: #f0f2f5; color: #666; }
 
         /* RESULT BOX */
@@ -151,7 +151,7 @@
         .doc-item { background: #f8fafc; padding: 12px 14px; border-radius: 10px; border: 1px solid #e4e9f0; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; font-weight: 700; color: #555; cursor: pointer; transition: 0.22s; }
         .doc-item:hover { background: #e8f4fd; border-color: #2196f3; transform: translateX(-3px); }
         .doc-item i { color: #d4af37; font-size: 1.3rem; flex-shrink: 0; }
-        .doc-view-btn { margin-right: auto; background: linear-gradient(135deg, #d4af37, #c49a2a); color: #0b132b; padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; }
+        .doc-view-btn { margin-right: auto; background: linear-gradient(135deg, #d4af37, #a9b0b8); color: #0b132b; padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; }
 
         /* TOAST */
         #toastContainer { position: fixed; bottom: 24px; left: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 9px; }
@@ -269,6 +269,7 @@
 
 
     <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 
@@ -353,8 +354,8 @@
 <header class="header">
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
         <div class="header-logo">
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
+        <div class="header-title">Obsidian System</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">
         <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
@@ -427,7 +428,7 @@
                 التالي <i class="fas fa-chevron-left"></i>
             </button>
         </div>
-        <span id="hrMonthLabel" style="background:rgba(212,175,55,0.12);color:#c49a2a;padding:5px 14px;border-radius:20px;font-size:0.85rem;font-weight:900;border:1px solid rgba(212,175,55,0.3);">...</span>
+        <span id="hrMonthLabel" style="background:rgba(212,175,55,0.12);color:#a9b0b8;padding:5px 14px;border-radius:20px;font-size:0.85rem;font-weight:900;border:1px solid rgba(212,175,55,0.3);">...</span>
         <span style="font-size:0.78rem;color:#bbb;font-weight:700;">الأرقام بتتصفر تلقائياً كل شهر جديد</span>
     </div>
 
@@ -571,9 +572,9 @@
 <!-- ===== Doctor Portal ===== -->
 <div id="doctorPortal">
     <div class="portal-header">
-        <img src="logo.png" alt="" style="height:36px;" onerror="this.style.display='none'">
+        <img src="obsidian-system-logo.jpeg" alt="" style="height:36px;" onerror="this.style.display='none'">
         <div>
-            <h1>LIFE SPORT — بوابة الدكتور</h1>
+            <h1>Obsidian System — بوابة الدكتور</h1>
             <span id="portalDocName">...</span>
         </div>
     </div>
@@ -585,7 +586,7 @@
         <div class="portal-stats">
             <div class="portal-stat"><div class="ps-num" id="portalTotalCases" style="color:#7b1fa2;">0</div><div class="ps-lbl">إجمالي الحالات</div></div>
             <div class="portal-stat"><div class="ps-num" id="portalTotalSessions" style="color:#27ae60;">0</div><div class="ps-lbl">جلسات الشهر</div></div>
-            <div class="portal-stat"><div class="ps-num" id="portalEarnings" style="color:#c49a2a;">0 ج</div><div class="ps-lbl">مستحقاتك</div></div>
+            <div class="portal-stat"><div class="ps-num" id="portalEarnings" style="color:#a9b0b8;">0 ج</div><div class="ps-lbl">مستحقاتك</div></div>
         </div>
         <div class="portal-cases">
             <div class="portal-cases-header">
@@ -669,7 +670,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY", authDomain: "life-sport-system-hossamzahran.firebaseapp.com", projectId: "life-sport-system-hossamzahran", storageBucket: "life-sport-system-hossamzahran.firebasestorage.app", messagingSenderId: "797045013311", appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a" };
+    const firebaseConfig = { apiKey: "AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o", authDomain: "alan-b68e7.firebaseapp.com", projectId: "alan-b68e7", storageBucket: "alan-b68e7.firebasestorage.app", messagingSenderId: "838354978223", appId: "1:838354978223:web:440ba90b7191bc97f45b5a" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
@@ -1273,7 +1274,7 @@
         let doc = globalHvDoctors.find(d => d.id === docId);
         if (!doc) return;
         let link = `${window.location.href.split('?')[0]}?doc=${doc.code}`;
-        let msg = `أهلاً د. ${doc.name} 😊\n\nهذا رابط بوابتك الخاصة في نظام لايف سبورت:\n${link}\n\nكودك السري: ${doc.code}\n\nمن خلال الرابط تقدر تشوف حالاتك وتسجل الجلسات المنزلية.`;
+        let msg = `أهلاً د. ${doc.name} 😊\n\nهذا رابط بوابتك الخاصة في نظام Obsidian System:\n${link}\n\nكودك السري: ${doc.code}\n\nمن خلال الرابط تقدر تشوف حالاتك وتسجل الجلسات المنزلية.`;
         let phone = doc.phone.trim();
         if (phone.startsWith('0')) phone = '2' + phone;
         else if (!phone.startsWith('20')) phone = '20' + phone;
@@ -1582,7 +1583,7 @@
                 var blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
                 var a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'LifeSport_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+                a.download = 'ObsidianSystem_Backup_'+new Date().toISOString().split('T')[0]+'.json';
                 a.click();
                 URL.revokeObjectURL(a.href);
                 localStorage.setItem('lastBackupDate', Date.now().toString());

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <script src="demo-mode.js"></script>
+    <script src="public-access.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Life Sport - الدعم وسجل المراقبة</title>
+    <title>Obsidian System - الدعم وسجل المراقبة</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -131,6 +131,7 @@
 
 
     <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="obsidian-theme.css">
 </head>
 <body>
 
@@ -139,7 +140,7 @@
 <div id="authOverlay">
     <div class="auth-box">
         <button type="button" class="auth-close" onclick="window.location.href='dashboard.html'" aria-label="إغلاق والعودة للوحة القيادة"><i class="fas fa-times"></i></button>
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
         <h2>بوابة الإدارة والأمان</h2>
         <p style="color:#777; margin-bottom:20px; font-weight:bold;">يرجى إدخال رمز التحقق الخاص بالدعم الفني</p>
         <input type="password" id="cpanelPass" placeholder="****" onkeydown="if(event.key==='Enter') checkPass()">
@@ -150,8 +151,8 @@
 <header class="header">
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
         <div class="header-logo">
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-        <div class="header-title">LIFE SPORT <span>SYSTEM</span></div>
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
+        <div class="header-title">Obsidian System</div>
     </div>
     <div style="display:flex; align-items:center;">
         <div id="serverStatus" class="server-status"><i class="fas fa-spinner fa-spin"></i> جاري الاتصال...</div>
@@ -234,23 +235,23 @@
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
             <div>
                 <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-shield-halved"></i> صفحة الدعم (السابورت)</label>
-                <input type="text" id="passSupport" placeholder="2210" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+                <input type="text" id="passSupport" placeholder="" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
             </div>
             <div>
                 <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-book"></i> الحركة المالية اليومية</label>
-                <input type="text" id="passLedger" placeholder="1234" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+                <input type="text" id="passLedger" placeholder="" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
             </div>
             <div>
                 <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-chart-pie"></i> التحليل الشهري</label>
-                <input type="text" id="passAnalytics" placeholder="9999" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+                <input type="text" id="passAnalytics" placeholder="" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
             </div>
             <div>
                 <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-user-shield"></i> ملفات المرضى الشاملة</label>
-                <input type="text" id="passAdminPatients" placeholder="9999" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+                <input type="text" id="passAdminPatients" placeholder="" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
             </div>
             <div>
                 <label style="font-weight:800; font-size:0.88rem; color:#555; display:block; margin-bottom:6px;"><i class="fas fa-trash"></i> مسح مريض</label>
-                <input type="text" id="passDelete" placeholder="999" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
+                <input type="text" id="passDelete" placeholder="" style="width:100%; padding:11px; border:1.5px solid #e0e4ea; border-radius:10px; font-family:'Tajawal'; font-weight:700; text-align:center; letter-spacing:3px;">
             </div>
         </div>
         <button onclick="savePasswords()" style="margin-top:18px; background:linear-gradient(135deg,#0b132b,#1a2a5e); color:white; border:none; padding:13px 30px; border-radius:12px; font-weight:800; cursor:pointer; font-family:'Tajawal'; font-size:0.95rem;"><i class="fas fa-save"></i> حفظ الأرقام السرية</button>
@@ -421,7 +422,7 @@
                 <p>شيتات منفصلة: إجمالي، كاش وكورسات، تأمين، مصروفات، ودفعات قديمة.</p>
                 <input type="date" id="excelDailyDate" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-family:Tajawal;margin:6px 0;">
                 <input type="month" id="excelMonthlyMonth" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-family:Tajawal;margin-bottom:6px;">
-                <label style="display:block;text-align:right;font-size:.78rem;font-weight:800;color:#087EAF;margin:5px 0 3px;">لوجو التقرير (اختياري)</label>
+                <label style="display:block;text-align:right;font-size:.78rem;font-weight:800;color:#087eaf;margin:5px 0 3px;">لوجو التقرير (اختياري)</label>
                 <input type="file" id="excelReportLogo" accept="image/png,image/jpeg" onchange="saveExcelReportLogo(this)" style="width:100%;font-size:.75rem;margin-bottom:7px;">
                 <select id="excelDailyBranch" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-family:Tajawal;margin-bottom:8px;">
                     <option value="all">كل الفروع</option><option value="المهندسين">المهندسين</option><option value="أكتوبر">أكتوبر</option><option value="الهرم">الهرم</option><option value="العبور">العبور</option><option value="مدينة نصر">مدينة نصر</option><option value="مستشفى الشروق">مستشفى الشروق</option><option value="بني سويف">بني سويف</option>
@@ -474,7 +475,7 @@
     }
 
     // باسورد السابورت (يتحدّث من الإعdادات، الافتراضي 2210)
-    let SUPPORT_PASS = '2210';
+    let SUPPORT_PASS = '';
 
     function checkPass() {
         let pass = document.getElementById('cpanelPass').value;
@@ -487,12 +488,12 @@
     }
 
     const firebaseConfig = {
-        apiKey: "AIzaSyD_ME3KKZkHienmFUYnltEwmHPIYrkFGGY",
-        authDomain: "life-sport-system-hossamzahran.firebaseapp.com",
-        projectId: "life-sport-system-hossamzahran",
-        storageBucket: "life-sport-system-hossamzahran.firebasestorage.app",
-        messagingSenderId: "797045013311",
-        appId: "1:797045013311:web:e50a7e6109b8e9eeb8318a"
+        apiKey: "AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o",
+        authDomain: "alan-b68e7.firebaseapp.com",
+        projectId: "alan-b68e7",
+        storageBucket: "alan-b68e7.firebasestorage.app",
+        messagingSenderId: "838354978223",
+        appId: "1:838354978223:web:440ba90b7191bc97f45b5a"
     };
 
     let db;
@@ -504,23 +505,23 @@
 
     // ===== الرسائل الافتراضية (global) =====
     const DEFAULT_MESSAGES = {
-        msgConfirm: 'أهلاً وسهلاً أستاذ/ة {الاسم} 😊\n\nنود تذكيركم بموعد جلستكم اليوم في مركز لايف سبورت:\n🕐 الساعة: {الساعة}\n👨‍⚕️ مع: {الدكتور}\n\nننتظر تشريفكم وجودكم في الميعاد.\nنتمنى لحضرتكم دوام الصحة والعافية 🌿',
-        msgLate: 'أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} مع {الدكتور} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟',
-        msgAbsent: 'أهلاً أستاذ/ة {الاسم} 🌿\nمعكم مركز لايف سبورت للعلاج الطبيعي.\nلاحظنا انقطاع حضرتك عن جلسات العلاج.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟',
+        msgConfirm: 'أهلاً وسهلاً أستاذ/ة {الاسم} 😊\n\nنود تذكيركم بموعد جلستكم اليوم في Obsidian System:\n🕐 الساعة: {الساعة}\n👨‍⚕️ مع: {الدكتور}\n\nننتظر تشريفكم وجودكم في الميعاد.\nنتمنى لحضرتكم دوام الصحة والعافية 🌿',
+        msgLate: 'أهلاً أستاذ/ة {الاسم} 🌿\nمعكم Obsidian System للعلاج الطبيعي.\nكان لحضرتك موعد اليوم الساعة {الساعة} مع {الدكتور} ولم نتشرف بحضوركم.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟',
+        msgAbsent: 'أهلاً أستاذ/ة {الاسم} 🌿\nمعكم Obsidian System للعلاج الطبيعي.\nلاحظنا انقطاع حضرتك عن جلسات العلاج.\nعلّ المانع خير 🙏\nنحجز لحضرتك المرة الجاية الساعة كام؟',
         msgCloseInsu: 'أستاذ/ة {الاسم}،\nنبلغ حضرتك أننا قمنا بإغلاق جلساتك لدينا لأن لشركة التأمين الخاصة بحضرتك "ديد لاين" وحضرتك متغيب منذ فترة.\nإذا كنت ترغب في الاستكمال، يرجى الكشف وإحضار "موافقة جديدة".\nنتمنى لحضرتك دوام الصحة والعافية.',
         msgCloseCash: 'أستاذ/ة {الاسم}،\nنبلغ حضرتك بانتهاء جلسات الكورس الخاص بك وتم تقفيل الملف.\nفي حال رغبتك في استكمال العلاج، يمكنك تشريفنا لفتح كورس جديد.\nنتمنى لحضرتك دوام الصحة والعافية.',
-        msgBookingConfirm: '🌿 *مركز Life Sport للعلاج الطبيعي* 🌿\n\nأهلاً وسهلاً أستاذ/ة *{الاسم}* 😊\nتم تأكيد حجز جلستكم بنجاح ✅\n━━━━━━━━━━━━\n📋 *تفاصيل الحجز:*\n🏥 الفرع: *{الفرع}*\n📅 اليوم: *{اليوم}*\n🕐 الساعة: *{الساعة}*\n👨‍⚕️ مع: *{الدكتور}*\n━━━━━━━━━━━━\n📌 *لحجز الجلسات يرجى مراعاة:*\n\n🍀 قبل كل موعد بـ 24 ساعة سيصلك رسالة لتأكيد أو إلغاء الحجز\n\n🍀 التأخير أكتر من 15 دقيقة سيتم إلغاء حجز الجلسة وتأجيلها لميعاد آخر\n\n🍀 في حالة تأكيد الموعد وعدم الحضور سيتم احتساب الجلسة من رصيد جلساتك\n\n🍀 عدم اصطحاب الأطفال لراحة جميع المرضى\n\n🍀 أثناء الجلسة لا يسمح بالمرافقين\n\n🍀 أثناء الجلسة بملابس مريحة وفضفاضة\n\n🍀 جميع العاملين طبيبات ومساعدين\n\n🍀 التواصل والحجز مع الاستقبال فقط\n━━━━━━━━━━━━\n🤍 نتمنى لحضرتك دوام الصحة والعافية\n_إدارة مركز Life Sport_'
+        msgBookingConfirm: '🌿 *Obsidian System للعلاج الطبيعي* 🌿\n\nأهلاً وسهلاً أستاذ/ة *{الاسم}* 😊\nتم تأكيد حجز جلستكم بنجاح ✅\n━━━━━━━━━━━━\n📋 *تفاصيل الحجز:*\n🏥 الفرع: *{الفرع}*\n📅 اليوم: *{اليوم}*\n🕐 الساعة: *{الساعة}*\n👨‍⚕️ مع: *{الدكتور}*\n━━━━━━━━━━━━\n📌 *لحجز الجلسات يرجى مراعاة:*\n\n🍀 قبل كل موعد بـ 24 ساعة سيصلك رسالة لتأكيد أو إلغاء الحجز\n\n🍀 التأخير أكتر من 15 دقيقة سيتم إلغاء حجز الجلسة وتأجيلها لميعاد آخر\n\n🍀 في حالة تأكيد الموعد وعدم الحضور سيتم احتساب الجلسة من رصيد جلساتك\n\n🍀 عدم اصطحاب الأطفال لراحة جميع المرضى\n\n🍀 أثناء الجلسة لا يسمح بالمرافقين\n\n🍀 أثناء الجلسة بملابس مريحة وفضفاضة\n\n🍀 جميع العاملين طبيبات ومساعدين\n\n🍀 التواصل والحجز مع الاستقبال فقط\n━━━━━━━━━━━━\n🤍 نتمنى لحضرتك دوام الصحة والعافية\n_إدارة Obsidian System_'
     };
 
     // ===== حفظ الأرقام السرية (global) =====
     async function savePasswords() {
         if (!db) { alert('جاري الاتصال، حاول بعد ثانية'); return; }
         const data = {
-            passSupport: document.getElementById('passSupport').value.trim() || '2210',
-            passLedger: document.getElementById('passLedger').value.trim() || '1234',
-            passAnalytics: document.getElementById('passAnalytics').value.trim() || '9999',
-            passAdminPatients: document.getElementById('passAdminPatients').value.trim() || '9999',
-            passDelete: document.getElementById('passDelete').value.trim() || '999'
+            passSupport: document.getElementById('passSupport').value.trim() || '',
+            passLedger: document.getElementById('passLedger').value.trim() || '',
+            passAnalytics: document.getElementById('passAnalytics').value.trim() || '',
+            passAdminPatients: document.getElementById('passAdminPatients').value.trim() || '',
+            passDelete: document.getElementById('passDelete').value.trim() || ''
         };
         try {
             await db.collection("settings").doc("system_settings").set(data, { merge: true });
@@ -631,11 +632,11 @@
                 // الأرقام السرية — تتملأ مرة واحدة بس (مش كل snapshot عشان ماتمسحش اللي بتكتبه)
                 if (document.getElementById('passLedger') && !window._passwordsLoaded) {
                     window._passwordsLoaded = true;
-                    if (document.getElementById('passSupport')) document.getElementById('passSupport').value = data.passSupport || '2210';
-                    document.getElementById('passLedger').value = data.passLedger || '1234';
-                    document.getElementById('passAnalytics').value = data.passAnalytics || '9999';
-                    document.getElementById('passAdminPatients').value = data.passAdminPatients || '9999';
-                    document.getElementById('passDelete').value = data.passDelete || '999';
+                    if (document.getElementById('passSupport')) document.getElementById('passSupport').value = data.passSupport || '';
+                    document.getElementById('passLedger').value = data.passLedger || '';
+                    document.getElementById('passAnalytics').value = data.passAnalytics || '';
+                    document.getElementById('passAdminPatients').value = data.passAdminPatients || '';
+                    document.getElementById('passDelete').value = data.passDelete || '';
                 }
                 if (!window._messagesLoaded) { window._messagesLoaded = true; loadMessages(data); }
             }
@@ -940,7 +941,7 @@
     }
 
     async function clearLogs() {
-        if (prompt("برجاء إدخال رقم تأكيد مسح السجل (1234):") === "1234") {
+        if (confirm("هل تريد مسح سجل النشاط؟")) {
             let snap = await db.collection('audit_logs').get();
             let batch = db.batch();
             snap.docs.forEach(doc => batch.delete(doc.ref));
@@ -964,7 +965,7 @@
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `LifeSport_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `ObsidianSystem_Backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(a.href);
             showToast("✅ تم تحميل النسخة الاحتياطية الكاملة");
@@ -981,7 +982,7 @@
         if (file.size > 2 * 1024 * 1024) return showToast('اختر لوجو أقل من 2 ميجابايت', 'error');
         const reader = new FileReader();
         reader.onload = event => {
-            try { localStorage.setItem('lifeSportExcelLogo', event.target.result); showToast('✅ تم حفظ اللوجو للتقارير'); }
+            try { localStorage.setItem('obsidianSystemExcelLogo', event.target.result); showToast('✅ تم حفظ اللوجو للتقارير'); }
             catch (error) { showToast('تعذر حفظ اللوجو، اختر صورة أصغر', 'error'); }
         };
         reader.readAsDataURL(file);
@@ -1002,12 +1003,12 @@
             // يطابق صفحة «تقارير أطباء العظام VIP»: الحالة تُنسب لشهر فتح ملفها، لا لشهر حضورها.
             const createdMonth = value => { if(!value || typeof value.toDate!=='function') return ''; const d=value.toDate(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
             patients.forEach(p=>{const doctor=String(p.refDoctor||'').trim();if(!doctor)return;const opened=createdMonth(p.createdAt);if(opened&&opened!==month)return;const rows=ledger.filter(x=>key(x.patientName)===key(p.id));const attendance=rows.filter(x=>!x.isPaymentOnly&&!x.isRefund);const attendanceDates=[...new Set(attendance.map(x=>x.date||toISO(x)).filter(Boolean))].join(' | ')||'لم يحضر في الشهر';const isInsu=!!p.comp;const paidThisMonth=rows.reduce((s,x)=>s+(parseFloat(x.amount)||0),0);const totalSessions=parseInt(p.totalSess||0), attendedTotal=parseInt(p.attended||0), remaining=Math.max(0,totalSessions-attendedTotal), price=parseFloat(p.price||p.sessPrice||p.cost||0), totalValue=isInsu?(price*totalSessions)+(parseFloat(p.copayTotal)||0):(p.mode==='course'?(parseFloat(p.cost)||0):price*attendedTotal), actualEarned=isInsu?(price*attendedTotal)+(parseFloat(p.copayPaid)||0):(p.mode==='course'?(parseFloat(p.paid)||0):price*attendedTotal);const renewed=rows.some(x=>String(x.type||'').includes('تجديد')||String(x.notes||'').includes('تجديد'))?'جدد خلال الشهر':'—';const row=[p.id,p.branch||'المهندسين',isInsu?'تأمين':'كاش',p.comp||'—',p.phone||'-',price,totalSessions,attendance.length,attendanceDates,attendedTotal,remaining,paidThisMonth,totalValue,actualEarned,renewed,p.serviceType||p.sessionType||p.type||'-'];if(!rowsByDoctor.has(doctor))rowsByDoctor.set(doctor,[]);rowsByDoctor.get(doctor).push(row);});
-            const wb=new ExcelJS.Workbook();wb.creator='Life Sport';
-            const style=(sh,title)=>{sh.views=[{rightToLeft:true,state:'frozen',ySplit:4}];sh.mergeCells('A1:P1');sh.getCell('A1').value=`LIFE SPORT | ${title} | شهر ${month}`;sh.getCell('A1').font={bold:true,size:16,color:{argb:'FFFFFFFF'}};sh.getCell('A1').fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF087EAF'}};sh.getCell('A1').alignment={horizontal:'center'};sh.addRow([]);const h=sh.addRow(['اسم المريض','الفرع','النوع','شركة التأمين','الهاتف','سعر الموافقة / الجلسة','جلسات الموافقة','حضور هذا الشهر','تواريخ الحضور في الشهر','إجمالي الحضور','المتبقي','المحصل النقدي خلال الشهر','القيمة الإجمالية للملف','المكتسب الفعلي','التجديد','الخدمة']);h.eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0B132B'}};c.alignment={horizontal:'center',wrapText:true};});sh.columns=[{width:24},{width:15},{width:12},{width:19},{width:17},{width:18},{width:15},{width:15},{width:30},{width:15},{width:13},{width:21},{width:21},{width:20},{width:17},{width:20}];};
+            const wb=new ExcelJS.Workbook();wb.creator='Obsidian System';
+            const style=(sh,title)=>{sh.views=[{rightToLeft:true,state:'frozen',ySplit:4}];sh.mergeCells('A1:P1');sh.getCell('A1').value=`Obsidian System | ${title} | شهر ${month}`;sh.getCell('A1').font={bold:true,size:16,color:{argb:'FFFFFFFF'}};sh.getCell('A1').fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF087EAF'}};sh.getCell('A1').alignment={horizontal:'center'};sh.addRow([]);const h=sh.addRow(['اسم المريض','الفرع','النوع','شركة التأمين','الهاتف','سعر الموافقة / الجلسة','جلسات الموافقة','حضور هذا الشهر','تواريخ الحضور في الشهر','إجمالي الحضور','المتبقي','المحصل النقدي خلال الشهر','القيمة الإجمالية للملف','المكتسب الفعلي','التجديد','الخدمة']);h.eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0B132B'}};c.alignment={horizontal:'center',wrapText:true};});sh.columns=[{width:24},{width:15},{width:12},{width:19},{width:17},{width:18},{width:15},{width:15},{width:30},{width:15},{width:13},{width:21},{width:21},{width:20},{width:17},{width:20}];};
             const summary=wb.addWorksheet('ملخص الأطباء');style(summary,'ملخص أطباء العظام');[...rowsByDoctor.entries()].forEach(([doctor,rows])=>summary.addRow([doctor,'-','-','-','-','-','-',rows.reduce((s,r)=>s+(parseFloat(r[7])||0),0),'-','-','-',rows.reduce((s,r)=>s+(parseFloat(r[11])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[12])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[13])||0),0),`إجمالي ${rows.length} حالة`,'']));
             [...rowsByDoctor.entries()].forEach(([doctor,rows],index)=>{const clean=doctor.replace(/[\\/*?:\[\]]/g,'').slice(0,26)||`طبيب ${index+1}`;const sh=wb.addWorksheet(clean);style(sh,`د. ${doctor}`);rows.forEach(r=>sh.addRow(r));const last=sh.addRow(['إجمالي الحالات','','','','','','',rows.reduce((s,r)=>s+(parseFloat(r[7])||0),0),'','','',rows.reduce((s,r)=>s+(parseFloat(r[11])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[12])||0),0),rows.reduce((s,r)=>s+(parseFloat(r[13])||0),0),'','']);last.font={bold:true,color:{argb:'FFFFFFFF'}};last.eachCell(c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF087EAF'}});});
             wb.worksheets.forEach(sh=>sh.eachRow((row,rowNumber)=>{if(rowNumber>=4){row.height=23;row.eachCell(cell=>{cell.font={...(cell.font||{}),name:'Arial',size:12,bold:true};cell.alignment={horizontal:'center',vertical:'middle',wrapText:true};});}}));
-            const data=await wb.xlsx.writeBuffer(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=`LifeSport_Ortho_Doctors_${month}.xlsx`;a.click();URL.revokeObjectURL(a.href);showToast('تم تنزيل ملف أطباء العظام');
+            const data=await wb.xlsx.writeBuffer(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=`ObsidianSystem_Ortho_Doctors_${month}.xlsx`;a.click();URL.revokeObjectURL(a.href);showToast('تم تنزيل ملف أطباء العظام');
         } catch(e){console.error(e);showToast('تعذر تجهيز تقرير أطباء العظام','error');} finally {btn.disabled=false;btn.innerHTML=old;}
     }
 
@@ -1110,12 +1111,12 @@
             const companyClaims = insuAttendees.reduce((sum,p)=>sum+num(p.price||p.sessPrice),0)+ledger.filter(row=>row.isCompanyAddition).reduce((sum,row)=>sum+num(row.amount),0);
             const branchLabel = selectedBranch === 'all' ? 'كل الفروع' : selectedBranch;
             const periodLabel = mode === 'monthly' ? `شهر ${monthInput}` : new Date(dateInput+'T00:00:00').toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-            const wb = new ExcelJS.Workbook(); wb.creator='Life Sport System'; wb.created=new Date();
-            let logoId=null; try { const customLogo=localStorage.getItem('lifeSportExcelLogo'); if(customLogo) { logoId=wb.addImage({base64:customLogo,extension:customLogo.includes('image/jpeg')?'jpeg':'png'}); } else { const res=await fetch('./logo.png', {cache:'no-store'}); if(res.ok) { const bytes=new Uint8Array(await res.arrayBuffer()); let binary=''; bytes.forEach(byte=>binary+=String.fromCharCode(byte)); logoId=wb.addImage({base64:btoa(binary),extension:'png'}); } } } catch(e) { console.warn('logo embed error',e); }
+            const wb = new ExcelJS.Workbook(); wb.creator='Obsidian System'; wb.created=new Date();
+            let logoId=null; try { const customLogo=localStorage.getItem('obsidianSystemExcelLogo'); if(customLogo) { logoId=wb.addImage({base64:customLogo,extension:customLogo.includes('image/jpeg')?'jpeg':'png'}); } else { const res=await fetch('./obsidian-system-logo.jpeg', {cache:'no-store'}); if(res.ok) { const bytes=new Uint8Array(await res.arrayBuffer()); let binary=''; bytes.forEach(byte=>binary+=String.fromCharCode(byte)); logoId=wb.addImage({base64:btoa(binary),extension:'jpeg'}); } } } catch(e) { console.warn('logo embed error',e); }
             const navy='087EAF', gold='D4AF37', stripe='E8F8FE';
             const brand = (sheet,title) => {
                 sheet.views=[{rightToLeft:true,state:'frozen',ySplit:6}]; sheet.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};
-                sheet.mergeCells('D1:J2'); const h=sheet.getCell('D1'); h.value='LIFE SPORT | مركز لايف سبورت للعلاج الطبيعي'; h.font={bold:true,size:18,color:{argb:'FFFFFFFF'}};h.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+navy}};h.alignment={horizontal:'center',vertical:'middle'};
+                sheet.mergeCells('D1:J2'); const h=sheet.getCell('D1'); h.value='Obsidian System | Obsidian System للعلاج الطبيعي'; h.font={bold:true,size:18,color:{argb:'FFFFFFFF'}};h.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+navy}};h.alignment={horizontal:'center',vertical:'middle'};
                 sheet.mergeCells('D3:J3'); const sub=sheet.getCell('D3'); sub.value=`${title} | الفرع: ${branchLabel} | ${periodLabel}`; sub.font={bold:true,size:12,color:{argb:'FF'+navy}};sub.alignment={horizontal:'center'};sub.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE1F5FC'}};
                 if(logoId!==null) sheet.addImage(logoId,{tl:{col:0,row:0},br:{col:2.7,row:3.8},editAs:'oneCell'});
             };
@@ -1165,7 +1166,7 @@
                 [14,16,16,32,16,22].forEach((width,index)=>movementSheet.getColumn(index+1).width=width);
                 footer(movementSheet,[['عدد الحركات المالية',movements.length,false],['إجمالي المصروفات',cashExpense+instaExpense]]);
             }
-            const output=await wb.xlsx.writeBuffer(), blob=new Blob([output],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=mode==='monthly'?`إجمالي التحليل الشهري_${branchLabel}_${period}.xlsx`:`LifeSport_Daily_${branchLabel}_${period}.xlsx`;a.click();URL.revokeObjectURL(a.href);showToast('✅ تم تنزيل التقرير الاحترافي');
+            const output=await wb.xlsx.writeBuffer(), blob=new Blob([output],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=mode==='monthly'?`إجمالي التحليل الشهري_${branchLabel}_${period}.xlsx`:`ObsidianSystem_Daily_${branchLabel}_${period}.xlsx`;a.click();URL.revokeObjectURL(a.href);showToast('✅ تم تنزيل التقرير الاحترافي');
         } catch(error) { console.error(error); showToast('تعذر تجهيز التقرير، حاول مرة أخرى','error'); } finally { button.disabled=false;button.innerHTML=oldHtml; }
     }
 
@@ -1199,15 +1200,15 @@
             const dateLabel = `${d}/${m}/${y}`;
             const dayName = new Date(dateInput + 'T00:00:00').toLocaleDateString('ar-EG', { weekday:'long' });
             const wb = new ExcelJS.Workbook();
-            wb.creator = 'Life Sport System'; wb.created = new Date();
+            wb.creator = 'Obsidian System'; wb.created = new Date();
             let logoBuffer = null;
-            try { logoBuffer = await (await fetch('logo.png')).arrayBuffer(); } catch (e) { console.warn('logo unavailable', e); }
-            const logoId = logoBuffer ? wb.addImage({ buffer:logoBuffer, extension:'png' }) : null;
+            try { logoBuffer = await (await fetch('obsidian-system-logo.jpeg')).arrayBuffer(); } catch (e) { console.warn('logo unavailable', e); }
+            const logoId = logoBuffer ? wb.addImage({ buffer:logoBuffer, extension:'jpeg' }) : null;
             const blue = '0B132B', gold = 'D4AF37', pale = 'F4F7FB';
             const applyBrand = (sheet, title, subtitle) => {
                 sheet.views = [{ rightToLeft:true, state:'frozen', ySplit:6 }];
                 sheet.pageSetup = { orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{ left:0.25,right:0.25,top:0.4,bottom:0.4 } };
-                sheet.mergeCells('D1:J2'); sheet.getCell('D1').value = 'LIFE SPORT | مركز لايف سبورت للعلاج الطبيعي';
+                sheet.mergeCells('D1:J2'); sheet.getCell('D1').value = 'Obsidian System | Obsidian System للعلاج الطبيعي';
                 sheet.getCell('D1').font = { bold:true, size:18, color:{argb:'FFFFFFFF'} }; sheet.getCell('D1').alignment = { horizontal:'center', vertical:'middle' }; sheet.getCell('D1').fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+blue} };
                 sheet.mergeCells('D3:J3'); sheet.getCell('D3').value = `${title} — ${subtitle}`; sheet.getCell('D3').font = { bold:true, size:12, color:{argb:'FF'+blue} }; sheet.getCell('D3').alignment = { horizontal:'center' };
                 if (logoId !== null) sheet.addImage(logoId, { tl:{ col:0, row:0 }, br:{ col:2.6, row:3.8 }, editAs:'oneCell' });
@@ -1229,7 +1230,7 @@
             addTableSheet('مصروفات اليومية', 'مصروفات اليومية', ['#','البيان','المبلغ','طريقة الصرف','التصنيف','الفرع'], transactions.map((row,i)=>[i+1,row.reason||'مصروف',amount(row.amount),row.type==='instapay'?'إنستاباي':'كاش',row.category||'المركز',row.branch||'المهندسين']));
             const buffer = await wb.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=`LifeSport_Daily_${branchLabel}_${dateInput}.xlsx`; link.click(); URL.revokeObjectURL(link.href);
+            const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=`ObsidianSystem_Daily_${branchLabel}_${dateInput}.xlsx`; link.click(); URL.revokeObjectURL(link.href);
             showToast('✅ تم تنزيل تقرير اليومية الاحترافي');
         } catch (error) {
             console.error('daily excel:', error); showToast('تعذر تجهيز التقرير، حاول مرة أخرى', 'error');
@@ -1257,7 +1258,7 @@
             };
             const addSheet = (workbook, name, headers, rows) => {
                 const sheet = XLSX.utils.aoa_to_sheet([
-                    ['LIFE SPORT | مركز لايف سبورت للعلاج الطبيعي'],
+                    ['Obsidian System | Obsidian System للعلاج الطبيعي'],
                     headers,
                     ...rows.map(row => headers.map((_, i) => value(row[i])))
                 ]);
@@ -1294,8 +1295,8 @@
                 [p._id,p.branch,p.comp||'كاش',pay.date,pay.amount,pay.type,pay.method,pay.note]));
             addSheet(wb, 'دفعات المرضى', ['اسم المريض','الفرع','الجهة','التاريخ','المبلغ','النوع','طريقة الدفع','ملاحظة'], payments);
 
-            wb.Props = { Title: 'Life Sport Full Backup', Subject: 'نسخة Excel شاملة', Author: 'Life Sport System' };
-            XLSX.writeFile(wb, `LifeSport_Full_Backup_${dateText.replace(/\//g,'-')}.xlsx`);
+            wb.Props = { Title: 'Obsidian System Full Backup', Subject: 'نسخة Excel شاملة', Author: 'Obsidian System' };
+            XLSX.writeFile(wb, `ObsidianSystem_Full_Backup_${dateText.replace(/\//g,'-')}.xlsx`);
             showToast("✅ تم تحميل نسخة Excel الشاملة");
             logAction('نظام', 'تصدير نسخة Excel شاملة من السيرفر');
         } catch(e) {
@@ -1333,9 +1334,9 @@
                 if (row.type === 'instapay') { if (!row.isTransfer) expInsta += amount; }
                 else expCash += amount;
             });
-            const subject = `Life Sport | ملخص اليومية | ${dmy}`;
+            const subject = `Obsidian System | ملخص اليومية | ${dmy}`;
             const body = [
-                '🏥 مركز لايف سبورت للعلاج الطبيعي', 'التقرير اليومي', `التاريخ: ${dmy}`, '',
+                '🏥 Obsidian System للعلاج الطبيعي', 'التقرير اليومي', `التاريخ: ${dmy}`, '',
                 `إجمالي الحالات: ${patients.size}`,
                 `الكاش: ${cash.toLocaleString()} ج.م`, `التحمل: ${copay.toLocaleString()} ج.م`,
                 `الإنستاباي: ${insta.toLocaleString()} ج.م`, `مصروفات الكاش: ${expCash.toLocaleString()} ج.م`,
@@ -1344,7 +1345,7 @@
                 `الإجمالي الكلي: ${(cash + copay + insta - expCash - expInsta).toLocaleString()} ج.م`, '',
                 'يمكن إرفاق ملف Excel الشامل الذي تم تنزيله من صفحة السابورت.'
             ].join('\n');
-            window.location.href = `mailto:lifesport.approvals@gmail.com,hossamzahran663@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         } catch (error) {
             console.error('compose daily email:', error);
             showToast('تعذر تجهيز رسالة البريد', 'error');

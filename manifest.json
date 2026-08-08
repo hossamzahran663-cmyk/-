@@ -1,12 +1,12 @@
 {
-    "name": "Life Sport System",
-    "short_name": "Life Sport",
+    "name": "Obsidian System",
+    "short_name": "Obsidian System",
     "start_url": "index.html",
     "display": "standalone",
     "background_color": "#0b132b",
     "theme_color": "#0b132b",
     "icons": [
-        { "src": "logo.png", "sizes": "192x192", "type": "image/png" },
-        { "src": "logo.png", "sizes": "512x512", "type": "image/png" }
+        { "src": "obsidian-system-logo.jpeg", "sizes": "192x192", "type": "image/jpeg" },
+        { "src": "obsidian-system-logo.jpeg", "sizes": "512x512", "type": "image/jpeg" }
     ]
 }
