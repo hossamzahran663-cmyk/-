@@ -3,72 +3,66 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Obsidian System - Campaign</title>
+  <title>Obsidian System | Physiotherapy & Rehabilitation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root{--ink:#0d0e10;--carbon:#1c1f24;--silver:#d8dbe0;--muted:#a5abb4;--line:#383d45}*{box-sizing:border-box}body{margin:0;background:#090a0b;color:#fff;font-family:Tajawal,Arial,sans-serif}.campaign{display:flex;gap:28px;overflow-x:auto;padding:28px;scroll-snap-type:x mandatory;scrollbar-color:#59606a #15171a}.slide{position:relative;flex:0 0 min(88vw,720px);aspect-ratio:4/5;scroll-snap-align:center;overflow:hidden;background:var(--ink);border:1px solid var(--line);padding:7%;display:flex;flex-direction:column}.slide::after{content:"";position:absolute;inset:14px;border:1px solid rgba(216,219,224,.18);pointer-events:none;z-index:3}.hero{background:#0b0c0e}.hero-img,.photo-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.72}.hero::before,.photo-slide::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,8,9,.97),rgba(7,8,9,.74),rgba(7,8,9,.08));z-index:1}.hero>*,.photo-slide>*:not(.photo-bg){position:relative;z-index:2}.brand{display:flex;align-items:center;gap:12px;color:var(--silver);font:900 clamp(16px,2vw,24px) Arial,sans-serif;letter-spacing:1px}.brand img{width:54px;height:54px;border-radius:7px;object-fit:cover}.kicker{margin:clamp(52px,9vw,96px) 0 14px;color:var(--silver);font-size:clamp(15px,1.8vw,20px);font-weight:800}.hero h1{margin:0;max-width:490px;font-size:clamp(38px,5.2vw,65px);line-height:1.18;font-weight:900}.hero p{max-width:420px;margin:18px 0;color:#e5e7ea;font-size:clamp(16px,1.9vw,23px);line-height:1.7;font-weight:700}.hero .cta{margin-top:auto;display:inline-block;align-self:flex-start;border:1px solid var(--silver);padding:11px 18px;font-weight:900;color:#fff;text-decoration:none;cursor:pointer}.number{color:var(--muted);font:700 14px Arial,sans-serif;letter-spacing:2px}.slide h2{margin:52px 0 10px;font-size:clamp(30px,4.2vw,52px);line-height:1.25;font-weight:900}.intro{margin:0 0 30px;color:var(--muted);font-size:clamp(15px,1.8vw,21px);line-height:1.7;font-weight:700}.feature-list{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}.feature-list li{padding:14px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;font-size:clamp(16px,1.95vw,23px);font-weight:800;line-height:1.5}.feature-list b{color:var(--silver)}.tick{color:var(--silver);font-family:Arial;font-size:20px}.roles{display:grid;gap:0;border-top:1px solid var(--line)}.role{padding:17px 0;border-bottom:1px solid var(--line)}.role h3{margin:0 0 5px;color:var(--silver);font-size:clamp(17px,2.05vw,25px)}.role p{margin:0;color:var(--muted);font-size:clamp(14px,1.6vw,19px);line-height:1.6;font-weight:700}.devices{margin-top:auto;border-top:1px solid var(--line);padding-top:22px;display:flex;gap:18px;align-items:center;color:var(--silver);font-size:clamp(16px,1.8vw,21px);font-weight:900}.devices span{display:flex;align-items:center;gap:8px}.devices i{font-style:normal;font:28px Arial}.devs{margin-top:auto;border-top:1px solid var(--line);padding-top:22px}.devs small{display:block;margin-bottom:11px;color:var(--muted);font:700 12px Arial;letter-spacing:2px}.devs strong{display:block;font:800 clamp(17px,2vw,24px) Arial,sans-serif;line-height:1.7;color:var(--silver)}.footer{position:absolute;bottom:7%;left:7%;color:#7f8791;font:700 11px Arial;letter-spacing:1px}@media(max-width:600px){.campaign{padding:0;gap:0;overflow-x:hidden;display:block}.slide{width:100%;min-height:100svh;aspect-ratio:auto;border-width:0 0 1px}.slide::after{inset:10px}.hero::before,.photo-slide::before{background:rgba(7,8,9,.72)}.hero p{max-width:82%}.slide h2{margin-top:62px}.feature-list li{padding:12px 0}.roles{margin-top:5px}}
+    :root{--black:#0b0c0e;--carbon:#1c1f24;--silver:#d8dbe0;--grey:#aab0b8;--line:rgba(216,219,224,.28)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#070809;color:#fff;font-family:Tajawal,Arial,sans-serif}.slides{padding:28px 0}.slide{position:relative;width:min(94vw,760px);min-height:900px;margin:0 auto 28px;padding:48px;overflow:hidden;border:1px solid var(--line);background:var(--black);display:flex;flex-direction:column}.slide::after{content:"";position:absolute;inset:14px;border:1px solid rgba(216,219,224,.16);pointer-events:none}.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.64}.shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,8,9,.98),rgba(7,8,9,.77),rgba(7,8,9,.18));z-index:1}.content{position:relative;z-index:2;display:flex;flex:1;flex-direction:column}.brand{display:flex;align-items:center;gap:14px;align-self:flex-start;padding:8px 12px;background:rgba(7,8,9,.88);border:1px solid var(--silver);border-radius:6px;color:var(--silver);font:900 23px Arial,sans-serif;letter-spacing:1px}.brand img{width:58px;height:58px;object-fit:cover;border-radius:5px;background:#fff}.eyebrow{margin:84px 0 13px;color:var(--silver);font:800 15px Arial,sans-serif;letter-spacing:1.7px}.title{margin:0;max-width:540px;font-size:clamp(38px,6vw,67px);line-height:1.2;font-weight:900}.lead{max-width:500px;margin:20px 0;color:#eceef0;font-size:clamp(17px,2.1vw,24px);line-height:1.7;font-weight:700}.list{margin:34px 0 0;padding:0;list-style:none;border-top:1px solid var(--line);max-width:540px}.list li{padding:15px 0;border-bottom:1px solid var(--line);font-size:clamp(17px,2vw,23px);font-weight:800;line-height:1.55}.list li::before{content:"✓";display:inline-block;margin-left:11px;color:var(--silver);font-family:Arial}.arrow{position:absolute;z-index:4;bottom:36px;right:48px;color:#fff;text-decoration:none;font-weight:900;font-size:17px}.arrow span{display:inline-block;font:30px Arial;vertical-align:middle;margin-right:7px}.number{margin-top:auto;color:var(--grey);font:700 13px Arial,sans-serif;letter-spacing:2px}.final{background:linear-gradient(150deg,#0b0c0e,#22262b)}.final .content{align-items:flex-start}.final .brand{margin-bottom:70px}.final h2{margin:0;font-size:clamp(38px,6vw,66px);line-height:1.2}.final p{max-width:500px;color:var(--grey);font-size:clamp(17px,2vw,23px);line-height:1.7;font-weight:700}.start{display:inline-block;margin-top:auto;background:var(--silver);color:#0b0c0e;text-decoration:none;padding:16px 24px;font-size:20px;font-weight:900;border:1px solid var(--silver)}.start:hover{background:#fff}.devs{margin-top:28px;color:#cbd0d6;font:700 15px Arial,sans-serif;line-height:1.7}@media(max-width:600px){.slides{padding:0}.slide{width:100%;min-height:100svh;margin:0;padding:30px 28px;border-width:0 0 1px}.slide::after{inset:9px}.brand{font-size:17px}.brand img{width:47px;height:47px}.eyebrow{margin-top:54px}.arrow{bottom:27px;right:28px}.list{margin-top:24px}.list li{padding:11px 0}.final .brand{margin-bottom:52px}}
   </style>
 </head>
 <body>
-  <main class="campaign">
-    <section class="slide hero">
-      <img class="hero-img" src="obsidian-ad-background.png" alt="نظام تشغيل مركز علاجي">
-      <div class="brand"><img src="obsidian-system-logo.jpeg" alt="Obsidian System"><span>OBSIDIAN SYSTEM</span></div>
-      <p class="kicker">THE OPERATING STANDARD FOR PHYSIOTHERAPY & REHABILITATION CENTERS</p>
-      <h1>برنامج متكامل لمراكز<br>العلاج الطبيعي والتأهيل.</h1>
-      <p>من أول حجز المريض إلى التقارير المالية، إدارة دقيقة للمركز العلاجي وشركات التأمين لحظة بلحظة.</p>
-      <a class="cta" href="app.html">ابدأ التجربة</a>
-    </section>
-
-    <section class="slide photo-slide">
-      <img class="photo-bg" src="obsidian-ad-operations.png" alt="الاستقبال والتشغيل">
-      <span class="number">01 / OPERATIONS</span>
-      <h2>تشغيل كامل.<br>بدون تشتت.</h2>
-      <p class="intro">كل ما يحتاجه المركز العلاجي، من الملفات وحتى المتابعة اليومية، في لوحة تشغيل واحدة.</p>
-      <ul class="feature-list">
-        <li><span class="tick">✓</span><span><b>ملفات المرضى</b> النقدي والتعاقدات وشركات التأمين.</span></li>
-        <li><span class="tick">✓</span><span><b>الحجوزات والاستقبال</b> وتسجيل المرضى والجلسات.</span></li>
-        <li><span class="tick">✓</span><span><b>متابعة الحجوزات الفائتة</b> وسجل التواصل.</span></li>
-        <li><span class="tick">✓</span><span><b>الزيارات المنزلية</b> والخدمات المتخصصة.</span></li>
-      </ul>
-      <div class="footer">OBSIDIAN SYSTEM</div>
-    </section>
-
-    <section class="slide photo-slide">
-      <img class="photo-bg" src="obsidian-ad-finance.png" alt="الحسابات والتقارير">
-      <span class="number">02 / FINANCE</span>
-      <h2>أرقامك واضحة.<br>في كل فرع.</h2>
-      <p class="intro">نظام مالي مصمم لمتابعة الإيرادات والمصروفات والفروع دون تأخير.</p>
-      <ul class="feature-list">
-        <li><span class="tick">✓</span><span>الحسابات الشهرية والملخص المالي.</span></li>
-        <li><span class="tick">✓</span><span>دفاتر يومية مفصلة لكل فرع.</span></li>
-        <li><span class="tick">✓</span><span>إدارة المصروفات وحركات الكاش والتأمين.</span></li>
-        <li><span class="tick">✓</span><span>تصدير الملخصات والتقارير إلى <b>Excel</b>.</span></li>
-      </ul>
-      <div class="footer">LIVE BRANCH REPORTING</div>
-    </section>
-
-    <section class="slide">
-      <span class="number">03 / ACCESS</span>
-      <h2>كل مستخدم.<br>صلاحياته.</h2>
-      <p class="intro">يوزر وباسورد مستقل لكل فرع، مع صلاحيات تضمن أن كل شخص يرى ما يخص عمله فقط.</p>
-      <div class="roles">
-        <div class="role"><h3>الاستقبال</h3><p>تسجيل المرضى، الحجوزات، الحضور ومتابعة الحجوزات الفائتة.</p></div>
-        <div class="role"><h3>مدير الفرع</h3><p>يشاهد إجماليات وحسابات فرعه فقط.</p></div>
-        <div class="role"><h3>Owner</h3><p>رؤية كاملة لجميع الفروع، الحسابات والملخصات.</p></div>
+  <main class="slides">
+    <section class="slide" id="intro">
+      <img class="photo" src="obsidian-ad-background.png" alt="مركز علاج طبيعي حديث">
+      <div class="shade"></div>
+      <div class="content">
+        <div class="brand"><img src="obsidian-system-logo.jpeg" alt="Obsidian System"><span>OBSIDIAN SYSTEM</span></div>
+        <p class="eyebrow">PHYSIOTHERAPY & REHABILITATION</p>
+        <h1 class="title">برنامج متكامل لمراكز العلاج الطبيعي والتأهيل.</h1>
+        <p class="lead">إدارة مركزك وفروعك في نظام واحد، من أول حجز المريض حتى القرار المالي.</p>
+        <span class="number">01 / OBSIDIAN SYSTEM</span>
       </div>
-      <div class="footer">ROLE-BASED ACCESS</div>
+      <a class="arrow" href="#operations">المزيد <span>↓</span></a>
     </section>
 
-    <section class="slide">
-      <span class="number">04 / REAL TIME</span>
-      <h2>تابع مركزك.<br>من أي مكان.</h2>
-      <p class="intro">من الموبايل أو الكمبيوتر، تتابع كل فرع وكل عملية لحظة بلحظة.</p>
-      <div class="devices"><span><i>⌘</i> الكمبيوتر</span><span><i>▯</i> الموبايل</span></div>
-      <div class="devs"><small>DEVELOPED BY</small><strong>Hossam Zahran<br>Adham Osama<br>Abdelrahim Ramadan</strong></div>
-      <div class="footer">OBSIDIAN SYSTEM / BUILT FOR GROWTH</div>
+    <section class="slide" id="operations">
+      <img class="photo" src="obsidian-ad-operations.png" alt="الاستقبال وإدارة المرضى">
+      <div class="shade"></div>
+      <div class="content">
+        <div class="brand"><img src="obsidian-system-logo.jpeg" alt="Obsidian System"><span>OBSIDIAN SYSTEM</span></div>
+        <p class="eyebrow">OPERATIONS</p>
+        <h2 class="title">تشغيل أسرع.<br>رعاية أوضح.</h2>
+        <ul class="list"><li>ملفات المرضى: نقدي، تعاقدات وشركات تأمين.</li><li>الاستقبال، الحجوزات وتسجيل الجلسات.</li><li>متابعة الحجوزات الفائتة وسجل التواصل.</li><li>الزيارات المنزلية والخدمات المتخصصة.</li></ul>
+        <span class="number">02 / DAILY OPERATIONS</span>
+      </div>
+      <a class="arrow" href="#finance">المزيد <span>↓</span></a>
+    </section>
+
+    <section class="slide" id="finance">
+      <img class="photo" src="obsidian-ad-finance.png" alt="تقارير وحسابات مركز علاجي">
+      <div class="shade"></div>
+      <div class="content">
+        <div class="brand"><img src="obsidian-system-logo.jpeg" alt="Obsidian System"><span>OBSIDIAN SYSTEM</span></div>
+        <p class="eyebrow">FINANCE & REPORTING</p>
+        <h2 class="title">كل رقم.<br>في مكانه.</h2>
+        <ul class="list"><li>الحسابات الشهرية والملخص المالي.</li><li>دفاتر يومية مفصلة لكل فرع.</li><li>إدارة المصروفات والكاش والتأمين.</li><li>تصدير الملخصات والتقارير إلى Excel.</li></ul>
+        <span class="number">03 / FINANCE</span>
+      </div>
+      <a class="arrow" href="#trial">المزيد <span>↓</span></a>
+    </section>
+
+    <section class="slide final" id="trial">
+      <img class="photo" src="obsidian-ad-realtime.png" alt="Obsidian System real-time monitoring">
+      <div class="shade"></div>
+      <div class="content">
+        <div class="brand"><img src="obsidian-system-logo.jpeg" alt="Obsidian System"><span>OBSIDIAN SYSTEM</span></div>
+        <p class="eyebrow">REAL-TIME CONTROL</p>
+        <h2>تابع مركزك<br>من أي مكان.</h2>
+        <p>صلاحيات مستقلة للاستقبال ومدير الفرع والـ Owner. متابعة لحظية من الموبايل أو الكمبيوتر لكل الفروع والحسابات.</p>
+        <a class="start" href="index.html">ابدأ التجربة المجانية</a>
+        <div class="devs">DEVELOPED BY<br>Hossam Zahran · Adham Osama · Abdelrahim Ramadan</div>
+      </div>
     </section>
   </main>
 </body>

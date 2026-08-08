@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/advertisement-campaign.html"
+    }
+  ]
+}

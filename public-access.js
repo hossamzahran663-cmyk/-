@@ -1,12 +1,19 @@
 (function () {
   'use strict';
 
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('userRole', 'owner');
-  localStorage.setItem('userName', 'Obsidian User');
-  localStorage.setItem('userBranch', 'Main');
-
   const path = location.pathname.toLowerCase();
+  const requestedRole = new URLSearchParams(location.search).get('demoRole');
+  const demoProfiles = {
+    owner: { role: 'owner', name: 'Demo Owner', branch: 'الإدارة المركزية' },
+    reception: { role: 'reception', name: 'Demo Reception', branch: 'المهندسين' },
+    manager: { role: 'manager', name: 'Demo Branch Manager', branch: 'المهندسين' }
+  };
+  const profile = demoProfiles[requestedRole] || demoProfiles[localStorage.getItem('obsidianDemoRole')] || demoProfiles.owner;
+  localStorage.setItem('obsidianDemoRole', Object.keys(demoProfiles).find(key => demoProfiles[key] === profile) || 'owner');
+  localStorage.setItem('isLoggedIn', 'true');
+  localStorage.setItem('userRole', profile.role);
+  localStorage.setItem('userName', profile.name);
+  localStorage.setItem('userBranch', profile.branch);
   if (/\/login\.html$/.test(path)) {
     location.replace('dashboard.html');
     return;
@@ -133,6 +140,32 @@
     }
   };
 
+  const enforceDemoAccess = () => {
+    const page = path.split('/').pop() || 'index.html';
+    const allowed = {
+      owner: null,
+      reception: new Set(['dashboard.html', 'reception.html', 'reservations.html', 'reports.html', 'patients.html']),
+      manager: new Set(['dashboard.html', 'patients.html', 'ledger.html', 'analytics.html', 'reports.html'])
+    };
+    const canOpen = target => profile.role === 'owner' || !target || !target.endsWith('.html') || allowed[profile.role].has(target.split('/').pop());
+    const showNotice = () => {
+      if (document.getElementById('obsidianAccessNotice')) return;
+      const overlay = document.createElement('div');
+      overlay.id = 'obsidianAccessNotice';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:999998;display:grid;place-items:center;padding:20px;direction:rtl;font-family:Arial,sans-serif;';
+      overlay.innerHTML = '<div style="width:min(390px,100%);background:#fff;color:#202328;padding:25px;border-radius:8px;text-align:right"><h2 style="margin:0 0 10px">صلاحية غير متاحة</h2><p style="margin:0;color:#59616c;line-height:1.7">هذه الصفحة ليست ضمن صلاحيات تجربة ' + profile.name + '.</p><button type="button" style="margin-top:18px;background:#1c1f24;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:700;cursor:pointer">رجوع</button></div>';
+      overlay.querySelector('button').onclick = () => { location.href = profile.role === 'reception' ? 'reception.html' : 'dashboard.html'; };
+      document.body.appendChild(overlay);
+    };
+    if (!canOpen(page) && page !== 'app.html') showNotice();
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[href]');
+      if (!link || !link.getAttribute('href')) return;
+      const target = link.getAttribute('href').split('?')[0];
+      if (!canOpen(target)) { event.preventDefault(); showNotice(); }
+    }, true);
+  };
+
   window.prompt = () => null;
-  document.addEventListener('DOMContentLoaded', () => { unlock(); addHelp(); setTimeout(seedDemoData, 800); });
+  document.addEventListener('DOMContentLoaded', () => { unlock(); addHelp(); enforceDemoAccess(); setTimeout(seedDemoData, 800); });
 })();
