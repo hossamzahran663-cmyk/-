@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="public-access.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Obsidian System - تسجيل الدخول</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Tajawal',sans-serif; }
+
+        body {
+            background: #0b132b;
+            background-image: radial-gradient(circle at 50% 0%, #1a2a4a 0%, #0b132b 70%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* PARTICLES */
+        .particles { position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+        .particle { position:absolute; width:2px; height:2px; background:rgba(212,175,55,0.4); border-radius:50%; animation:rise linear infinite; }
+        @keyframes rise {
+            0%   { transform:translateY(100vh) scale(0); opacity:0; }
+            10%  { opacity:1; }
+            90%  { opacity:0.6; }
+            100% { transform:translateY(-10vh) scale(1); opacity:0; }
+        }
+
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        @keyframes gradMove { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+        @keyframes shine { 0%{background-position:200% center} 100%{background-position:-200% center} }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+        /* WRAPPER */
+        .login-wrapper {
+            display: flex;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(212,175,55,0.08);
+            overflow: hidden;
+            width: 1020px;
+            max-width: 96%;
+            height: 580px;
+            position: relative;
+            z-index: 1;
+            animation: fadeUp 0.7s ease;
+        }
+
+        /* BRANDING */
+        .branding {
+            flex: 1.3;
+            background: linear-gradient(-45deg, #0b132b, #152238, #0b132b, #1a2a4a);
+            background-size: 400% 400%;
+            animation: gradMove 12s ease infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 44px;
+            text-align: center;
+            position: relative;
+            border-left: 1px solid rgba(212,175,55,0.15);
+        }
+        .branding::before { content:''; position:absolute; top:-60px; right:-60px; width:240px; height:240px; background:radial-gradient(circle,rgba(212,175,55,0.12),transparent 70%); border-radius:50%; }
+        .branding::after  { content:''; position:absolute; bottom:-80px; left:-60px; width:320px; height:320px; background:radial-gradient(circle,rgba(26,42,74,0.8),transparent 70%); border-radius:50%; }
+
+        .branding img { width:150px; margin-bottom:24px; filter:drop-shadow(0 12px 24px rgba(0,0,0,0.5)); animation:float 6s ease-in-out infinite; position:relative; z-index:2; }
+        .branding h1 { color:white; font-weight:900; font-size:2.6rem; margin-bottom:10px; letter-spacing:2px; position:relative; z-index:2; text-shadow:0 4px 12px rgba(0,0,0,0.4); }
+        .branding h1 span { color:#d4af37; }
+        .branding p { color:rgba(163,174,209,0.85); font-size:1.05rem; line-height:1.7; position:relative; z-index:2; max-width:280px; }
+
+        /* gold divider */
+        .branding-divider { width:60px; height:3px; background:linear-gradient(90deg,transparent,#d4af37,transparent); border-radius:10px; margin:16px auto; position:relative; z-index:2; }
+
+        /* badges */
+        .branding-badges { display:flex; gap:10px; margin-top:20px; position:relative; z-index:2; flex-wrap:wrap; justify-content:center; }
+        .bb { background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.25); color:rgba(212,175,55,0.9); padding:5px 14px; border-radius:20px; font-size:0.78rem; font-weight:800; display:flex; align-items:center; gap:5px; }
+
+        /* FORM SIDE */
+        .form-side {
+            flex: 1;
+            padding: 55px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+            position: relative;
+        }
+
+        .form-side h2 { color:#0b132b; font-weight:900; font-size:1.9rem; margin-bottom:6px; }
+        .form-side .subtitle { color:#9aa0b0; font-size:0.88rem; margin-bottom:32px; font-weight:700; }
+
+        .access-points { display:grid; gap:12px; margin:8px 0 26px; }
+        .access-point { display:flex; align-items:flex-start; gap:11px; padding:13px; background:#f6f7f9; border:1px solid #e8ebef; border-radius:8px; color:#4b5260; font-size:.87rem; font-weight:700; line-height:1.55; }
+        .access-point i { color:#8e959f; margin-top:3px; width:18px; text-align:center; }
+
+        .input-group { margin-bottom:20px; position:relative; }
+        .input-group .inp-icon { position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#c8d0e0; font-size:1.1rem; transition:0.3s; pointer-events:none; }
+        .input-group input {
+            width:100%; padding:14px 48px 14px 16px;
+            font-size:1rem; font-weight:700;
+            border:2px solid #f0f2f7; border-radius:14px;
+            outline:none; background:#f8f9fc;
+            transition:all 0.3s; color:#0b132b;
+            font-family:'Tajawal';
+        }
+        .input-group input:focus { border-color:#d4af37; background:white; box-shadow:0 0 0 4px rgba(212,175,55,0.1); }
+        .input-group input:focus ~ .inp-icon { color:#d4af37; }
+
+        /* show password */
+        .eye-btn { position:absolute; left:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#c8d0e0; font-size:1rem; padding:4px; transition:0.22s; }
+        .eye-btn:hover { color:#d4af37; }
+
+        .btn-login {
+            background: linear-gradient(120deg,#d4af37 0%,#f3d060 50%,#d4af37 100%);
+            background-size: 200% auto;
+            color: #0b132b;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.35s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(212,175,55,0.35);
+            font-family: 'Tajawal';
+            letter-spacing: 0.3px;
+        }
+        .btn-login:hover { transform:translateY(-3px); box-shadow:0 14px 28px rgba(212,175,55,0.45); animation:shine 1.8s linear infinite; }
+        .btn-login:disabled { background:#e4e6eb !important; color:#aaa !important; box-shadow:none !important; cursor:not-allowed; animation:none; transform:none; }
+
+        #errorMsg { color:#e74c3c; background:#fef3f2; border:1px solid rgba(231,76,60,0.2); padding:10px 14px; border-radius:12px; font-weight:700; margin-top:16px; display:none; text-align:center; font-size:0.88rem; animation:shake 0.4s ease; }
+
+        .server-status { margin-top:20px; font-size:0.82rem; font-weight:700; color:#f39c12; display:flex; justify-content:center; align-items:center; gap:7px; padding:9px; border-radius:10px; background:#fffdf5; border:1px solid rgba(243,156,18,0.2); }
+
+        /* LANG BUTTON — floating */
+        #langBtn {
+            position: fixed;
+            bottom: 28px;
+            left: 28px;
+            z-index: 9999;
+            background: linear-gradient(135deg,#0b132b,#1a2a5e);
+            color: #d4af37;
+            border: 2px solid rgba(212,175,55,0.35);
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-family: 'Tajawal';
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(11,19,43,0.4);
+            transition: all 0.28s cubic-bezier(0.34,1.2,0.64,1);
+            font-size: 0.9rem;
+        }
+        #langBtn:hover { transform:translateY(-3px) scale(1.05); background:linear-gradient(135deg,#d4af37,#a9b0b8); color:#0b132b; }
+
+        @media(max-width:768px) {
+            .login-wrapper { flex-direction:column; height:auto; max-height:96vh; overflow-y:auto; }
+            .branding { padding:36px 20px; border-left:none; border-bottom:1px solid rgba(212,175,55,0.15); flex:none; }
+            .branding img { width:110px; }
+            .branding h1 { font-size:2rem; }
+            .form-side { padding:36px 28px; }
+        }
+    </style>
+    <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="obsidian-theme.css">
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- LANG BUTTON -->
+<div class="login-wrapper">
+    <!-- BRANDING -->
+    <div class="branding">
+        <img src="obsidian-system-logo.jpeg" alt="Obsidian System" onerror="this.style.display='none'">
+        <h1>Obsidian System</h1>
+        <div class="branding-divider"></div>
+        <p id="brandingText">منصة موحدة لإدارة العمليات والمتابعة<br>بواجهة عملية وآمنة</p>
+        <div class="branding-badges">
+            <div class="bb"><i class="fas fa-shield-alt"></i> <span id="b1">آمن ومشفر</span></div>
+            <div class="bb"><i class="fas fa-wifi"></i> <span id="b2">لحظي</span></div>
+            <div class="bb"><i class="fas fa-mobile-alt"></i> <span id="b3">متعدد الأجهزة</span></div>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-side">
+        <h2 id="welcomeTitle">الدخول إلى المنظومة</h2>
+        <p class="subtitle" id="welcomeSub">نسخة العرض التجريبية متاحة للدخول المباشر</p>
+
+        <div class="access-points">
+            <div class="access-point"><i class="fas fa-users-cog"></i><span>يمكن إنشاء حساب مستقل لكل مستخدم من صفحة الدعم.</span></div>
+            <div class="access-point"><i class="fas fa-user-shield"></i><span>تُحدد صلاحيات كل حساب والفرع المسموح له من لوحة إدارة المستخدمين.</span></div>
+        </div>
+
+        <a href="dashboard.html" class="btn-login" id="loginBtn">
+            <span id="loginBtnText">دخول المنظومة</span>
+            <i class="fas fa-arrow-left" id="loginBtnIcon"></i>
+        </a>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script>
+const FB = { apiKey:"AIzaSyCFdNgNFjtC4gbuUl6NOzxcd0zCwokMc4o", authDomain:"alan-b68e7.firebaseapp.com", projectId:"alan-b68e7", storageBucket:"alan-b68e7.firebasestorage.app", messagingSenderId:"838354978223", appId:"1:838354978223:web:440ba90b7191bc97f45b5a" };
+firebase.initializeApp(FB);
+const db = firebase.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true }); } catch(e){}
+// تأكيد الاتصال بعد 3 ثواني
+setTimeout(() => {
+    const st = document.getElementById('serverStatus');
+    if (st && st.innerHTML.includes('جاري')) {
+        st.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60;"></i> <span>متصل ومؤمن</span>';
+        st.style.color='#27ae60'; st.style.background='#e8f5e9';
+    }
+}, 3000);
+
+// ===== PARTICLES =====
+(function(){
+    const c = document.getElementById('particles');
+    for(let i=0;i<35;i++){
+        const p=document.createElement('div');
+        p.className='particle';
+        p.style.cssText=`left:${Math.random()*100}%;width:${Math.random()*3+1}px;height:${Math.random()*3+1}px;animation-duration:${Math.random()*10+8}s;animation-delay:${Math.random()*10}s;opacity:${Math.random()*0.5+0.2}`;
+        c.appendChild(p);
+    }
+})();
+
+// ===== LANGUAGE =====
+const T = {
+    ar: {
+        welcomeTitle:'مرحباً بك! 👋', welcomeSub:'أدخل بياناتك للوصول للنظام',
+        unPlaceholder:'اسم المستخدم', passPlaceholder:'كلمة المرور',
+        loginBtn:'تسجيل الدخول', logging:'جاري المصادقة...',
+        error:'اسم المستخدم أو كلمة المرور غير صحيحة!',
+        serverOk:'متصل ومؤمن بنجاح', serverErr:'فشل الاتصال! تحقق من الإنترنت',
+        serverLoading:'جاري الاتصال بالسيرفر...',
+        brandingText:'منصة موحدة لإدارة العمليات والمتابعة<br>بواجهة عملية وآمنة',
+        b1:'آمن ومشفر', b2:'لحظي', b3:'متعدد الأجهزة',
+        langLabel:'EN', langSub:'English',
+    },
+    en: {
+        welcomeTitle:'Welcome Back! 👋', welcomeSub:'Enter your credentials to access the system',
+        unPlaceholder:'Username', passPlaceholder:'Password',
+        loginBtn:'Sign In', logging:'Authenticating...',
+        error:'Invalid username or password!',
+        serverOk:'Connected & Secured', serverErr:'Connection failed! Check internet',
+        serverLoading:'Connecting to server...',
+        brandingText:'A unified platform for operations and follow-up<br>with a practical, secure interface',
+        b1:'Secure & Encrypted', b2:'Real-time', b3:'Multi-device',
+        langLabel:'ع', langSub:'عربي',
+    }
+};
+let lang = localStorage.getItem('ls_lang') || 'ar';
+
+function applyLang(l) {
+    lang = l;
+    localStorage.setItem('ls_lang', l);
+    const t = T[l];
+    document.getElementById('welcomeTitle').innerText = t.welcomeTitle;
+    document.getElementById('welcomeSub').innerText   = t.welcomeSub;
+    document.getElementById('username').placeholder   = t.unPlaceholder;
+    document.getElementById('password').placeholder   = t.passPlaceholder;
+    document.getElementById('loginBtnText').innerText = t.loginBtn;
+    document.getElementById('errorText').innerText    = t.error;
+    document.getElementById('brandingText').innerHTML = t.brandingText;
+    document.getElementById('b1').innerText = t.b1;
+    document.getElementById('b2').innerText = t.b2;
+    document.getElementById('b3').innerText = t.b3;
+    document.getElementById('langLabel').innerText = t.langLabel;
+    document.getElementById('langSub').innerText   = t.langSub;
+    document.documentElement.dir  = l==='ar'?'rtl':'ltr';
+    document.documentElement.lang = l;
+    // flip arrow
+    document.getElementById('loginBtnIcon').className = l==='ar'?'fas fa-arrow-left':'fas fa-arrow-right';
+}
+function toggleLang() { applyLang(lang==='ar'?'en':'ar'); }
+
+// ===== SHOW/HIDE PASSWORD =====
+function togglePass() {
+    const inp = document.getElementById('password');
+    const ico = document.getElementById('eyeIcon');
+    if (inp.type==='password') { inp.type='text'; ico.className='fas fa-eye-slash'; }
+    else { inp.type='password'; ico.className='fas fa-eye'; }
+}
+
+// ===== FIREBASE =====
+async function checkAndCreateAdmin() {
+    try {
+        // Check connectivity only. Credentials are never seeded in client-side code.
+        const usersPromise = db.collection("users").limit(50).get();
+        const timeoutP = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+        const snap = await Promise.race([usersPromise, timeoutP]);
+        const st = document.getElementById('serverStatus');
+        st.innerHTML = `<i class="fas fa-check-circle" style="color:#27ae60;"></i> <span>${T[lang].serverOk}</span>`;
+        st.style.cssText = 'color:#27ae60;background:#e8f5e9;border-color:rgba(39,174,96,0.2);margin-top:20px;font-size:0.82rem;font-weight:700;display:flex;justify-content:center;align-items:center;gap:7px;padding:9px;border-radius:10px;border:1px solid;';
+    } catch(e) {
+        const st = document.getElementById('serverStatus');
+        st.innerHTML = `<i class="fas fa-times-circle" style="color:#e74c3c;"></i> <span>${T[lang].serverErr}</span>`;
+        st.style.color='#e74c3c'; st.style.background='#fef3f2';
+    }
+}
+// The public entry page does not query Firebase before direct access.
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+    const btn  = document.getElementById('loginBtn');
+    const err  = document.getElementById('errorMsg');
+
+    btn.innerHTML=`<i class="fas fa-circle-notch fa-spin"></i> <span>${T[lang].logging}</span>`;
+    btn.disabled=true; err.style.display='none';
+
+    try {
+        // اقرأ بمهلة 6 ثواني (عشان مايعلّقش)
+        const loginPromise = db.collection("users").where("username","==",user).where("password","==",pass).get();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+        const snap = await Promise.race([loginPromise, timeoutPromise]);
+        if (!snap.empty) {
+            let ud = snap.docs[0].data();
+            localStorage.setItem('userRole',   ud.role);
+            localStorage.setItem('userName',   ud.username);
+            localStorage.setItem('userBranch', ud.branch||'المهندسين');
+            localStorage.setItem('isLoggedIn', 'true');
+            window.location.href = ud.role==='reception' ? 'reservations.html' : 'dashboard.html';
+        } else {
+            // يوزر أو باسورد غلط
+            err.style.display='block';
+            document.getElementById('errorText').innerText = T[lang].error || 'اسم المستخدم أو كلمة المرور غير صحيحة';
+            btn.innerHTML=`<span>${T[lang].loginBtn}</span> <i class="fas fa-arrow-${lang==='ar'?'left':'right'}" id="loginBtnIcon"></i>`;
+            btn.disabled=false;
+        }
+    } catch(ex) {
+        err.style.display='block';
+        document.getElementById('errorText').innerText = (ex.message === 'timeout') ? 'الاتصال بطيء، حاول تاني' : (T[lang].error || 'حصل خطأ، حاول تاني');
+        btn.innerHTML=`<span>${T[lang].loginBtn}</span> <i class="fas fa-arrow-${lang==='ar'?'left':'right'}"></i>`;
+        btn.disabled=false;
+        console.error(ex);
+    }
+}
+</script>
+        <script>
+    // ═══ إزالة Service Worker نهائياً + زرار تحديث بسيط ═══
+    (function(){
+        // 1) شيل أي Service Worker قديم ومسح الكاش (سبب مشاكل WiFi والتحديثات)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+                regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+        }
+
+        // 2) زرار التحديث: يتحقق من رقم النسخة على السيرفر كل دقيقة
+        var CURRENT_VERSION = null;
+        function checkVersion(){
+            fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (!data || !data.version) return;
+                    if (CURRENT_VERSION === null) {
+                        CURRENT_VERSION = data.version;
+                    } else if (data.version !== CURRENT_VERSION) {
+                        showUpdateButton();
+                    }
+                }).catch(function(){});
+        }
+        function showUpdateButton(){
+            if (document.getElementById('ls-update-btn')) return;
+            var bar = document.createElement('div');
+            bar.id = 'ls-update-btn';
+            bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0b132b,#1a2a5e);color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;gap:14px;border:1px solid #d4af37;font-family:Tajawal,sans-serif;';
+            bar.innerHTML = '<div style="font-size:1.5rem;">🎉</div><div style="flex:1;"><div style="font-weight:900;color:#d4af37;font-size:0.95rem;">فيه تحديث جديد!</div><div style="font-size:0.78rem;color:#a3aed1;">اضغط للتحديث لآخر نسخة</div></div><button id="ls-do-update" style="background:#d4af37;color:#0b132b;border:none;padding:9px 20px;border-radius:9px;font-weight:900;cursor:pointer;font-family:Tajawal;font-size:0.9rem;">تحديث الآن</button>';
+            document.body.appendChild(bar);
+            document.getElementById('ls-do-update').onclick = function(){
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                location.reload(true);
+            };
+        }
+        // افحص أول مرة بعد 3 ثواني، وبعدين كل دقيقة
+        setTimeout(checkVersion, 3000);
+        setInterval(checkVersion, 60000);
+    })();
+    </script>
+</body>
+</html>
